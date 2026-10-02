@@ -41,5 +41,5 @@ A troca de senha precisa da chave secreta, que **fica só no Supabase**, dentro 
 Para ativar:
 
 1. Rode `supabase/admin.sql` no SQL Editor (cria a coluna `admin` e marca a Soraya como administradora).
-2. **Edge Functions → Deploy a new function → Via Editor**, com o nome `hub-admin`. Cole o conteúdo de `supabase/functions/hub-admin/index.ts` e clique em **Deploy**.
+2. **Edge Functions → Deploy a new function → Via Editor**, com o nome `hub-admin-` (é o nome que o Hub chama; foi publicada assim). Cole o conteúdo de `supabase/functions/hub-admin/index.ts` e clique em **Deploy**.
 3. Nas configurações da função, desligue **Verify JWT** (ou "Enforce JWT verification"). A própria função confere o login e se a pessoa é administradora.

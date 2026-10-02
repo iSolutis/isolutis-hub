@@ -408,11 +408,12 @@ window.HubSupabase = (() => {
   /* gestão de usuários: chama a Edge Function "hub-admin", que roda no Supabase com a chave secreta */
   function criarAdmin(){
     const chamar = async body => {
-      const { data, error } = await sb.functions.invoke('hub-admin', { body });
+      // a função foi publicada no Supabase com o nome "hub-admin-" (com hífen no fim)
+      const { data, error } = await sb.functions.invoke('hub-admin-', { body });
       if (error) {
         let m = error.message || 'erro';
         try { const j = await error.context.json(); if (j && j.erro) m = j.erro; } catch(_){}
-        if (/Failed to send a request|not found|404/i.test(m)) m = 'O painel de usuários ainda não foi ativado no Supabase: falta publicar a função "hub-admin".';
+        if (/Failed to send a request|not found|404/i.test(m)) m = 'O painel de usuários ainda não foi ativado no Supabase: falta publicar a função "hub-admin-".';
         throw new Error(m);
       }
       if (data && data.erro) throw new Error(data.erro);
