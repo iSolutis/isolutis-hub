@@ -32,6 +32,11 @@ RECURSO_DA_TABELA = {
     "tarefas": "tarefas",
     "tarefa_checklist": "tarefas",
     "usuarios": "equipe",
+    # módulo financeiro (tudo o que ele grava avisa a tela "financeiro")
+    "plano_contas": "financeiro",
+    "conta_bancaria": "financeiro",
+    "parceiro_negocio": "financeiro",
+    "titulo_financeiro": "financeiro",
 }
 
 

@@ -30,6 +30,7 @@ include = ["app*"]
 
 [tool.setuptools.package-data]
 "app.documents" = ["templates/*", "assets/*"]
+"app.financeiro" = ["dados/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -56,3 +57,5 @@ extend-immutable-calls = ["fastapi.Query", "fastapi.Depends"]
 # Tabelas de mapeamento densas (um campo por coluna do schema novo).
 "app/scripts/legado.py" = ["E501"]
 "app/scripts/importar_legado.py" = ["E501"]
+"app/financeiro/*" = ["E501"]
+"tests/test_financeiro.py" = ["E501"]

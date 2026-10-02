@@ -11,6 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from app.config import get_settings
 from app.deps import usuario_atual
 from app.errors import registrar_tratadores
+from app.financeiro import rotas as financeiro
 from app.routers import (
     auth,
     clientes,
@@ -73,6 +74,8 @@ def criar_app() -> FastAPI:
     protegidos = (clientes, produtos, negocios, orcamentos, faturamento, despesas, projetos, tarefas, painel)
     for modulo in protegidos:
         api.include_router(modulo.router, dependencies=[Depends(usuario_atual)])
+    # Módulo financeiro: exige administrador (a dependência já está no próprio router).
+    api.include_router(financeiro.router)
     app.include_router(api)
 
     @app.get("/api/saude", tags=["Infra"])
