@@ -6,9 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.errors import NaoEncontrado
-from app.models import Cliente, Projeto, Tarefa, TarefaChecklist
+from app.models import Projeto, Tarefa, TarefaChecklist
 from app.schemas.tarefa import ChecklistEntrada, MoverTarefa, TarefaAtualizar, TarefaEntrada
 from app.services.base import aplicar, conferir_versao, confirmar, obter
+from app.services.parceiros import exigir_cliente
 
 
 def consulta():
@@ -52,7 +53,7 @@ def _sincronizar_checklist(tarefa: Tarefa, itens: list[ChecklistEntrada]) -> Non
 
 async def _validar_vinculos(sessao: AsyncSession, dados: TarefaEntrada) -> None:
     if dados.cliente_id:
-        await obter(sessao, Cliente, dados.cliente_id, "Cliente")
+        await exigir_cliente(sessao, dados.cliente_id)
     if dados.projeto_id:
         await obter(sessao, Projeto, dados.projeto_id, "Projeto")
 

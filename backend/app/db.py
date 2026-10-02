@@ -17,7 +17,8 @@ from app.realtime import agendar_publicacao
 
 # Tabela -> recurso que a interface precisa recarregar quando a tabela muda.
 RECURSO_DA_TABELA = {
-    "clientes": "clientes",
+    "parceiro_negocio": ("clientes", "financeiro"),
+    "parceiro_papel": ("clientes", "financeiro"),
     "produtos": "produtos",
     "negocios": "negocios",
     "orcamentos": "orcamentos",
@@ -35,7 +36,6 @@ RECURSO_DA_TABELA = {
     # módulo financeiro (tudo o que ele grava avisa a tela "financeiro")
     "plano_contas": "financeiro",
     "conta_bancaria": "financeiro",
-    "parceiro_negocio": "financeiro",
     "titulo_financeiro": "financeiro",
 }
 
@@ -74,7 +74,7 @@ def _coletar_recursos(sessao: Session, _contexto: object) -> None:
     for obj in (*sessao.new, *sessao.dirty, *sessao.deleted):
         recurso = RECURSO_DA_TABELA.get(getattr(obj, "__tablename__", ""))
         if recurso:
-            alterados.add(recurso)
+            alterados.update((recurso,) if isinstance(recurso, str) else recurso)
 
 
 @event.listens_for(Session, "after_commit")

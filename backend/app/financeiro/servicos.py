@@ -15,28 +15,18 @@ from app.errors import NaoEncontrado, RegraDeNegocio
 from app.financeiro import regras
 from app.financeiro.models import (
     ContaBancaria,
-    Empresa,
     InstituicaoFinanceira,
-    Municipio,
-    ParceiroNegocio,
     PlanoConta,
     TituloFinanceiro,
 )
 from app.financeiro.schemas import (
     ContaBancariaEntrada,
-    ParceiroEntrada,
     PlanoContaEntrada,
     TituloEntrada,
 )
+from app.models import Empresa, Municipio, Parceiro
 from app.services.base import confirmar
-
-
-async def empresa_atual(sessao: AsyncSession) -> Empresa:
-    """O sistema atende uma empresa só: a mais antiga cadastrada em `companies`."""
-    empresa = await sessao.scalar(select(Empresa).order_by(Empresa.created_at).limit(1))
-    if empresa is None:
-        raise RegraDeNegocio("Nenhuma empresa cadastrada para o módulo financeiro.")
-    return empresa
+from app.services.parceiros import empresa_atual  # noqa: F401  (reexportado para as rotas)
 
 
 async def _obter(sessao: AsyncSession, modelo, id_: UUID, empresa: Empresa, nome: str):  # noqa: ANN001, ANN202
@@ -239,81 +229,6 @@ async def _confirmar_conta(sessao: AsyncSession) -> None:
         raise RegraDeNegocio("Já existe uma conta com este nome nesta instituição financeira.") from e
 
 
-# ============================================================================= parceiros
-def _linha_parceiro(p: ParceiroNegocio) -> dict:
-    return {
-        "id": p.id, "tipo_pessoa": p.tipo_pessoa, "cpf_cnpj": p.cpf_cnpj, "nome": p.nome, "endereco": p.endereco, "cep": p.cep,
-        "municipio_id": p.municipio_id, "municipio_nome": p.municipio.nome, "uf": p.municipio.uf,
-    }  # fmt: skip
-
-
-async def listar_parceiros(sessao: AsyncSession, empresa: Empresa, busca: str | None) -> list[dict]:
-    consulta = (
-        select(ParceiroNegocio)
-        .options(joinedload(ParceiroNegocio.municipio))
-        .where(ParceiroNegocio.company_id == empresa.id)
-        .order_by(ParceiroNegocio.nome)
-    )
-    if busca:
-        termo = f"%{busca.strip()}%"
-        consulta = consulta.where(
-            ParceiroNegocio.nome.ilike(termo)
-            | ParceiroNegocio.cpf_cnpj.ilike(f"%{regras.so_digitos(busca) or busca.strip()}%")
-        )
-    return [_linha_parceiro(p) for p in (await sessao.scalars(consulta)).all()]
-
-
-async def _parceiro_completo(sessao: AsyncSession, id_: UUID) -> dict:
-    consulta = select(ParceiroNegocio).options(joinedload(ParceiroNegocio.municipio)).where(ParceiroNegocio.id == id_)
-    return _linha_parceiro((await sessao.scalars(consulta.execution_options(populate_existing=True))).one())
-
-
-async def _validar_parceiro(sessao: AsyncSession, d: ParceiroEntrada) -> None:
-    if not regras.documento_valido(d.tipo_pessoa, d.cpf_cnpj):
-        raise RegraDeNegocio(f"{'CPF' if d.tipo_pessoa == 'PF' else 'CNPJ'} inválido. Confira os números digitados.")
-    if d.cep is not None and len(d.cep) != 8:
-        raise RegraDeNegocio("O CEP deve ter 8 dígitos.")
-    if await sessao.get(Municipio, d.municipio_id) is None:
-        raise RegraDeNegocio("Escolha um município válido.")
-
-
-async def criar_parceiro(sessao: AsyncSession, empresa: Empresa, d: ParceiroEntrada) -> dict:
-    await _validar_parceiro(sessao, d)
-    parceiro = ParceiroNegocio(company_id=empresa.id, **d.model_dump())
-    parceiro.nome = d.nome.strip()
-    sessao.add(parceiro)
-    await _confirmar_parceiro(sessao)
-    return await _parceiro_completo(sessao, parceiro.id)
-
-
-async def atualizar_parceiro(sessao: AsyncSession, empresa: Empresa, id_: UUID, d: ParceiroEntrada) -> dict:
-    parceiro = await _obter(sessao, ParceiroNegocio, id_, empresa, "Parceiro")
-    await _validar_parceiro(sessao, d)
-    for campo, valor in d.model_dump().items():
-        setattr(parceiro, campo, valor)
-    parceiro.nome = d.nome.strip()
-    await _confirmar_parceiro(sessao)
-    return await _parceiro_completo(sessao, id_)
-
-
-async def excluir_parceiro(sessao: AsyncSession, empresa: Empresa, id_: UUID) -> None:
-    parceiro = await _obter(sessao, ParceiroNegocio, id_, empresa, "Parceiro")
-    if await sessao.scalar(
-        select(func.count()).select_from(TituloFinanceiro).where(TituloFinanceiro.parceiro_id == id_)
-    ):
-        raise RegraDeNegocio("Há títulos financeiros deste parceiro. Exclua ou mude esses títulos antes.")
-    await sessao.delete(parceiro)
-    await confirmar(sessao)
-
-
-async def _confirmar_parceiro(sessao: AsyncSession) -> None:
-    try:
-        await confirmar(sessao)
-    except IntegrityError as e:
-        await sessao.rollback()
-        raise RegraDeNegocio("Já existe um parceiro com este CPF/CNPJ.") from e
-
-
 # ============================================================================= títulos
 def _linha_titulo(t: TituloFinanceiro) -> dict:
     return {
@@ -354,8 +269,8 @@ async def listar_titulos(
     if ate:
         consulta = consulta.where(TituloFinanceiro.data_vencimento <= ate)
     if busca:
-        consulta = consulta.join(ParceiroNegocio, ParceiroNegocio.id == TituloFinanceiro.parceiro_id).where(
-            ParceiroNegocio.nome.ilike(f"%{busca.strip()}%")
+        consulta = consulta.join(Parceiro, Parceiro.id == TituloFinanceiro.parceiro_id).where(
+            Parceiro.nome.ilike(f"%{busca.strip()}%")
         )
     return [_linha_titulo(t) for t in (await sessao.scalars(consulta)).unique().all()]
 
@@ -368,7 +283,7 @@ async def _titulo_completo(sessao: AsyncSession, empresa: Empresa, id_: UUID) ->
 async def _campos_validados(sessao: AsyncSession, empresa: Empresa, d: TituloEntrada) -> dict:
     """RN03/RN04 e coerência da quitação, com mensagens claras (o banco repete as regras)."""
     await _obter(sessao, ContaBancaria, d.conta_bancaria_id, empresa, "Conta bancária")
-    await _obter(sessao, ParceiroNegocio, d.parceiro_id, empresa, "Parceiro")
+    await _obter(sessao, Parceiro, d.parceiro_id, empresa, "Parceiro")
     conta = await _obter(sessao, PlanoConta, d.plano_conta_id, empresa, "Conta do plano de contas")
     if conta.tipo_conta != "A":
         raise RegraDeNegocio(

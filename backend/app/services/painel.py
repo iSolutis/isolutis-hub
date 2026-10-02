@@ -5,7 +5,7 @@ from sqlalchemy.orm import joinedload
 from app.domain.constantes import ETAPAS_ABERTAS
 from app.domain.datas import adicionar_meses, hoje
 from app.domain.dinheiro import ZERO
-from app.models import Cliente, LancamentoReceita, Negocio
+from app.models import LancamentoReceita, Negocio, ParceiroPapel
 from app.services import orcamentos as svc_orcamentos
 
 ABERTAS = [e.value for e in ETAPAS_ABERTAS]
@@ -52,7 +52,9 @@ async def montar(sessao: AsyncSession) -> dict:
     # --- orçamentos aguardando resposta ---
     aguardando = [o for o in await svc_orcamentos.listar(sessao) if o.status_exibido == "enviado"]
 
-    n_clientes = await sessao.scalar(select(func.count()).select_from(Cliente))
+    n_clientes = await sessao.scalar(
+        select(func.count()).select_from(ParceiroPapel).where(ParceiroPapel.papel == "cliente")
+    )
     n_lancamentos = await sessao.scalar(select(func.count()).select_from(LancamentoReceita))
     return {
         "ano": h.year,

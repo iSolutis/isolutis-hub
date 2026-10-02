@@ -30,7 +30,6 @@ const ir = async (id) => { await page.click(`nav button[data-go="${id}"]`); awai
 await ir("clientes");
 await page.click('[data-act="novoCliente"]');
 await page.fill('#f-nome', "Empresa <Teste> & Cia");
-await page.fill('#f-cnpj', String(Date.now()).padStart(14,'1').slice(-14));
 await page.fill('#f-telefone', "(71) 98888-7777");
 await page.click("[data-salvar]");
 await page.waitForSelector(".toast");

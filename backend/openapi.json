@@ -2841,154 +2841,6 @@
         ]
       }
     },
-    "/api/v1/financeiro/municipios": {
-      "get": {
-        "tags": [
-          "Financeiro"
-        ],
-        "summary": "Municipios",
-        "operationId": "municipios_api_v1_financeiro_municipios_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "uf",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "minLength": 2,
-                  "maxLength": 2
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Uf"
-            }
-          },
-          {
-            "name": "busca",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "maxLength": 100
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Busca"
-            }
-          },
-          {
-            "name": "limite",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 6000,
-              "minimum": 1,
-              "default": 1000,
-              "title": "Limite"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MunicipioLeitura"
-                  },
-                  "title": "Response Municipios Api V1 Financeiro Municipios Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/financeiro/instituicoes": {
-      "get": {
-        "tags": [
-          "Financeiro"
-        ],
-        "summary": "Instituicoes",
-        "operationId": "instituicoes_api_v1_financeiro_instituicoes_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "busca",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "maxLength": 100
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Busca"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/InstituicaoLeitura"
-                  },
-                  "title": "Response Instituicoes Api V1 Financeiro Instituicoes Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/financeiro/plano-contas": {
       "get": {
         "tags": [
@@ -3386,206 +3238,6 @@
         }
       }
     },
-    "/api/v1/financeiro/parceiros": {
-      "get": {
-        "tags": [
-          "Financeiro"
-        ],
-        "summary": "Listar Parceiros",
-        "operationId": "listar_parceiros_api_v1_financeiro_parceiros_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "busca",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "maxLength": 100
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Busca"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ParceiroLeitura"
-                  },
-                  "title": "Response Listar Parceiros Api V1 Financeiro Parceiros Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Financeiro"
-        ],
-        "summary": "Criar Parceiro",
-        "operationId": "criar_parceiro_api_v1_financeiro_parceiros_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ParceiroEntrada"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ParceiroLeitura"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/financeiro/parceiros/{id_}": {
-      "put": {
-        "tags": [
-          "Financeiro"
-        ],
-        "summary": "Atualizar Parceiro",
-        "operationId": "atualizar_parceiro_api_v1_financeiro_parceiros__id___put",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id_",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id "
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ParceiroEntrada"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ParceiroLeitura"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Financeiro"
-        ],
-        "summary": "Excluir Parceiro",
-        "operationId": "excluir_parceiro_api_v1_financeiro_parceiros__id___delete",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id_",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id "
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/financeiro/titulos": {
       "get": {
         "tags": [
@@ -3910,6 +3562,402 @@
         }
       }
     },
+    "/api/v1/financeiro/municipios": {
+      "get": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Municipios",
+        "operationId": "municipios_api_v1_financeiro_municipios_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "uf",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 2
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Uf"
+            }
+          },
+          {
+            "name": "busca",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Busca"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 6000,
+              "minimum": 1,
+              "default": 1000,
+              "title": "Limite"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MunicipioLeitura"
+                  },
+                  "title": "Response Municipios Api V1 Financeiro Municipios Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/instituicoes": {
+      "get": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Instituicoes",
+        "operationId": "instituicoes_api_v1_financeiro_instituicoes_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "busca",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Busca"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InstituicaoLeitura"
+                  },
+                  "title": "Response Instituicoes Api V1 Financeiro Instituicoes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/parceiros": {
+      "get": {
+        "tags": [
+          "Parceiros de negócio"
+        ],
+        "summary": "Listar",
+        "operationId": "listar_api_v1_parceiros_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "papel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 40
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Papel"
+            }
+          },
+          {
+            "name": "busca",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Busca"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ParceiroLeitura"
+                  },
+                  "title": "Response Listar Api V1 Parceiros Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Parceiros de negócio"
+        ],
+        "summary": "Criar",
+        "operationId": "criar_api_v1_parceiros_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParceiroEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParceiroLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/parceiros/{id_}": {
+      "put": {
+        "tags": [
+          "Parceiros de negócio"
+        ],
+        "summary": "Atualizar",
+        "operationId": "atualizar_api_v1_parceiros__id___put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParceiroAtualizar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParceiroLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Parceiros de negócio"
+        ],
+        "summary": "Excluir",
+        "operationId": "excluir_api_v1_parceiros__id___delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/parceiros/papeis": {
+      "get": {
+        "tags": [
+          "Parceiros de negócio"
+        ],
+        "summary": "Papeis",
+        "description": "Papéis que um parceiro pode assumir (qualquer pessoa logada pode consultar).",
+        "operationId": "papeis_api_v1_parceiros_papeis_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PapelLeitura"
+                  },
+                  "type": "array",
+                  "title": "Response Papeis Api V1 Parceiros Papeis Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/saude": {
       "get": {
         "tags": [
@@ -4046,13 +4094,7 @@
       },
       "ClienteAtualizar": {
         "properties": {
-          "nome": {
-            "type": "string",
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Nome"
-          },
-          "cnpj": {
+          "cpf_cnpj": {
             "anyOf": [
               {
                 "type": "string"
@@ -4061,7 +4103,13 @@
                 "type": "null"
               }
             ],
-            "title": "Cnpj"
+            "title": "Cpf Cnpj"
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Nome"
           },
           "segmento": {
             "anyOf": [
@@ -4118,17 +4166,6 @@
             ],
             "title": "Email"
           },
-          "cidade": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cidade"
-          },
           "origem": {
             "anyOf": [
               {
@@ -4161,6 +4198,41 @@
               }
             ],
             "title": "Obs"
+          },
+          "endereco": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endereco"
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cep"
+          },
+          "municipio_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipio Id"
           },
           "versao": {
             "type": "integer",
@@ -4178,13 +4250,7 @@
       },
       "ClienteEntrada": {
         "properties": {
-          "nome": {
-            "type": "string",
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Nome"
-          },
-          "cnpj": {
+          "cpf_cnpj": {
             "anyOf": [
               {
                 "type": "string"
@@ -4193,7 +4259,13 @@
                 "type": "null"
               }
             ],
-            "title": "Cnpj"
+            "title": "Cpf Cnpj"
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Nome"
           },
           "segmento": {
             "anyOf": [
@@ -4250,17 +4322,6 @@
             ],
             "title": "Email"
           },
-          "cidade": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cidade"
-          },
           "origem": {
             "anyOf": [
               {
@@ -4293,6 +4354,41 @@
               }
             ],
             "title": "Obs"
+          },
+          "endereco": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endereco"
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cep"
+          },
+          "municipio_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipio Id"
           }
         },
         "additionalProperties": false,
@@ -4300,7 +4396,8 @@
         "required": [
           "nome"
         ],
-        "title": "ClienteEntrada"
+        "title": "ClienteEntrada",
+        "description": "Cliente: o tipo de pessoa é deduzido do documento (11 dígitos = PF; senão PJ)."
       },
       "ClienteLeitura": {
         "properties": {
@@ -4347,11 +4444,11 @@
             "type": "integer",
             "title": "Versao"
           },
-          "nome": {
+          "tipo_pessoa": {
             "type": "string",
-            "title": "Nome"
+            "title": "Tipo Pessoa"
           },
-          "cnpj": {
+          "cpf_cnpj": {
             "anyOf": [
               {
                 "type": "string"
@@ -4360,7 +4457,11 @@
                 "type": "null"
               }
             ],
-            "title": "Cnpj"
+            "title": "Cpf Cnpj"
+          },
+          "nome": {
+            "type": "string",
+            "title": "Nome"
           },
           "segmento": {
             "anyOf": [
@@ -4417,17 +4518,6 @@
             ],
             "title": "Email"
           },
-          "cidade": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cidade"
-          },
           "origem": {
             "anyOf": [
               {
@@ -4449,6 +4539,69 @@
               }
             ],
             "title": "Obs"
+          },
+          "endereco": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endereco"
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cep"
+          },
+          "municipio_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipio Id"
+          },
+          "municipio_nome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipio Nome"
+          },
+          "uf": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uf"
+          },
+          "papeis": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Papeis"
           }
         },
         "type": "object",
@@ -4459,16 +4612,22 @@
           "criado_por",
           "atualizado_por",
           "versao",
+          "tipo_pessoa",
+          "cpf_cnpj",
           "nome",
-          "cnpj",
           "segmento",
           "contato",
           "cargo",
           "telefone",
           "email",
-          "cidade",
           "origem",
-          "obs"
+          "obs",
+          "endereco",
+          "cep",
+          "municipio_id",
+          "municipio_nome",
+          "uf",
+          "papeis"
         ],
         "title": "ClienteLeitura"
       },
@@ -4551,11 +4710,11 @@
             "type": "integer",
             "title": "Versao"
           },
-          "nome": {
+          "tipo_pessoa": {
             "type": "string",
-            "title": "Nome"
+            "title": "Tipo Pessoa"
           },
-          "cnpj": {
+          "cpf_cnpj": {
             "anyOf": [
               {
                 "type": "string"
@@ -4564,7 +4723,11 @@
                 "type": "null"
               }
             ],
-            "title": "Cnpj"
+            "title": "Cpf Cnpj"
+          },
+          "nome": {
+            "type": "string",
+            "title": "Nome"
           },
           "segmento": {
             "anyOf": [
@@ -4621,17 +4784,6 @@
             ],
             "title": "Email"
           },
-          "cidade": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cidade"
-          },
           "origem": {
             "anyOf": [
               {
@@ -4654,6 +4806,69 @@
             ],
             "title": "Obs"
           },
+          "endereco": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endereco"
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cep"
+          },
+          "municipio_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipio Id"
+          },
+          "municipio_nome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipio Nome"
+          },
+          "uf": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uf"
+          },
+          "papeis": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Papeis"
+          },
           "negocios_abertos": {
             "type": "integer",
             "title": "Negocios Abertos"
@@ -4671,16 +4886,22 @@
           "criado_por",
           "atualizado_por",
           "versao",
+          "tipo_pessoa",
+          "cpf_cnpj",
           "nome",
-          "cnpj",
           "segmento",
           "contato",
           "cargo",
           "telefone",
           "email",
-          "cidade",
           "origem",
           "obs",
+          "endereco",
+          "cep",
+          "municipio_id",
+          "municipio_nome",
+          "uf",
+          "papeis",
           "negocios_abertos",
           "faturado"
         ],
@@ -7566,19 +7787,35 @@
         ],
         "title": "Painel"
       },
-      "ParceiroEntrada": {
+      "PapelLeitura": {
         "properties": {
-          "tipo_pessoa": {
+          "codigo": {
             "type": "string",
-            "enum": [
-              "PJ",
-              "PF"
-            ],
-            "title": "Tipo Pessoa",
-            "default": "PJ"
+            "title": "Codigo"
           },
-          "cpf_cnpj": {
+          "nome": {
             "type": "string",
+            "title": "Nome"
+          }
+        },
+        "type": "object",
+        "required": [
+          "codigo",
+          "nome"
+        ],
+        "title": "PapelLeitura"
+      },
+      "ParceiroAtualizar": {
+        "properties": {
+          "cpf_cnpj": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Cpf Cnpj"
           },
           "nome": {
@@ -7586,6 +7823,94 @@
             "maxLength": 150,
             "minLength": 1,
             "title": "Nome"
+          },
+          "segmento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segmento"
+          },
+          "contato": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contato"
+          },
+          "cargo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cargo"
+          },
+          "telefone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefone"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "origem": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Site",
+                  "Indicação",
+                  "LinkedIn",
+                  "Instagram",
+                  "WhatsApp",
+                  "Evento",
+                  "Prospecção ativa",
+                  "Outro"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origem"
+          },
+          "obs": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Obs"
           },
           "endereco": {
             "anyOf": [
@@ -7611,17 +7936,214 @@
             "title": "Cep"
           },
           "municipio_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Municipio Id"
+          },
+          "tipo_pessoa": {
+            "type": "string",
+            "enum": [
+              "PJ",
+              "PF"
+            ],
+            "title": "Tipo Pessoa",
+            "default": "PJ"
+          },
+          "papeis": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Papeis"
+          },
+          "versao": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Versao"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "cpf_cnpj",
           "nome",
-          "municipio_id"
+          "papeis",
+          "versao"
+        ],
+        "title": "ParceiroAtualizar"
+      },
+      "ParceiroEntrada": {
+        "properties": {
+          "cpf_cnpj": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpf Cnpj"
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Nome"
+          },
+          "segmento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segmento"
+          },
+          "contato": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contato"
+          },
+          "cargo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cargo"
+          },
+          "telefone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefone"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "origem": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Site",
+                  "Indicação",
+                  "LinkedIn",
+                  "Instagram",
+                  "WhatsApp",
+                  "Evento",
+                  "Prospecção ativa",
+                  "Outro"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origem"
+          },
+          "obs": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Obs"
+          },
+          "endereco": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endereco"
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cep"
+          },
+          "municipio_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipio Id"
+          },
+          "tipo_pessoa": {
+            "type": "string",
+            "enum": [
+              "PJ",
+              "PF"
+            ],
+            "title": "Tipo Pessoa",
+            "default": "PJ"
+          },
+          "papeis": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Papeis"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nome",
+          "papeis"
         ],
         "title": "ParceiroEntrada"
       },
@@ -7632,17 +8154,139 @@
             "format": "uuid",
             "title": "Id"
           },
+          "criado_em": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Criado Em"
+          },
+          "atualizado_em": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Atualizado Em"
+          },
+          "criado_por": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Criado Por"
+          },
+          "atualizado_por": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Atualizado Por"
+          },
+          "versao": {
+            "type": "integer",
+            "title": "Versao"
+          },
           "tipo_pessoa": {
             "type": "string",
             "title": "Tipo Pessoa"
           },
           "cpf_cnpj": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Cpf Cnpj"
           },
           "nome": {
             "type": "string",
             "title": "Nome"
+          },
+          "segmento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segmento"
+          },
+          "contato": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contato"
+          },
+          "cargo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cargo"
+          },
+          "telefone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefone"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "origem": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origem"
+          },
+          "obs": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Obs"
           },
           "endereco": {
             "anyOf": [
@@ -7667,30 +8311,71 @@
             "title": "Cep"
           },
           "municipio_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Municipio Id"
           },
           "municipio_nome": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Municipio Nome"
           },
           "uf": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Uf"
+          },
+          "papeis": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Papeis"
           }
         },
         "type": "object",
         "required": [
           "id",
+          "criado_em",
+          "atualizado_em",
+          "criado_por",
+          "atualizado_por",
+          "versao",
           "tipo_pessoa",
           "cpf_cnpj",
           "nome",
+          "segmento",
+          "contato",
+          "cargo",
+          "telefone",
+          "email",
+          "origem",
+          "obs",
           "endereco",
           "cep",
           "municipio_id",
           "municipio_nome",
-          "uf"
+          "uf",
+          "papeis"
         ],
         "title": "ParceiroLeitura"
       },

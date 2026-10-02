@@ -9,9 +9,10 @@ from app.domain.constantes import StatusEtapa
 from app.domain.datas import adicionar_dias, hoje
 from app.domain.projeto import ETAPAS_PADRAO, POS_ENTREGA_PADRAO
 from app.errors import NaoEncontrado, RegraDeNegocio
-from app.models import Cliente, Negocio, Orcamento, Projeto, ProjetoEtapa
+from app.models import Negocio, Orcamento, Projeto, ProjetoEtapa
 from app.schemas.projeto import EtapaEntrada, ProjetoAtualizar, ProjetoEntrada
 from app.services.base import aplicar, conferir_versao, confirmar, obter
+from app.services.parceiros import exigir_cliente
 
 
 def consulta():
@@ -30,7 +31,7 @@ async def obter_completo(sessao: AsyncSession, id_: UUID) -> Projeto:
 
 
 async def _validar_vinculos(sessao: AsyncSession, dados: ProjetoEntrada, id_atual: UUID | None = None) -> None:
-    await obter(sessao, Cliente, dados.cliente_id, "Cliente")
+    await exigir_cliente(sessao, dados.cliente_id)
     if dados.negocio_id:
         negocio = await obter(sessao, Negocio, dados.negocio_id, "Negócio")
         if negocio.cliente_id != dados.cliente_id:

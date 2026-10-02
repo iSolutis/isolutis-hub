@@ -7,19 +7,30 @@ HOJE = date.today()
 
 
 async def test_cliente_crud_cnpj_e_exclusao(api: AsyncClient, novo_cliente):
-    c = await novo_cliente("Alfa Ltda", cnpj="12.345.678/0001-90", telefone="(71) 99239-0992")
-    assert c["cnpj"] == "12345678000190" and c["versao"] == 1 and c["criado_por"]
+    c = await novo_cliente("Alfa Ltda", cpf_cnpj="11.222.333/0001-81", telefone="(71) 99239-0992")
+    assert (
+        c["cpf_cnpj"] == "11222333000181"
+        and c["papeis"] == ["cliente"]
+        and c["tipo_pessoa"] == "PJ"
+        and c["versao"] == 1
+        and c["criado_por"]
+    )
 
     # CNPJ inválido e duplicado
-    r = await api.post(f"{API}/clientes", json={"nome": "X", "cnpj": "123"})
-    assert r.status_code == 422 and r.json()["erro"]["codigo"] == "validacao"
-    r = await api.post(f"{API}/clientes", json={"nome": "Y", "cnpj": "12345678000190"})
+    r = await api.post(f"{API}/clientes", json={"nome": "X", "cpf_cnpj": "123"})
+    assert r.status_code == 422 and "CNPJ inválido" in r.json()["erro"]["mensagem"]
+    r = await api.post(f"{API}/clientes", json={"nome": "Y", "cpf_cnpj": "11222333000181"})
     assert r.status_code == 422 and "CNPJ" in r.json()["erro"]["mensagem"]
 
     r = await api.put(
-        f"{API}/clientes/{c['id']}", json={"nome": "Alfa S.A.", "versao": c["versao"], "cidade": "Salvador"}
+        f"{API}/clientes/{c['id']}", json={"nome": "Alfa S.A.", "versao": c["versao"], "cargo": "Diretora"}
     )
-    assert r.status_code == 200 and r.json()["versao"] == 2 and r.json()["cnpj"] is None
+    assert (
+        r.status_code == 200
+        and r.json()["versao"] == 2
+        and r.json()["cpf_cnpj"] is None
+        and r.json()["papeis"] == ["cliente"]
+    )
 
     lista = (await api.get(f"{API}/clientes")).json()
     assert lista[0]["nome"] == "Alfa S.A." and lista[0]["negocios_abertos"] == 0 and lista[0]["faturado"] == 0
@@ -186,7 +197,22 @@ async def test_campos_opcionais_aceitam_null_explicito(api: AsyncClient, novo_cl
     """O frontend envia `null` (não omite) nos campos vazios: nenhum schema pode quebrar com isso."""
     r = await api.post(
         f"{API}/clientes",
-        json={k: None for k in ("cnpj", "segmento", "contato", "cargo", "telefone", "email", "cidade", "origem", "obs")}
+        json={
+            k: None
+            for k in (
+                "cpf_cnpj",
+                "segmento",
+                "contato",
+                "cargo",
+                "telefone",
+                "email",
+                "endereco",
+                "cep",
+                "municipio_id",
+                "origem",
+                "obs",
+            )
+        }
         | {"nome": "Nulos"},
     )
     assert r.status_code == 201, r.text

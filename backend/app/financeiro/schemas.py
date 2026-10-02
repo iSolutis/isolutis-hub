@@ -7,8 +7,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, model_validator
 
-from app.financeiro.regras import so_digitos
-from app.schemas.comum import Entrada, Leitura, TextoLongo, TextoOpcional
+from app.schemas.comum import Entrada, Leitura, TextoLongo
 
 # Valores monetários do plano: numeric(13,2)
 Valor = Annotated[
@@ -78,35 +77,6 @@ class ContaBancariaLeitura(Leitura):
     instituicao_nome: str
     nome: str
     saldo_inicial: Valor
-
-
-# ----------------------------------------------------------------------------- parceiros
-class ParceiroEntrada(Entrada):
-    tipo_pessoa: Literal["PJ", "PF"] = "PJ"
-    cpf_cnpj: str
-    nome: Nome
-    endereco: Annotated[str | None, Field(max_length=150)] = None
-    cep: TextoOpcional = None
-    municipio_id: UUID
-
-    @model_validator(mode="after")
-    def _normalizar(self) -> "ParceiroEntrada":
-        self.cpf_cnpj = so_digitos(self.cpf_cnpj)
-        self.cep = so_digitos(self.cep) or None
-        self.endereco = (self.endereco or "").strip() or None
-        return self
-
-
-class ParceiroLeitura(Leitura):
-    id: UUID
-    tipo_pessoa: str
-    cpf_cnpj: str
-    nome: str
-    endereco: str | None
-    cep: str | None
-    municipio_id: UUID
-    municipio_nome: str
-    uf: str
 
 
 # ----------------------------------------------------------------------------- títulos

@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, ComAuditoria
-from app.models.comercial import Cliente
+from app.models.parceiro import Parceiro
 from app.models.usuario import CategoriaDespesa, Investidor
 
 
@@ -16,7 +16,7 @@ class LancamentoReceita(ComAuditoria, Base):
 
     __tablename__ = "lancamentos_receita"
 
-    cliente_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("clientes.id"))
+    cliente_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("parceiro_negocio.id"))
     tipo: Mapped[str]
     descricao: Mapped[str]
     valor: Mapped[Decimal]
@@ -30,7 +30,7 @@ class LancamentoReceita(ComAuditoria, Base):
     parcela: Mapped[int | None]
     total_parcelas: Mapped[int | None]
 
-    cliente: Mapped[Cliente] = relationship(lazy="raise")
+    cliente: Mapped[Parceiro] = relationship(lazy="raise", foreign_keys=[cliente_id])
 
     @property
     def cliente_nome(self) -> str:

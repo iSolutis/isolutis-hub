@@ -5,10 +5,9 @@ from fastapi import APIRouter, Query, Response
 
 from app.deps import Sessao
 from app.documents.render import orcamento_html, slug
-from app.models import Cliente
 from app.schemas.orcamento import AprovacaoSaida, OrcamentoAtualizar, OrcamentoEntrada, OrcamentoLeitura, StatusExibido
 from app.services import orcamentos as svc
-from app.services.base import obter
+from app.services.parceiros import exigir_cliente
 
 router = APIRouter(prefix="/orcamentos", tags=["Orçamentos"])
 
@@ -43,7 +42,7 @@ async def excluir(id_: UUID, sessao: Sessao) -> Response:
 @router.get("/{id_}/documento", response_class=Response)
 async def documento(id_: UUID, sessao: Sessao) -> Response:
     orc = await svc.obter_completo(sessao, id_)
-    cliente = await obter(sessao, Cliente, orc.cliente_id, "Cliente")
+    cliente = await exigir_cliente(sessao, orc.cliente_id)
     nome = f"Orcamento-{orc.numero}-{slug(cliente.nome)}.html"
     return Response(
         orcamento_html(orc, cliente),

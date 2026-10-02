@@ -15,6 +15,8 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Protocol
 
+from app.financeiro.regras import documento_valido
+
 COLECOES = (
     "hub_membros", "hub_clientes", "hub_produtos", "hub_negocios", "hub_orcamentos",
     "hub_faturamento", "hub_despesas", "hub_projetos", "hub_tarefas",
@@ -161,19 +163,20 @@ def parcela_do_texto(descricao: str) -> tuple[int, int] | None:
 
 def limpar_cliente(d: dict[str, Any], rel: Relatorio) -> dict[str, Any]:
     obs = texto(d.get("obs"))
-    cnpj = re.sub(r"\D", "", str(d.get("cnpj") or ""))
-    if cnpj and len(cnpj) != 14:
+    documento = re.sub(r"\D", "", str(d.get("cnpj") or ""))
+    tipo = "PF" if len(documento) == 11 else "PJ"
+    if documento and not documento_valido(tipo, documento):
         obs = acrescentar_obs(obs, f"[CNPJ legado inválido: {d.get('cnpj')}]")
         rel.avisar(f"Cliente '{d.get('nome')}': CNPJ inválido '{d.get('cnpj')}' movido para as observações.")
-        cnpj = ""
+        documento = ""
     origem = texto(d.get("origem"))
     if origem and origem not in ORIGENS:
         obs = acrescentar_obs(obs, f"[origem legado: {origem}]")
         origem = "Outro"
     return {
-        "nome": texto(d.get("nome")) or "(sem nome)", "cnpj": cnpj or None, "segmento": texto(d.get("segmento")),
+        "nome": (texto(d.get("nome")) or "(sem nome)")[:150], "tipo_pessoa": tipo, "cpf_cnpj": documento or None, "segmento": texto(d.get("segmento")),
         "contato": texto(d.get("contato")), "cargo": texto(d.get("cargo")), "telefone": texto(d.get("telefone")),
-        "email": texto(d.get("email")), "cidade": texto(d.get("cidade")), "origem": origem, "obs": obs,
+        "email": texto(d.get("email")), "cidade": texto(d.get("cidade")), "origem": origem, "obs": obs,  # cidade: resolvida em município pelo importador
     }  # fmt: skip
 
 

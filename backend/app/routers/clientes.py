@@ -24,13 +24,13 @@ async def listar(sessao: Sessao) -> list[ClienteResumo]:
 
 
 @router.post("", response_model=ClienteLeitura, status_code=201)
-async def criar(dados: ClienteEntrada, sessao: Sessao) -> ClienteLeitura:
-    return ClienteLeitura.model_validate(await svc.criar(sessao, dados))
+async def criar(dados: ClienteEntrada, sessao: Sessao):
+    return await svc.criar(sessao, dados)
 
 
 @router.put("/{id_}", response_model=ClienteLeitura)
-async def atualizar(id_: UUID, dados: ClienteAtualizar, sessao: Sessao) -> ClienteLeitura:
-    return ClienteLeitura.model_validate(await svc.atualizar(sessao, id_, dados))
+async def atualizar(id_: UUID, dados: ClienteAtualizar, sessao: Sessao):
+    return await svc.atualizar(sessao, id_, dados)
 
 
 @router.delete("/{id_}", status_code=204)

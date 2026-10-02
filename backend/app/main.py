@@ -21,6 +21,7 @@ from app.routers import (
     negocios,
     orcamentos,
     painel,
+    parceiros,
     produtos,
     projetos,
     tarefas,
@@ -76,6 +77,10 @@ def criar_app() -> FastAPI:
         api.include_router(modulo.router, dependencies=[Depends(usuario_atual)])
     # Módulo financeiro: exige administrador (a dependência já está no próprio router).
     api.include_router(financeiro.router)
+    api.include_router(financeiro.router_referencias)
+    # Hub de parceiros: lista/edita todos os papéis (administradores); os papéis disponíveis qualquer logado consulta.
+    api.include_router(parceiros.router)
+    api.include_router(parceiros.router_papeis)
     app.include_router(api)
 
     @app.get("/api/saude", tags=["Infra"])

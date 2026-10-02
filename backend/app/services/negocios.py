@@ -8,9 +8,10 @@ from sqlalchemy.orm import joinedload
 from app.domain.constantes import EtapaNegocio
 from app.domain.datas import hoje
 from app.errors import RegraDeNegocio
-from app.models import Cliente, LancamentoReceita, Negocio
+from app.models import LancamentoReceita, Negocio
 from app.schemas.negocio import MoverEtapa, NegocioAtualizar, NegocioEntrada
 from app.services.base import aplicar, conferir_versao, confirmar, obter
+from app.services.parceiros import exigir_cliente
 
 
 def _consulta():
@@ -56,7 +57,7 @@ def definir_etapa(negocio: Negocio, etapa: str, motivo_perda: str | None, hoje_:
 
 
 async def criar(sessao: AsyncSession, dados: NegocioEntrada) -> Negocio:
-    await obter(sessao, Cliente, dados.cliente_id, "Cliente")
+    await exigir_cliente(sessao, dados.cliente_id)
     campos = dados.model_dump(exclude={"etapa", "motivo_perda"})
     negocio = Negocio(**campos, etapa="lead")
     definir_etapa(negocio, dados.etapa, dados.motivo_perda)

@@ -9,6 +9,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+from app.models.parceiro import Parceiro
 
 
 class Carimbos:
@@ -17,19 +18,6 @@ class Carimbos:
     )
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime | None]
-
-
-class Empresa(Carimbos, Base):
-    __tablename__ = "companies"
-
-    nome: Mapped[str]
-
-
-class Municipio(Carimbos, Base):
-    __tablename__ = "municipio"
-
-    nome: Mapped[str]
-    uf: Mapped[str]
 
 
 class InstituicaoFinanceira(Carimbos, Base):
@@ -62,20 +50,6 @@ class ContaBancaria(Carimbos, Base):
     instituicao: Mapped[InstituicaoFinanceira] = relationship(lazy="raise")
 
 
-class ParceiroNegocio(Carimbos, Base):
-    __tablename__ = "parceiro_negocio"
-
-    company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id"))
-    tipo_pessoa: Mapped[str] = mapped_column(default="PJ")
-    cpf_cnpj: Mapped[str]
-    nome: Mapped[str]
-    endereco: Mapped[str | None]
-    cep: Mapped[str | None]
-    municipio_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("municipio.id"))
-
-    municipio: Mapped[Municipio] = relationship(lazy="raise")
-
-
 class TituloFinanceiro(Carimbos, Base):
     __tablename__ = "titulo_financeiro"
 
@@ -97,4 +71,4 @@ class TituloFinanceiro(Carimbos, Base):
 
     conta_bancaria: Mapped[ContaBancaria] = relationship(lazy="raise")
     plano_conta: Mapped[PlanoConta] = relationship(lazy="raise")
-    parceiro: Mapped[ParceiroNegocio] = relationship(lazy="raise")
+    parceiro: Mapped[Parceiro] = relationship(lazy="raise")

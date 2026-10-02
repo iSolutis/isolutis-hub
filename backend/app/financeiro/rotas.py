@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Response
 
-from app.deps import Sessao, administrador
+from app.deps import Sessao, administrador, usuario_atual
 from app.financeiro import servicos as svc
 from app.financeiro.schemas import (
     ContaBancariaEntrada,
@@ -14,8 +14,6 @@ from app.financeiro.schemas import (
     FluxoDeCaixa,
     InstituicaoLeitura,
     MunicipioLeitura,
-    ParceiroEntrada,
-    ParceiroLeitura,
     PlanoContaEntrada,
     PlanoContaLeitura,
     ProximoCodigo,
@@ -24,6 +22,8 @@ from app.financeiro.schemas import (
 )
 
 router = APIRouter(prefix="/financeiro", tags=["Financeiro"], dependencies=[Depends(administrador)])
+# Referências (municípios e instituições) são dados públicos de apoio a formulários: qualquer pessoa logada lê.
+router_referencias = APIRouter(prefix="/financeiro", tags=["Financeiro"], dependencies=[Depends(usuario_atual)])
 
 Ano = Annotated[int, Query(ge=2000, le=2100)]
 
@@ -33,7 +33,7 @@ async def _empresa(sessao: Sessao):  # noqa: ANN202
 
 
 # --------------------------------------------------------------------------- referências
-@router.get("/municipios", response_model=list[MunicipioLeitura])
+@router_referencias.get("/municipios", response_model=list[MunicipioLeitura])
 async def municipios(
     sessao: Sessao,
     uf: str | None = Query(None, min_length=2, max_length=2),
@@ -43,7 +43,7 @@ async def municipios(
     return await svc.listar_municipios(sessao, uf.upper() if uf else None, busca, limite)
 
 
-@router.get("/instituicoes", response_model=list[InstituicaoLeitura])
+@router_referencias.get("/instituicoes", response_model=list[InstituicaoLeitura])
 async def instituicoes(sessao: Sessao, busca: str | None = Query(None, max_length=100)):
     return await svc.listar_instituicoes(sessao, busca)
 
@@ -98,28 +98,6 @@ async def atualizar_conta_bancaria(id_: UUID, dados: ContaBancariaEntrada, sessa
 @router.delete("/contas-bancarias/{id_}", status_code=204)
 async def excluir_conta_bancaria(id_: UUID, sessao: Sessao) -> Response:
     await svc.excluir_conta_bancaria(sessao, await _empresa(sessao), id_)
-    return Response(status_code=204)
-
-
-# --------------------------------------------------------------------------- parceiros
-@router.get("/parceiros", response_model=list[ParceiroLeitura])
-async def listar_parceiros(sessao: Sessao, busca: str | None = Query(None, max_length=100)):
-    return await svc.listar_parceiros(sessao, await _empresa(sessao), busca)
-
-
-@router.post("/parceiros", response_model=ParceiroLeitura, status_code=201)
-async def criar_parceiro(dados: ParceiroEntrada, sessao: Sessao):
-    return await svc.criar_parceiro(sessao, await _empresa(sessao), dados)
-
-
-@router.put("/parceiros/{id_}", response_model=ParceiroLeitura)
-async def atualizar_parceiro(id_: UUID, dados: ParceiroEntrada, sessao: Sessao):
-    return await svc.atualizar_parceiro(sessao, await _empresa(sessao), id_, dados)
-
-
-@router.delete("/parceiros/{id_}", status_code=204)
-async def excluir_parceiro(id_: UUID, sessao: Sessao) -> Response:
-    await svc.excluir_parceiro(sessao, await _empresa(sessao), id_)
     return Response(status_code=204)
 
 

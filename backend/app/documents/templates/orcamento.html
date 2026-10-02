@@ -15,7 +15,7 @@
 </header>
 <h1>{{ c.nome }}</h1>
 {% if c.contato %}<div>A/C {{ c.contato }}{% if c.cargo %} · {{ c.cargo }}{% endif %}</div>{% endif %}
-{% if c.cnpj %}<div>CNPJ {{ c.cnpj | cnpj }}</div>{% endif %}
+{% if c.cpf_cnpj %}<div>{{ "CPF" if c.tipo_pessoa == "PF" else "CNPJ" }} {{ c.cpf_cnpj | cnpj }}</div>{% endif %}
 <table>
   <thead><tr><th>Descrição</th><th class="r">Qtd</th><th class="r">Valor unitário</th><th class="r">Total</th></tr></thead>
   <tbody>

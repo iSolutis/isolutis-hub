@@ -11,9 +11,10 @@ from sqlalchemy.orm import joinedload
 from app.domain.datas import adicionar_meses, hoje
 from app.domain.dinheiro import ZERO, dividir_em_parcelas
 from app.errors import RegraDeNegocio
-from app.models import Cliente, Despesa, Investimento, LancamentoReceita, Negocio, Orcamento
+from app.models import Despesa, Investimento, LancamentoReceita, Negocio, Orcamento
 from app.schemas.faturamento import FaturamentoEmLote, LancamentoAtualizar, LancamentoEntrada
 from app.services.base import aplicar, conferir_versao, confirmar, obter
+from app.services.parceiros import exigir_cliente
 
 ROTULO_TIPO = {
     "projeto": "Projeto sob medida",
@@ -48,7 +49,7 @@ async def _recarregar(sessao: AsyncSession, ids: list[UUID]) -> list[LancamentoR
 async def _validar_vinculos(
     sessao: AsyncSession, cliente_id: UUID, negocio_id: UUID | None, orcamento_id: UUID | None
 ) -> None:
-    await obter(sessao, Cliente, cliente_id, "Cliente")
+    await exigir_cliente(sessao, cliente_id)
     if negocio_id and (await obter(sessao, Negocio, negocio_id, "Negócio")).cliente_id != cliente_id:
         raise RegraDeNegocio("O negócio vinculado pertence a outro cliente.")
     if orcamento_id and (await obter(sessao, Orcamento, orcamento_id, "Orçamento")).cliente_id != cliente_id:

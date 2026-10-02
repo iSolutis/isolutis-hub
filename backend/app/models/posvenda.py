@@ -7,14 +7,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.domain.constantes import StatusEtapa
 from app.domain.projeto import progresso
 from app.models.base import Base, ComAuditoria
-from app.models.comercial import Cliente
+from app.models.parceiro import Parceiro
 
 
 class Projeto(ComAuditoria, Base):
     __tablename__ = "projetos"
 
     titulo: Mapped[str]
-    cliente_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("clientes.id"))
+    cliente_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("parceiro_negocio.id"))
     negocio_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("negocios.id"))
     orcamento_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("orcamentos.id"))
     status: Mapped[str] = mapped_column(default="planejamento")
@@ -26,7 +26,7 @@ class Projeto(ComAuditoria, Base):
     fora_escopo: Mapped[str | None]
     pos_entrega: Mapped[str | None]
 
-    cliente: Mapped[Cliente] = relationship(lazy="raise")
+    cliente: Mapped[Parceiro] = relationship(lazy="raise", foreign_keys=[cliente_id])
     etapas: Mapped[list["ProjetoEtapa"]] = relationship(
         back_populates="projeto", cascade="all, delete-orphan", order_by="ProjetoEtapa.ordem", lazy="raise"
     )
@@ -67,7 +67,7 @@ class Tarefa(ComAuditoria, Base):
     prioridade_ordem: Mapped[int] = mapped_column(
         Computed("CASE prioridade WHEN 'alta' THEN 1 WHEN 'media' THEN 2 ELSE 3 END", persisted=True)
     )
-    cliente_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("clientes.id"))
+    cliente_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("parceiro_negocio.id"))
     projeto_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("projetos.id"))
     descricao: Mapped[str | None]
     concluida_em: Mapped[datetime | None]

@@ -102,7 +102,7 @@ passo("conta bancária criada; duplicada recusada");
 // parceiro (CNPJ inválido, depois válido)
 await page.click('nav button[data-go="fin-parceiros"]'); await page.waitForTimeout(400);
 await page.click('[data-act="novoParceiro"]'); await page.waitForSelector(".drawer");
-await page.fill("#f-cpf_cnpj", cnpjErrado); await page.fill("#f-nome", `Fornecedor ${sufixo}`);
+await page.check('input[name="papel"][value="fornecedor"]'); await page.fill("#f-cpf_cnpj", cnpjErrado); await page.fill("#f-nome", `Fornecedor ${sufixo}`);
 await page.selectOption("#f-uf", "BA");
 await page.waitForFunction(() => document.querySelectorAll("#f-municipio_id option").length > 100, null, { timeout: 5000 });
 await page.selectOption("#f-municipio_id", { label: "Salvador" });

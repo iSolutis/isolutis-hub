@@ -727,40 +727,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/financeiro/municipios": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Municipios */
-        get: operations["municipios_api_v1_financeiro_municipios_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/financeiro/instituicoes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Instituicoes */
-        get: operations["instituicoes_api_v1_financeiro_instituicoes_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/financeiro/plano-contas": {
         parameters: {
             query?: never;
@@ -850,42 +816,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/financeiro/parceiros": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar Parceiros */
-        get: operations["listar_parceiros_api_v1_financeiro_parceiros_get"];
-        put?: never;
-        /** Criar Parceiro */
-        post: operations["criar_parceiro_api_v1_financeiro_parceiros_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/financeiro/parceiros/{id_}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Atualizar Parceiro */
-        put: operations["atualizar_parceiro_api_v1_financeiro_parceiros__id___put"];
-        post?: never;
-        /** Excluir Parceiro */
-        delete: operations["excluir_parceiro_api_v1_financeiro_parceiros__id___delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/financeiro/titulos": {
         parameters: {
             query?: never;
@@ -931,6 +861,96 @@ export interface paths {
         };
         /** Fluxo De Caixa */
         get: operations["fluxo_de_caixa_api_v1_financeiro_fluxo_de_caixa_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/municipios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Municipios */
+        get: operations["municipios_api_v1_financeiro_municipios_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/instituicoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Instituicoes */
+        get: operations["instituicoes_api_v1_financeiro_instituicoes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parceiros": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar */
+        get: operations["listar_api_v1_parceiros_get"];
+        put?: never;
+        /** Criar */
+        post: operations["criar_api_v1_parceiros_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parceiros/{id_}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Atualizar */
+        put: operations["atualizar_api_v1_parceiros__id___put"];
+        post?: never;
+        /** Excluir */
+        delete: operations["excluir_api_v1_parceiros__id___delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parceiros/papeis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Papeis
+         * @description Papéis que um parceiro pode assumir (qualquer pessoa logada pode consultar).
+         */
+        get: operations["papeis_api_v1_parceiros_papeis_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1004,10 +1024,10 @@ export interface components {
         };
         /** ClienteAtualizar */
         ClienteAtualizar: {
+            /** Cpf Cnpj */
+            cpf_cnpj?: string | null;
             /** Nome */
             nome: string;
-            /** Cnpj */
-            cnpj?: string | null;
             /** Segmento */
             segmento?: string | null;
             /** Contato */
@@ -1018,21 +1038,28 @@ export interface components {
             telefone?: string | null;
             /** Email */
             email?: string | null;
-            /** Cidade */
-            cidade?: string | null;
             /** Origem */
             origem?: ("Site" | "Indicação" | "LinkedIn" | "Instagram" | "WhatsApp" | "Evento" | "Prospecção ativa" | "Outro") | null;
             /** Obs */
             obs?: string | null;
+            /** Endereco */
+            endereco?: string | null;
+            /** Cep */
+            cep?: string | null;
+            /** Municipio Id */
+            municipio_id?: string | null;
             /** Versao */
             versao: number;
         };
-        /** ClienteEntrada */
+        /**
+         * ClienteEntrada
+         * @description Cliente: o tipo de pessoa é deduzido do documento (11 dígitos = PF; senão PJ).
+         */
         ClienteEntrada: {
+            /** Cpf Cnpj */
+            cpf_cnpj?: string | null;
             /** Nome */
             nome: string;
-            /** Cnpj */
-            cnpj?: string | null;
             /** Segmento */
             segmento?: string | null;
             /** Contato */
@@ -1043,12 +1070,16 @@ export interface components {
             telefone?: string | null;
             /** Email */
             email?: string | null;
-            /** Cidade */
-            cidade?: string | null;
             /** Origem */
             origem?: ("Site" | "Indicação" | "LinkedIn" | "Instagram" | "WhatsApp" | "Evento" | "Prospecção ativa" | "Outro") | null;
             /** Obs */
             obs?: string | null;
+            /** Endereco */
+            endereco?: string | null;
+            /** Cep */
+            cep?: string | null;
+            /** Municipio Id */
+            municipio_id?: string | null;
         };
         /** ClienteLeitura */
         ClienteLeitura: {
@@ -1073,10 +1104,12 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /** Tipo Pessoa */
+            tipo_pessoa: string;
+            /** Cpf Cnpj */
+            cpf_cnpj: string | null;
             /** Nome */
             nome: string;
-            /** Cnpj */
-            cnpj: string | null;
             /** Segmento */
             segmento: string | null;
             /** Contato */
@@ -1087,12 +1120,22 @@ export interface components {
             telefone: string | null;
             /** Email */
             email: string | null;
-            /** Cidade */
-            cidade: string | null;
             /** Origem */
             origem: string | null;
             /** Obs */
             obs: string | null;
+            /** Endereco */
+            endereco: string | null;
+            /** Cep */
+            cep: string | null;
+            /** Municipio Id */
+            municipio_id: string | null;
+            /** Municipio Nome */
+            municipio_nome: string | null;
+            /** Uf */
+            uf: string | null;
+            /** Papeis */
+            papeis: string[];
         };
         /** ClienteRelacionados */
         ClienteRelacionados: {
@@ -1131,10 +1174,12 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /** Tipo Pessoa */
+            tipo_pessoa: string;
+            /** Cpf Cnpj */
+            cpf_cnpj: string | null;
             /** Nome */
             nome: string;
-            /** Cnpj */
-            cnpj: string | null;
             /** Segmento */
             segmento: string | null;
             /** Contato */
@@ -1145,12 +1190,22 @@ export interface components {
             telefone: string | null;
             /** Email */
             email: string | null;
-            /** Cidade */
-            cidade: string | null;
             /** Origem */
             origem: string | null;
             /** Obs */
             obs: string | null;
+            /** Endereco */
+            endereco: string | null;
+            /** Cep */
+            cep: string | null;
+            /** Municipio Id */
+            municipio_id: string | null;
+            /** Municipio Nome */
+            municipio_nome: string | null;
+            /** Uf */
+            uf: string | null;
+            /** Papeis */
+            papeis: string[];
             /** Negocios Abertos */
             negocios_abertos: number;
             /** Faturado */
@@ -2174,27 +2229,84 @@ export interface components {
             /** Orcamentos Aguardando */
             orcamentos_aguardando: components["schemas"]["OrcamentoAguardando"][];
         };
-        /** ParceiroEntrada */
-        ParceiroEntrada: {
+        /** PapelLeitura */
+        PapelLeitura: {
+            /** Codigo */
+            codigo: string;
+            /** Nome */
+            nome: string;
+        };
+        /** ParceiroAtualizar */
+        ParceiroAtualizar: {
+            /** Cpf Cnpj */
+            cpf_cnpj?: string | null;
+            /** Nome */
+            nome: string;
+            /** Segmento */
+            segmento?: string | null;
+            /** Contato */
+            contato?: string | null;
+            /** Cargo */
+            cargo?: string | null;
+            /** Telefone */
+            telefone?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Origem */
+            origem?: ("Site" | "Indicação" | "LinkedIn" | "Instagram" | "WhatsApp" | "Evento" | "Prospecção ativa" | "Outro") | null;
+            /** Obs */
+            obs?: string | null;
+            /** Endereco */
+            endereco?: string | null;
+            /** Cep */
+            cep?: string | null;
+            /** Municipio Id */
+            municipio_id?: string | null;
             /**
              * Tipo Pessoa
              * @default PJ
              * @enum {string}
              */
             tipo_pessoa: "PJ" | "PF";
+            /** Papeis */
+            papeis: string[];
+            /** Versao */
+            versao: number;
+        };
+        /** ParceiroEntrada */
+        ParceiroEntrada: {
             /** Cpf Cnpj */
-            cpf_cnpj: string;
+            cpf_cnpj?: string | null;
             /** Nome */
             nome: string;
+            /** Segmento */
+            segmento?: string | null;
+            /** Contato */
+            contato?: string | null;
+            /** Cargo */
+            cargo?: string | null;
+            /** Telefone */
+            telefone?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Origem */
+            origem?: ("Site" | "Indicação" | "LinkedIn" | "Instagram" | "WhatsApp" | "Evento" | "Prospecção ativa" | "Outro") | null;
+            /** Obs */
+            obs?: string | null;
             /** Endereco */
             endereco?: string | null;
             /** Cep */
             cep?: string | null;
+            /** Municipio Id */
+            municipio_id?: string | null;
             /**
-             * Municipio Id
-             * Format: uuid
+             * Tipo Pessoa
+             * @default PJ
+             * @enum {string}
              */
-            municipio_id: string;
+            tipo_pessoa: "PJ" | "PF";
+            /** Papeis */
+            papeis: string[];
         };
         /** ParceiroLeitura */
         ParceiroLeitura: {
@@ -2203,25 +2315,54 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /**
+             * Criado Em
+             * Format: date-time
+             */
+            criado_em: string;
+            /**
+             * Atualizado Em
+             * Format: date-time
+             */
+            atualizado_em: string;
+            /** Criado Por */
+            criado_por: string | null;
+            /** Atualizado Por */
+            atualizado_por: string | null;
+            /** Versao */
+            versao: number;
             /** Tipo Pessoa */
             tipo_pessoa: string;
             /** Cpf Cnpj */
-            cpf_cnpj: string;
+            cpf_cnpj: string | null;
             /** Nome */
             nome: string;
+            /** Segmento */
+            segmento: string | null;
+            /** Contato */
+            contato: string | null;
+            /** Cargo */
+            cargo: string | null;
+            /** Telefone */
+            telefone: string | null;
+            /** Email */
+            email: string | null;
+            /** Origem */
+            origem: string | null;
+            /** Obs */
+            obs: string | null;
             /** Endereco */
             endereco: string | null;
             /** Cep */
             cep: string | null;
-            /**
-             * Municipio Id
-             * Format: uuid
-             */
-            municipio_id: string;
+            /** Municipio Id */
+            municipio_id: string | null;
             /** Municipio Nome */
-            municipio_nome: string;
+            municipio_nome: string | null;
             /** Uf */
-            uf: string;
+            uf: string | null;
+            /** Papeis */
+            papeis: string[];
         };
         /** PlanoContaEntrada */
         PlanoContaEntrada: {
@@ -4787,70 +4928,6 @@ export interface operations {
             };
         };
     };
-    municipios_api_v1_financeiro_municipios_get: {
-        parameters: {
-            query?: {
-                uf?: string | null;
-                busca?: string | null;
-                limite?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MunicipioLeitura"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    instituicoes_api_v1_financeiro_instituicoes_get: {
-        parameters: {
-            query?: {
-                busca?: string | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InstituicaoLeitura"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     listar_plano_api_v1_financeiro_plano_contas_get: {
         parameters: {
             query?: never;
@@ -5116,134 +5193,6 @@ export interface operations {
             };
         };
     };
-    listar_parceiros_api_v1_financeiro_parceiros_get: {
-        parameters: {
-            query?: {
-                busca?: string | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ParceiroLeitura"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    criar_parceiro_api_v1_financeiro_parceiros_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ParceiroEntrada"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ParceiroLeitura"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    atualizar_parceiro_api_v1_financeiro_parceiros__id___put: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id_: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ParceiroEntrada"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ParceiroLeitura"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    excluir_parceiro_api_v1_financeiro_parceiros__id___delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id_: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     listar_titulos_api_v1_financeiro_titulos_get: {
         parameters: {
             query?: {
@@ -5403,6 +5352,219 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    municipios_api_v1_financeiro_municipios_get: {
+        parameters: {
+            query?: {
+                uf?: string | null;
+                busca?: string | null;
+                limite?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MunicipioLeitura"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    instituicoes_api_v1_financeiro_instituicoes_get: {
+        parameters: {
+            query?: {
+                busca?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstituicaoLeitura"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listar_api_v1_parceiros_get: {
+        parameters: {
+            query?: {
+                papel?: string | null;
+                busca?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParceiroLeitura"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    criar_api_v1_parceiros_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParceiroEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParceiroLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_api_v1_parceiros__id___put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParceiroAtualizar"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParceiroLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    excluir_api_v1_parceiros__id___delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    papeis_api_v1_parceiros_papeis_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PapelLeitura"][];
                 };
             };
         };

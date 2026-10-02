@@ -6,12 +6,13 @@ from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.financeiro.models import Empresa, InstituicaoFinanceira, Municipio
-from app.models import Usuario
+from app.financeiro.models import InstituicaoFinanceira
+from app.models import Empresa, Municipio, Usuario
 from app.security import gerar_hash
 from tests.conftest import SENHA
 
 F = "/api/v1/financeiro"
+P = "/api/v1/parceiros"
 ANO = date.today().year
 CNPJ = "11222333000181"
 CPF = "52998224725"
@@ -26,6 +27,12 @@ async def ref(sessao: AsyncSession) -> dict:
     sessao.add_all([mun, banco, outro])
     await sessao.flush()
     return {"municipio": str(mun.id), "banco": str(banco.id), "outro_banco": str(outro.id)}
+
+
+async def _criar_parceiro(api: AsyncClient, corpo: dict) -> dict:
+    r = await api.post(P, json={"papeis": ["fornecedor"], **corpo})
+    assert r.status_code == 201, r.text
+    return r.json()
 
 
 async def _criar(api: AsyncClient, caminho: str, corpo: dict, esperado: int = 201) -> dict:
@@ -67,16 +74,18 @@ async def conta_bancaria(api: AsyncClient, ref: dict) -> dict:
 
 @pytest.fixture
 async def parceiro(api: AsyncClient, ref: dict) -> dict:
-    return await _criar(
-        api,
-        "/parceiros",
-        {
+    r = await api.post(
+        P,
+        json={
             "tipo_pessoa": "PJ",
             "cpf_cnpj": "11.222.333/0001-81",
             "nome": "Fornecedor Alfa",
             "municipio_id": ref["municipio"],
+            "papeis": ["fornecedor"],
         },
     )
+    assert r.status_code == 201, r.text
+    return r.json()
 
 
 # ============================================================================ acesso
@@ -218,41 +227,43 @@ async def test_contas_bancarias_crud_e_duplicidade(api: AsyncClient, ref: dict):
 # ============================================================================ US04 parceiros
 async def test_parceiros_validam_documento_e_unicidade(api: AsyncClient, ref: dict):
     base = {
+        "papeis": ["fornecedor"],
         "tipo_pessoa": "PJ",
         "nome": "Alfa",
         "municipio_id": ref["municipio"],
         "cep": "40.000-000",
         "endereco": " Rua A, 10 ",
     }
-    r = await api.post(f"{F}/parceiros", json={**base, "cpf_cnpj": "11.222.333/0001-80"})
+    r = await api.post(f"{P}", json={**base, "cpf_cnpj": "11.222.333/0001-80"})
     assert r.status_code == 422 and "CNPJ inválido" in r.json()["erro"]["mensagem"]
-    p = await _criar(api, "/parceiros", {**base, "cpf_cnpj": "11.222.333/0001-81"})
+    p = await _criar_parceiro(api, {**base, "cpf_cnpj": "11.222.333/0001-81"})
     assert (
         p["cpf_cnpj"] == CNPJ
         and p["cep"] == "40000000"
         and p["endereco"] == "Rua A, 10"
         and (p["municipio_nome"], p["uf"]) == ("Salvador", "BA")
     )
-    r = await api.post(f"{F}/parceiros", json={**base, "nome": "Duplicado", "cpf_cnpj": CNPJ})
+    r = await api.post(f"{P}", json={**base, "nome": "Duplicado", "cpf_cnpj": CNPJ})
     assert r.status_code == 422 and "já existe" in r.json()["erro"]["mensagem"].lower()
-    pf = await _criar(
+    pf = await _criar_parceiro(
         api,
-        "/parceiros",
         {"tipo_pessoa": "PF", "cpf_cnpj": "529.982.247-25", "nome": "Maria", "municipio_id": ref["municipio"]},
     )
     assert pf["cpf_cnpj"] == CPF and pf["cep"] is None
     assert (
-        await api.post(f"{F}/parceiros", json={**base, "tipo_pessoa": "PF", "cpf_cnpj": CNPJ})
+        await api.post(f"{P}", json={**base, "tipo_pessoa": "PF", "cpf_cnpj": CNPJ})
     ).status_code == 422  # CNPJ marcado como PF
     assert (
-        await api.post(f"{F}/parceiros", json={**base, "cpf_cnpj": "52998224726", "tipo_pessoa": "PF", "cep": "123"})
+        await api.post(f"{P}", json={**base, "cpf_cnpj": "52998224726", "tipo_pessoa": "PF", "cep": "123"})
     ).status_code == 422
-    achados = (await api.get(f"{F}/parceiros", params={"busca": "mar"})).json()
+    achados = (await api.get(f"{P}", params={"busca": "mar"})).json()
     assert [x["nome"] for x in achados] == ["Maria"]
-    assert [x["nome"] for x in (await api.get(f"{F}/parceiros", params={"busca": "11.222"})).json()] == ["Alfa"]
-    r = await api.put(f"{F}/parceiros/{p['id']}", json={**base, "cpf_cnpj": CNPJ, "nome": "Alfa Renomeada"})
+    assert [x["nome"] for x in (await api.get(f"{P}", params={"busca": "11.222"})).json()] == ["Alfa"]
+    r = await api.put(
+        f"{P}/{p['id']}", json={**base, "cpf_cnpj": CNPJ, "nome": "Alfa Renomeada", "versao": p["versao"]}
+    )
     assert r.json()["nome"] == "Alfa Renomeada"
-    assert (await api.delete(f"{F}/parceiros/{pf['id']}")).status_code == 204
+    assert (await api.delete(f"{P}/{pf['id']}")).status_code == 204
 
 
 # ============================================================================ US03 / RN03 / RN04 títulos
@@ -339,7 +350,7 @@ async def test_titulo_filtros_e_exclusao_com_bloqueios(
     assert len((await api.get(f"{F}/titulos", params={"busca": "alfa"})).json()) == 2
     # com título lançado, conta bancária / parceiro / conta do plano não podem ser excluídos nem mudar de natureza
     assert (await api.delete(f"{F}/contas-bancarias/{conta_bancaria['id']}")).status_code == 422
-    assert (await api.delete(f"{F}/parceiros/{parceiro['id']}")).status_code == 422
+    assert (await api.delete(f"{P}/{parceiro['id']}")).status_code == 422
     assert (await api.delete(f"{F}/plano-contas/{plano['gt']['id']}")).status_code == 422
     r = await api.put(
         f"{F}/plano-contas/{plano['gt']['id']}",

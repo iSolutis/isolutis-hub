@@ -9,6 +9,7 @@ export type ContaBancaria = S["ContaBancariaLeitura"];
 export type ContaBancariaEntrada = S["ContaBancariaEntrada"];
 export type Parceiro = S["ParceiroLeitura"];
 export type ParceiroEntrada = S["ParceiroEntrada"];
+export type Papel = S["PapelLeitura"];
 export type Titulo = S["TituloLeitura"];
 export type TituloEntrada = S["TituloEntrada"];
 export type Municipio = S["MunicipioLeitura"];
@@ -34,10 +35,11 @@ export const apiFinanceiro = {
     excluir: (id: string) => http.delete(`${B}/contas-bancarias/${id}`),
   },
   parceiros: {
-    listar: (busca?: string) => http.get<Parceiro[]>(`${B}/parceiros`, { busca }),
-    criar: (d: ParceiroEntrada) => http.post<Parceiro>(`${B}/parceiros`, d),
-    atualizar: (id: string, d: ParceiroEntrada) => http.put<Parceiro>(`${B}/parceiros/${id}`, d),
-    excluir: (id: string) => http.delete(`${B}/parceiros/${id}`),
+    listar: (filtros: { papel?: string; busca?: string } = {}) => http.get<Parceiro[]>("/parceiros", filtros),
+    papeis: () => http.get<Papel[]>("/parceiros/papeis"),
+    criar: (d: ParceiroEntrada) => http.post<Parceiro>("/parceiros", d),
+    atualizar: (id: string, d: S["ParceiroAtualizar"]) => http.put<Parceiro>(`/parceiros/${id}`, d),
+    excluir: (id: string) => http.delete(`/parceiros/${id}`),
   },
   titulos: {
     listar: (filtros: { tipo?: string; status?: string } = {}) => http.get<Titulo[]>(`${B}/titulos`, filtros),

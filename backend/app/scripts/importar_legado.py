@@ -12,6 +12,7 @@ um administrador define a senha de cada um na tela Equipe.
 
 import argparse
 import asyncio
+import re
 import sys
 import uuid
 from collections import defaultdict
@@ -24,14 +25,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db import SessionLocal
 from app.models import (
     CategoriaDespesa,
-    Cliente,
     Despesa,
     Investidor,
     Investimento,
     LancamentoReceita,
+    Municipio,
     Negocio,
     Orcamento,
     OrcamentoItem,
+    Parceiro,
+    ParceiroPapel,
     Produto,
     Projeto,
     ProjetoEtapa,
@@ -40,6 +43,7 @@ from app.models import (
     Usuario,
 )  # fmt: skip
 from app.scripts import legado as lg
+from app.services.parceiros import empresa_atual
 
 
 class Importador:
@@ -135,19 +139,55 @@ class Importador:
             await self._adicionar("hub_membros", linha, u)
             self.usuarios_por_email[email] = u
 
+    async def _indice_de_municipios(self) -> dict[tuple[str, str | None], list[uuid.UUID]]:
+        """(nome sem acento, UF) e (nome sem acento, None) -> ids; usado para casar a cidade em texto livre."""
+        indice: dict[tuple[str, str | None], list[uuid.UUID]] = defaultdict(list)
+        for m in (await self.sessao.scalars(select(Municipio))).all():
+            nome = lg.sem_acento(m.nome)
+            indice[(nome, m.uf)].append(m.id)
+            indice[(nome, None)].append(m.id)
+        return indice
+
+    @staticmethod
+    def _municipio_do_texto(
+        cidade: str | None, indice: dict[tuple[str, str | None], list[uuid.UUID]]
+    ) -> uuid.UUID | None:
+        """ "Salvador", "Salvador/BA", "Salvador - BA": só aceita se o casamento for único."""
+        if not cidade:
+            return None
+        achado = re.fullmatch(r"(.*?)\s*[/,-]\s*([A-Za-z]{2})\s*", cidade)
+        nome, uf = (achado[1], achado[2].upper()) if achado else (cidade, None)
+        ids = indice.get((lg.sem_acento(nome), uf), [])
+        return ids[0] if len(ids) == 1 else None
+
     async def clientes(self) -> None:
-        cnpjs_usados = {
-            c for (c,) in (await self.sessao.execute(select(Cliente.cnpj).where(Cliente.cnpj.is_not(None)))).all()
+        empresa = await empresa_atual(self.sessao)
+        documentos_usados = {
+            c
+            for (c,) in (
+                await self.sessao.execute(select(Parceiro.cpf_cnpj).where(Parceiro.cpf_cnpj.is_not(None)))
+            ).all()
         }
+        indice = await self._indice_de_municipios()
         for linha in self._novas("hub_clientes"):
             campos = lg.limpar_cliente(linha.dados, self.rel)
-            if campos["cnpj"] in cnpjs_usados:
-                campos["obs"] = lg.acrescentar_obs(campos["obs"], f"[CNPJ duplicado no legado: {campos['cnpj']}]")
-                self.rel.avisar(f"Cliente '{campos['nome']}': CNPJ {campos['cnpj']} repetido; mantido só no primeiro.")
-                campos["cnpj"] = None
-            if campos["cnpj"]:
-                cnpjs_usados.add(campos["cnpj"])
-            await self._adicionar("hub_clientes", linha, Cliente(**campos, **self._carimbos(linha)))
+            cidade = campos.pop("cidade")
+            if campos["cpf_cnpj"] in documentos_usados:
+                campos["obs"] = lg.acrescentar_obs(campos["obs"], f"[CNPJ duplicado no legado: {campos['cpf_cnpj']}]")
+                self.rel.avisar(
+                    f"Cliente '{campos['nome']}': CNPJ {campos['cpf_cnpj']} repetido; mantido só no primeiro."
+                )
+                campos["cpf_cnpj"] = None
+            if campos["cpf_cnpj"]:
+                documentos_usados.add(campos["cpf_cnpj"])
+            municipio_id = self._municipio_do_texto(cidade, indice)
+            if cidade and municipio_id is None:
+                campos["obs"] = lg.acrescentar_obs(campos["obs"], f"[cidade informada: {cidade}]")
+            parceiro = Parceiro(
+                company_id=empresa.id, municipio_id=municipio_id, papeis=[ParceiroPapel(papel="cliente")],
+                **campos, **self._carimbos(linha),
+            )  # fmt: skip
+            await self._adicionar("hub_clientes", linha, parceiro)
 
     async def produtos(self) -> None:
         for linha in self._novas("hub_produtos"):

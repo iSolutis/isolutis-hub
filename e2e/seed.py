@@ -12,8 +12,8 @@ hoje=d.date.today()
 eu=c.get("/auth/eu").json()
 c.post("/usuarios",json={"nome":"Jefferson Pereira","email":"jefferson@isolutis.com.br","senha":"outra-senha-123"})
 cli=[c.post("/clientes",json=x).json() for x in [
- {"nome":"Distribuidora Alfa","contato":"Maria Souza","telefone":"(71) 99239-0992","cidade":"Salvador","origem":"Indicação","segmento":"distribuição"},
- {"nome":"Clínica Beta","contato":"João Lima","cidade":"Feira de Santana","origem":"Site"},
+ {"nome":"Distribuidora Alfa","contato":"Maria Souza","telefone":"(71) 99239-0992","origem":"Indicação","segmento":"distribuição"},
+ {"nome":"Clínica Beta","contato":"João Lima","origem":"Site"},
  {"nome":"Indústria Gama","contato":"Ana Paula","telefone":"71988887777","origem":"LinkedIn"}]]
 c.post("/produtos/catalogo")
 prods=c.get("/produtos").json()

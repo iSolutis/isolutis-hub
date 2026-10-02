@@ -14,7 +14,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.domain.datas import hoje
-from app.models import Cliente, Orcamento, Projeto
+from app.models import Orcamento, Parceiro, Projeto
 from app.schemas.usuario import MembroEquipe
 
 PASTA = Path(__file__).parent
@@ -41,7 +41,12 @@ def _qtd(v: Decimal) -> str:
 
 
 def _cnpj(v: str) -> str:
-    return re.sub(r"(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})", r"\1.\2.\3/\4-\5", v) if len(v) == 14 else v
+    """Formata CNPJ (14 dígitos) ou CPF (11); outro tamanho volta como veio."""
+    if len(v) == 14:
+        return re.sub(r"(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})", r"\1.\2.\3/\4-\5", v)
+    if len(v) == 11:
+        return re.sub(r"(\d{3})(\d{3})(\d{3})(\d{2})", r"\1.\2.\3-\4", v)
+    return v
 
 
 @lru_cache
@@ -61,7 +66,7 @@ def _css(nome: str) -> str:
     return (PASTA / "templates" / nome).read_text(encoding="utf-8")
 
 
-def orcamento_html(orc: Orcamento, cliente: Cliente) -> str:
+def orcamento_html(orc: Orcamento, cliente: Parceiro) -> str:
     return (
         _ambiente()
         .get_template("orcamento.html")
@@ -98,7 +103,7 @@ def _gantt(projeto: Projeto, inicio: date, fim: date) -> dict:
     return {"marcas": marcas, "linhas": linhas}
 
 
-def projeto_html(projeto: Projeto, cliente: Cliente, responsavel: MembroEquipe | None, equipe: dict) -> str:
+def projeto_html(projeto: Projeto, cliente: Parceiro, responsavel: MembroEquipe | None, equipe: dict) -> str:
     etapas = projeto.etapas
     datas = sorted(
         [d for e in etapas for d in (e.inicio, e.fim) if d] + [d for d in (projeto.inicio, projeto.entrega) if d]

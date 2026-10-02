@@ -22,7 +22,8 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import SessionLocal
-from app.financeiro.models import InstituicaoFinanceira, Municipio
+from app.financeiro.models import InstituicaoFinanceira
+from app.models import Municipio
 
 DADOS = Path(__file__).parent / "dados"
 URL_IBGE = "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=nivelado"

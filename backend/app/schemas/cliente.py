@@ -1,52 +1,28 @@
-from typing import Annotated, Literal
+"""Fachada de clientes: o parceiro (hub) visto apenas no papel de cliente. Os papéis não aparecem aqui."""
+
 from uuid import UUID
 
-from pydantic import AfterValidator, BeforeValidator, Field
+from pydantic import Field
 
-from app.schemas.comum import Auditoria, Dinheiro, Entrada, Leitura, Texto, TextoLongo, TextoOpcional, so_digitos
+from app.schemas.comum import Dinheiro, Leitura
+from app.schemas.parceiro import Origem, ParceiroLeitura, _CamposDoParceiro
 
-Origem = Literal["Site", "Indicação", "LinkedIn", "Instagram", "WhatsApp", "Evento", "Prospecção ativa", "Outro"]
-
-
-def _validar_cnpj(v: str | None) -> str | None:
-    if not v:
-        return None
-    if len(v) != 14:
-        raise ValueError("O CNPJ deve ter 14 dígitos.")
-    return v
+__all__ = [
+    "ClienteAtualizar", "ClienteEntrada", "ClienteLeitura", "ClienteRelacionados", "ClienteResumo", "Origem",
+    "RelNegocio", "RelOrcamento",
+]  # fmt: skip
 
 
-Cnpj = Annotated[str | None, BeforeValidator(so_digitos), AfterValidator(_validar_cnpj)]
-
-
-class ClienteEntrada(Entrada):
-    nome: Texto
-    cnpj: Cnpj = None
-    segmento: TextoOpcional = None
-    contato: TextoOpcional = None
-    cargo: TextoOpcional = None
-    telefone: TextoOpcional = None
-    email: TextoOpcional = None
-    cidade: TextoOpcional = None
-    origem: Origem | None = None
-    obs: TextoLongo = None
+class ClienteEntrada(_CamposDoParceiro):
+    """Cliente: o tipo de pessoa é deduzido do documento (11 dígitos = PF; senão PJ)."""
 
 
 class ClienteAtualizar(ClienteEntrada):
     versao: int = Field(ge=1)
 
 
-class ClienteLeitura(Auditoria):
-    nome: str
-    cnpj: str | None
-    segmento: str | None
-    contato: str | None
-    cargo: str | None
-    telefone: str | None
-    email: str | None
-    cidade: str | None
-    origem: str | None
-    obs: str | None
+class ClienteLeitura(ParceiroLeitura):
+    pass
 
 
 class ClienteResumo(ClienteLeitura):

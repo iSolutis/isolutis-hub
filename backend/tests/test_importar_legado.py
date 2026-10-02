@@ -2,7 +2,7 @@ from pathlib import Path
 
 from sqlalchemy import func, select, text
 
-from app.models import Cliente, Despesa, Investimento, LancamentoReceita, Negocio, Orcamento, Projeto, Tarefa, Usuario
+from app.models import Despesa, Investimento, LancamentoReceita, Negocio, Orcamento, Parceiro, Projeto, Tarefa, Usuario
 from app.scripts import legado as lg
 from app.scripts.importar_legado import Importador
 
@@ -17,15 +17,15 @@ async def test_importacao_completa_com_limpeza(sessao):
     assert soraya.admin and soraya.senha_hash is None and not soraya.senha_definida
 
     alfa, beta, dup = [
-        await sessao.scalar(select(Cliente).where(Cliente.nome == n))
+        await sessao.scalar(select(Parceiro).where(Parceiro.nome == n))
         for n in ("Distribuidora Alfa", "Beta", "Alfa Duplicada")
     ]
     assert (
-        alfa.cnpj == "12345678000190" and alfa.criado_em.year == 2025 and alfa.atualizado_por is not None
+        alfa.cpf_cnpj == "11222333000181" and alfa.criado_em.year == 2025 and alfa.atualizado_por is not None
     )  # carimbos preservados
     assert alfa.criado_por == soraya.id
-    assert beta.cnpj is None and "CNPJ legado inválido" in beta.obs and beta.origem == "Outro"
-    assert dup.cnpj is None and "duplicado" in dup.obs
+    assert beta.cpf_cnpj is None and "CNPJ legado inválido" in beta.obs and beta.origem == "Outro"
+    assert dup.cpf_cnpj is None and "duplicado" in dup.obs
 
     negocios = {n.titulo: n for n in (await sessao.scalars(select(Negocio))).all()}
     assert set(negocios) == {"Portal", "Perdido sem motivo"}  # o órfão não migra
@@ -66,7 +66,7 @@ async def test_importacao_e_idempotente(sessao):
     await Importador(sessao, lg.OrigemJson(PASTA)).importar()
     segunda = await Importador(sessao, lg.OrigemJson(PASTA)).importar()
     assert sum(segunda.importados.values()) == 0
-    assert await sessao.scalar(select(func.count()).select_from(Cliente)) == 3
+    assert await sessao.scalar(select(func.count()).select_from(Parceiro)) == 3
 
 
 def test_limpeza_de_valores():

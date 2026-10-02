@@ -7,10 +7,11 @@ from sqlalchemy.orm import joinedload, selectinload
 from app.domain.constantes import ETAPAS_ANTES_DA_PROPOSTA, StatusOrcamento
 from app.domain.datas import hoje
 from app.errors import NaoEncontrado, RegraDeNegocio
-from app.models import Cliente, Negocio, Orcamento, OrcamentoItem
+from app.models import Negocio, Orcamento, OrcamentoItem
 from app.schemas.orcamento import ItemEntrada, OrcamentoAtualizar, OrcamentoEntrada
 from app.services import negocios as svc_negocios
 from app.services.base import aplicar, conferir_versao, confirmar, obter
+from app.services.parceiros import exigir_cliente
 
 
 def consulta():
@@ -32,7 +33,7 @@ async def obter_completo(sessao: AsyncSession, id_: UUID) -> Orcamento:
 
 
 async def _validar_vinculos(sessao: AsyncSession, dados: OrcamentoEntrada) -> Negocio | None:
-    await obter(sessao, Cliente, dados.cliente_id, "Cliente")
+    await exigir_cliente(sessao, dados.cliente_id)
     if not dados.negocio_id:
         return None
     negocio = await obter(sessao, Negocio, dados.negocio_id, "Negócio")

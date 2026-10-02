@@ -1,12 +1,17 @@
 from app.models.base import Base
-from app.models.comercial import Cliente, Negocio, Orcamento, OrcamentoItem, Produto
+from app.models.comercial import Negocio, Orcamento, OrcamentoItem, Produto
 from app.models.financeiro import Despesa, Investimento, LancamentoReceita
+from app.models.parceiro import Empresa, Municipio, PapelParceiro, Parceiro, ParceiroPapel
 from app.models.posvenda import Projeto, ProjetoEtapa, Tarefa, TarefaChecklist
 from app.models.usuario import CategoriaDespesa, Investidor, Usuario
 
 __all__ = [
     "Base",
-    "Cliente",
+    "Empresa",
+    "Municipio",
+    "PapelParceiro",
+    "Parceiro",
+    "ParceiroPapel",
     "Negocio",
     "Orcamento",
     "OrcamentoItem",

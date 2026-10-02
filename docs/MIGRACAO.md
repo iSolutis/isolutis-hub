@@ -46,3 +46,5 @@ O sistema anterior guardava cada área em `hub_<área>(id, dados jsonb, …)` no
   que estava no `index.html` antigo e a Edge Function `hub-admin` deixam de ser necessárias; revogue a chave secreta que
   a função usava).
 - O código do sistema anterior (`index.html`, `supabase*.sql`, funções) continua disponível no histórico do Git.
+
+> Desde a migração 0003 o importador grava `hub_clientes` em `parceiro_negocio` com o papel `cliente` (CPF/CNPJ validado; cidade → município quando possível). Veja `docs/banco-de-dados.md`.

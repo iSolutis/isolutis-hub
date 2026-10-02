@@ -409,3 +409,17 @@ Supabase Auth (identidades): migrado apenas o necessário para `usuarios`. `orca
 - Alembic: `op.get_bind().exec_driver_sql(open('.../0001_schema_inicial.sql').read())` (ou `op.execute(sa.text(...))`: o script evita `%` e `:nome` para não colidir com bind params). O script não tem BEGIN/COMMIT: rode dentro da transação do Alembic (`transactional_ddl`). Requer PG15+ e permissão para criar as extensões `citext`, `pg_trgm`, `unaccent` (todas "trusted").
 - Via psql: `psql -v ON_ERROR_STOP=1 -1 -f backend/migrations/sql/0001_schema_inicial.sql`.
 - Testes: base vazia, `psql -h localhost -U hub -d hub_dba -v ON_ERROR_STOP=1 -f backend/tests_sql/test_schema.sql`. O teste carrega o schema via `\ir` e termina com `NOTICE: TODOS OS TESTES PASSARAM`; recrie a base antes de reexecutar.
+
+## Parceiro de negócio como hub (migração 0003)
+
+`parceiro_negocio` é o cadastro único de pessoas e empresas; o que cada uma é para a iSolutis vem de **papéis**
+(`papel_parceiro`: cliente, fornecedor, funcionário — extensível por INSERT — e `parceiro_papel`, N:N). A tabela `clientes`
+foi **removida**: seus registros foram copiados com o **mesmo id** para `parceiro_negocio` (papel `cliente`) e as FKs
+`cliente_id` de negócios, orçamentos, lançamentos de receita, projetos e tarefas passaram a apontar para o parceiro.
+Triggers garantem que `cliente_id` só referencie parceiro com papel `cliente` e que o papel não seja retirado enquanto houver vínculos.
+
+- Colunas de cliente incorporadas: segmento, contato, cargo, telefone, email, origem, obs, auditoria e `versao`. `cpf_cnpj` e `municipio_id` passaram a aceitar NULL (cliente legado muitas vezes não tem).
+- `cidade` (texto livre) virou `municipio_id` quando o nome é único (com UF, se informada); caso contrário vai para `obs` como `[cidade informada: X]`.
+- CPF/CNPJ passa a ser validado (dígitos verificadores) em todo cadastro.
+- API: `/api/v1/parceiros` (administradores; filtro `papel`, `busca`) e `/parceiros/papeis`; `/api/v1/clientes` continua como fachada (parceiros com papel cliente) para a equipe comercial.
+- **Irreversível:** o `downgrade` da 0003 falha de propósito. Faça backup antes. Se o mesmo CPF/CNPJ existir em `clientes` e em `parceiro_negocio`, a migração aborta sem alterar nada — unifique antes.
