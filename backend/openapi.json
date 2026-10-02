@@ -2841,6 +2841,1075 @@
         ]
       }
     },
+    "/api/v1/financeiro/municipios": {
+      "get": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Municipios",
+        "operationId": "municipios_api_v1_financeiro_municipios_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "uf",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 2
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Uf"
+            }
+          },
+          {
+            "name": "busca",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Busca"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 6000,
+              "minimum": 1,
+              "default": 1000,
+              "title": "Limite"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MunicipioLeitura"
+                  },
+                  "title": "Response Municipios Api V1 Financeiro Municipios Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/instituicoes": {
+      "get": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Instituicoes",
+        "operationId": "instituicoes_api_v1_financeiro_instituicoes_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "busca",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Busca"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InstituicaoLeitura"
+                  },
+                  "title": "Response Instituicoes Api V1 Financeiro Instituicoes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/plano-contas": {
+      "get": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Listar Plano",
+        "operationId": "listar_plano_api_v1_financeiro_plano_contas_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlanoContaLeitura"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Plano Api V1 Financeiro Plano Contas Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Criar Conta",
+        "operationId": "criar_conta_api_v1_financeiro_plano_contas_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanoContaEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanoContaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/financeiro/plano-contas/proximo-codigo": {
+      "get": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Proximo Codigo",
+        "operationId": "proximo_codigo_api_v1_financeiro_plano_contas_proximo_codigo_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pai_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Pai Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProximoCodigo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/plano-contas/{id_}": {
+      "put": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Atualizar Conta",
+        "operationId": "atualizar_conta_api_v1_financeiro_plano_contas__id___put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanoContaEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanoContaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Excluir Conta",
+        "operationId": "excluir_conta_api_v1_financeiro_plano_contas__id___delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/contas-bancarias": {
+      "get": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Listar Contas Bancarias",
+        "operationId": "listar_contas_bancarias_api_v1_financeiro_contas_bancarias_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ContaBancariaLeitura"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Contas Bancarias Api V1 Financeiro Contas Bancarias Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Criar Conta Bancaria",
+        "operationId": "criar_conta_bancaria_api_v1_financeiro_contas_bancarias_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContaBancariaEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContaBancariaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/financeiro/contas-bancarias/{id_}": {
+      "put": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Atualizar Conta Bancaria",
+        "operationId": "atualizar_conta_bancaria_api_v1_financeiro_contas_bancarias__id___put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContaBancariaEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContaBancariaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Excluir Conta Bancaria",
+        "operationId": "excluir_conta_bancaria_api_v1_financeiro_contas_bancarias__id___delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/parceiros": {
+      "get": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Listar Parceiros",
+        "operationId": "listar_parceiros_api_v1_financeiro_parceiros_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "busca",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Busca"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ParceiroLeitura"
+                  },
+                  "title": "Response Listar Parceiros Api V1 Financeiro Parceiros Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Criar Parceiro",
+        "operationId": "criar_parceiro_api_v1_financeiro_parceiros_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParceiroEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParceiroLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/parceiros/{id_}": {
+      "put": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Atualizar Parceiro",
+        "operationId": "atualizar_parceiro_api_v1_financeiro_parceiros__id___put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParceiroEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParceiroLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Excluir Parceiro",
+        "operationId": "excluir_parceiro_api_v1_financeiro_parceiros__id___delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/titulos": {
+      "get": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Listar Titulos",
+        "operationId": "listar_titulos_api_v1_financeiro_titulos_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tipo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "P",
+                    "R"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tipo"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "A",
+                    "Q",
+                    "C"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "de",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "De"
+            }
+          },
+          {
+            "name": "ate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ate"
+            }
+          },
+          {
+            "name": "busca",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Busca"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TituloLeitura"
+                  },
+                  "title": "Response Listar Titulos Api V1 Financeiro Titulos Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Criar Titulo",
+        "operationId": "criar_titulo_api_v1_financeiro_titulos_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TituloEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TituloLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/titulos/{id_}": {
+      "put": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Atualizar Titulo",
+        "operationId": "atualizar_titulo_api_v1_financeiro_titulos__id___put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TituloEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TituloLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Excluir Titulo",
+        "operationId": "excluir_titulo_api_v1_financeiro_titulos__id___delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/fluxo-de-caixa": {
+      "get": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Fluxo De Caixa",
+        "operationId": "fluxo_de_caixa_api_v1_financeiro_fluxo_de_caixa_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ano",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "maximum": 2100,
+              "minimum": 2000,
+              "title": "Ano"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FluxoDeCaixa"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/saude": {
       "get": {
         "tags": [
@@ -3084,13 +4153,13 @@
           "obs": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Obs"
           },
           "versao": {
@@ -3216,13 +4285,13 @@
           "obs": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Obs"
           }
         },
@@ -3618,6 +4687,81 @@
         "title": "ClienteResumo",
         "description": "Linha da lista de clientes, com os números que a tabela mostra."
       },
+      "ContaBancariaEntrada": {
+        "properties": {
+          "instituicao_financeira_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Instituicao Financeira Id"
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Nome"
+          },
+          "saldo_inicial": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,14}0*$)\\d{0,11}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Saldo Inicial",
+            "default": "0.00"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "instituicao_financeira_id",
+          "nome"
+        ],
+        "title": "ContaBancariaEntrada"
+      },
+      "ContaBancariaLeitura": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "instituicao_financeira_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Instituicao Financeira Id"
+          },
+          "instituicao_codigo": {
+            "type": "string",
+            "title": "Instituicao Codigo"
+          },
+          "instituicao_nome": {
+            "type": "string",
+            "title": "Instituicao Nome"
+          },
+          "nome": {
+            "type": "string",
+            "title": "Nome"
+          },
+          "saldo_inicial": {
+            "type": "number",
+            "title": "Saldo Inicial"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "instituicao_financeira_id",
+          "instituicao_codigo",
+          "instituicao_nome",
+          "nome",
+          "saldo_inicial"
+        ],
+        "title": "ContaBancariaLeitura"
+      },
       "DespesaAtualizar": {
         "properties": {
           "data": {
@@ -3671,13 +4815,13 @@
           "obs": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Obs"
           },
           "versao": {
@@ -3752,13 +4896,13 @@
           "obs": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Obs"
           },
           "repetir": {
@@ -4011,25 +5155,25 @@
           "descricao": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Descricao"
           },
           "entregaveis": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Entregaveis"
           }
         },
@@ -4266,6 +5410,50 @@
         "title": "FaturamentoEmLote",
         "description": "Geração atômica dos lançamentos de uma venda fechada (projeto parcelado e/ou mensalidades)."
       },
+      "FluxoDeCaixa": {
+        "properties": {
+          "ano": {
+            "type": "integer",
+            "title": "Ano"
+          },
+          "anos_disponiveis": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Anos Disponiveis"
+          },
+          "saldo_inicial": {
+            "type": "number",
+            "title": "Saldo Inicial"
+          },
+          "meses": {
+            "items": {
+              "$ref": "#/components/schemas/MesFluxo"
+            },
+            "type": "array",
+            "title": "Meses"
+          },
+          "total_entradas": {
+            "type": "number",
+            "title": "Total Entradas"
+          },
+          "total_saidas": {
+            "type": "number",
+            "title": "Total Saidas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ano",
+          "anos_disponiveis",
+          "saldo_inicial",
+          "meses",
+          "total_entradas",
+          "total_saidas"
+        ],
+        "title": "FluxoDeCaixa"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -4278,6 +5466,30 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "InstituicaoLeitura": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "codigo": {
+            "type": "string",
+            "title": "Codigo"
+          },
+          "nome": {
+            "type": "string",
+            "title": "Nome"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "codigo",
+          "nome"
+        ],
+        "title": "InstituicaoLeitura"
       },
       "InvestidorResumo": {
         "properties": {
@@ -4353,13 +5565,13 @@
           "obs": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Obs"
           },
           "versao": {
@@ -4425,13 +5637,13 @@
           "obs": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Obs"
           }
         },
@@ -5121,6 +6333,49 @@
         ],
         "title": "MesFaturamento"
       },
+      "MesFluxo": {
+        "properties": {
+          "mes": {
+            "type": "integer",
+            "title": "Mes"
+          },
+          "entradas_realizadas": {
+            "type": "number",
+            "title": "Entradas Realizadas"
+          },
+          "entradas_previstas": {
+            "type": "number",
+            "title": "Entradas Previstas"
+          },
+          "saidas_realizadas": {
+            "type": "number",
+            "title": "Saidas Realizadas"
+          },
+          "saidas_previstas": {
+            "type": "number",
+            "title": "Saidas Previstas"
+          },
+          "saldo_do_mes": {
+            "type": "number",
+            "title": "Saldo Do Mes"
+          },
+          "saldo_acumulado": {
+            "type": "number",
+            "title": "Saldo Acumulado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mes",
+          "entradas_realizadas",
+          "entradas_previstas",
+          "saidas_realizadas",
+          "saidas_previstas",
+          "saldo_do_mes",
+          "saldo_acumulado"
+        ],
+        "title": "MesFluxo"
+      },
       "MesResultado": {
         "properties": {
           "mes": {
@@ -5303,6 +6558,30 @@
         ],
         "title": "MoverTarefa"
       },
+      "MunicipioLeitura": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nome": {
+            "type": "string",
+            "title": "Nome"
+          },
+          "uf": {
+            "type": "string",
+            "title": "Uf"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "uf"
+        ],
+        "title": "MunicipioLeitura"
+      },
       "NegocioAtualizar": {
         "properties": {
           "titulo": {
@@ -5425,13 +6704,13 @@
           "obs": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Obs"
           },
           "versao": {
@@ -5571,13 +6850,13 @@
           "obs": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Obs"
           }
         },
@@ -5883,13 +7162,13 @@
           "obs": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Obs"
           },
           "itens": {
@@ -5975,13 +7254,13 @@
           "obs": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Obs"
           },
           "itens": {
@@ -6287,6 +7566,255 @@
         ],
         "title": "Painel"
       },
+      "ParceiroEntrada": {
+        "properties": {
+          "tipo_pessoa": {
+            "type": "string",
+            "enum": [
+              "PJ",
+              "PF"
+            ],
+            "title": "Tipo Pessoa",
+            "default": "PJ"
+          },
+          "cpf_cnpj": {
+            "type": "string",
+            "title": "Cpf Cnpj"
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Nome"
+          },
+          "endereco": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endereco"
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cep"
+          },
+          "municipio_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Municipio Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cpf_cnpj",
+          "nome",
+          "municipio_id"
+        ],
+        "title": "ParceiroEntrada"
+      },
+      "ParceiroLeitura": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "tipo_pessoa": {
+            "type": "string",
+            "title": "Tipo Pessoa"
+          },
+          "cpf_cnpj": {
+            "type": "string",
+            "title": "Cpf Cnpj"
+          },
+          "nome": {
+            "type": "string",
+            "title": "Nome"
+          },
+          "endereco": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endereco"
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cep"
+          },
+          "municipio_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Municipio Id"
+          },
+          "municipio_nome": {
+            "type": "string",
+            "title": "Municipio Nome"
+          },
+          "uf": {
+            "type": "string",
+            "title": "Uf"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "tipo_pessoa",
+          "cpf_cnpj",
+          "nome",
+          "endereco",
+          "cep",
+          "municipio_id",
+          "municipio_nome",
+          "uf"
+        ],
+        "title": "ParceiroLeitura"
+      },
+      "PlanoContaEntrada": {
+        "properties": {
+          "plano_pai_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plano Pai Id"
+          },
+          "codigo": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Codigo"
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Nome"
+          },
+          "tipo_conta": {
+            "type": "string",
+            "enum": [
+              "A",
+              "S"
+            ],
+            "title": "Tipo Conta"
+          },
+          "natureza": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "R",
+                  "D"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Natureza"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "codigo",
+          "nome",
+          "tipo_conta"
+        ],
+        "title": "PlanoContaEntrada"
+      },
+      "PlanoContaLeitura": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "plano_pai_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plano Pai Id"
+          },
+          "codigo": {
+            "type": "string",
+            "title": "Codigo"
+          },
+          "nome": {
+            "type": "string",
+            "title": "Nome"
+          },
+          "tipo_conta": {
+            "type": "string",
+            "title": "Tipo Conta"
+          },
+          "natureza": {
+            "type": "string",
+            "title": "Natureza"
+          },
+          "nivel": {
+            "type": "integer",
+            "title": "Nivel"
+          },
+          "possui_filhas": {
+            "type": "boolean",
+            "title": "Possui Filhas",
+            "default": false
+          },
+          "possui_titulos": {
+            "type": "boolean",
+            "title": "Possui Titulos",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "plano_pai_id",
+          "codigo",
+          "nome",
+          "tipo_conta",
+          "natureza",
+          "nivel"
+        ],
+        "title": "PlanoContaLeitura"
+      },
       "PlanoMensal": {
         "properties": {
           "valor": {
@@ -6434,13 +7962,13 @@
           "descricao": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Descricao"
           },
           "versao": {
@@ -6505,13 +8033,13 @@
           "descricao": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Descricao"
           }
         },
@@ -6705,49 +8233,49 @@
           "objetivo": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Objetivo"
           },
           "escopo": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Escopo"
           },
           "fora_escopo": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Fora Escopo"
           },
           "pos_entrega": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Pos Entrega"
           },
           "etapas": {
@@ -6861,49 +8389,49 @@
           "objetivo": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Objetivo"
           },
           "escopo": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Escopo"
           },
           "fora_escopo": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Fora Escopo"
           },
           "pos_entrega": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Pos Entrega"
           },
           "etapas": {
@@ -7126,6 +8654,19 @@
           "etapas"
         ],
         "title": "ProjetoLeitura"
+      },
+      "ProximoCodigo": {
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "title": "Codigo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "codigo"
+        ],
+        "title": "ProximoCodigo"
       },
       "ProximoFechamento": {
         "properties": {
@@ -7426,13 +8967,13 @@
           "descricao": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Descricao"
           },
           "checklist": {
@@ -7537,13 +9078,13 @@
           "descricao": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 20000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 20000,
             "title": "Descricao"
           },
           "checklist": {
@@ -7718,6 +9259,302 @@
           "checklist"
         ],
         "title": "TarefaLeitura"
+      },
+      "TituloEntrada": {
+        "properties": {
+          "tipo_conta": {
+            "type": "string",
+            "enum": [
+              "P",
+              "R"
+            ],
+            "title": "Tipo Conta"
+          },
+          "conta_bancaria_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Conta Bancaria Id"
+          },
+          "plano_conta_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plano Conta Id"
+          },
+          "parceiro_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Parceiro Id"
+          },
+          "data_emissao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Emissao"
+          },
+          "data_vencimento": {
+            "type": "string",
+            "format": "date",
+            "title": "Data Vencimento"
+          },
+          "valor_titulo": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,14}0*$)\\d{0,11}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Valor Titulo"
+          },
+          "valor_desconto": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,14}0*$)\\d{0,11}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Valor Desconto",
+            "default": "0.00"
+          },
+          "valor_multa": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,14}0*$)\\d{0,11}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Valor Multa",
+            "default": "0.00"
+          },
+          "valor_juros": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,14}0*$)\\d{0,11}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Valor Juros",
+            "default": "0.00"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "A",
+              "Q",
+              "C"
+            ],
+            "title": "Status",
+            "default": "A"
+          },
+          "data_pagamento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Pagamento"
+          },
+          "valor_quitacao": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,14}0*$)\\d{0,11}\\.\\d{0,2}0*$)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor Quitacao"
+          },
+          "anotacao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anotacao"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tipo_conta",
+          "conta_bancaria_id",
+          "plano_conta_id",
+          "parceiro_id",
+          "data_vencimento",
+          "valor_titulo"
+        ],
+        "title": "TituloEntrada"
+      },
+      "TituloLeitura": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "tipo_conta": {
+            "type": "string",
+            "title": "Tipo Conta"
+          },
+          "conta_bancaria_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Conta Bancaria Id"
+          },
+          "conta_bancaria_nome": {
+            "type": "string",
+            "title": "Conta Bancaria Nome"
+          },
+          "plano_conta_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plano Conta Id"
+          },
+          "plano_conta_codigo": {
+            "type": "string",
+            "title": "Plano Conta Codigo"
+          },
+          "plano_conta_nome": {
+            "type": "string",
+            "title": "Plano Conta Nome"
+          },
+          "parceiro_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Parceiro Id"
+          },
+          "parceiro_nome": {
+            "type": "string",
+            "title": "Parceiro Nome"
+          },
+          "data_emissao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Emissao"
+          },
+          "data_vencimento": {
+            "type": "string",
+            "format": "date",
+            "title": "Data Vencimento"
+          },
+          "valor_titulo": {
+            "type": "number",
+            "title": "Valor Titulo"
+          },
+          "valor_desconto": {
+            "type": "number",
+            "title": "Valor Desconto"
+          },
+          "valor_multa": {
+            "type": "number",
+            "title": "Valor Multa"
+          },
+          "valor_juros": {
+            "type": "number",
+            "title": "Valor Juros"
+          },
+          "valor_devido": {
+            "type": "number",
+            "title": "Valor Devido"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "data_pagamento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Pagamento"
+          },
+          "valor_quitacao": {
+            "type": "number",
+            "title": "Valor Quitacao"
+          },
+          "anotacao": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anotacao"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "tipo_conta",
+          "conta_bancaria_id",
+          "conta_bancaria_nome",
+          "plano_conta_id",
+          "plano_conta_codigo",
+          "plano_conta_nome",
+          "parceiro_id",
+          "parceiro_nome",
+          "data_emissao",
+          "data_vencimento",
+          "valor_titulo",
+          "valor_desconto",
+          "valor_multa",
+          "valor_juros",
+          "valor_devido",
+          "status",
+          "data_pagamento",
+          "valor_quitacao",
+          "anotacao"
+        ],
+        "title": "TituloLeitura"
       },
       "TokenSaida": {
         "properties": {

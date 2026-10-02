@@ -24,13 +24,14 @@ import "@/features/faturamento";
 import "@/features/despesas";
 import "@/features/produtos";
 import "@/features/equipe";
+import "@/features/financeiro";
 import "@/features/periodo";
 
 /** Busca nas listas: refaz a tela a cada tecla e devolve o foco ao campo. */
 function ligarBuscas(): void {
   obrigatorio("#view").addEventListener("input", (e) => {
     const campo = e.target as HTMLInputElement;
-    const chave = campo.dataset.busca as "busca" | "tarefaBusca" | undefined;
+    const chave = campo.dataset.busca as "busca" | "tarefaBusca" | "buscaFin" | undefined;
     if (!chave) return;
     ui[chave] = campo.value;
     const pos = campo.selectionStart ?? campo.value.length;

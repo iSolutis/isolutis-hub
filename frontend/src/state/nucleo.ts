@@ -6,6 +6,7 @@ import { api } from "@/api/endpoints";
 import type { Recurso } from "@/api/tipos";
 import { $, obrigatorio } from "@/core/dom";
 import { html, type Safe } from "@/core/html";
+import { registrarAcao } from "@/ui/acoes";
 import { conexao, dados, eu } from "./estado";
 
 export interface Vista {
@@ -19,6 +20,8 @@ export interface Vista {
   depende?: readonly string[];
   desenhar: () => Safe;
   somenteAdmin?: boolean;
+  /** Agrupa a vista num submenu recolhível do menu lateral (ex.: "Financeiro"). */
+  grupo?: string;
 }
 
 const vistas = new Map<string, Vista>();
@@ -26,7 +29,10 @@ let atual = "painel";
 const CHAVE_ABA = "hub.aba";
 
 /** Ordem do menu lateral (independe da ordem em que os módulos são importados). */
-const ORDEM_MENU = ["painel", "clientes", "negocios", "orcamentos", "projetos", "tarefas", "faturamento", "despesas", "produtos", "equipe"];
+const ORDEM_MENU = [
+  "painel", "clientes", "negocios", "orcamentos", "projetos", "tarefas", "faturamento", "despesas", "produtos",
+  "fin-plano", "fin-contas", "fin-parceiros", "fin-titulos", "fin-fluxo", "equipe",
+];  // fmt: skip
 const posicao = (id: string): number => {
   const i = ORDEM_MENU.indexOf(id);
   return i === -1 ? ORDEM_MENU.length : i;
@@ -76,14 +82,35 @@ export async function recarregarVista(): Promise<void> {
   if (atual === id) render();
 }
 
+const gruposAbertos = new Set<string>();
+
+registrarAcao("alternarGrupo", (alvo) => {
+  const g = alvo.dataset.valor ?? "";
+  if (gruposAbertos.has(g)) gruposAbertos.delete(g);
+  else gruposAbertos.add(g);
+  renderMenu();
+});
+
 export function renderMenu(): void {
   const itens = [...vistas.values()].filter((v) => !v.somenteAdmin || eu.admin).sort((a, b) => posicao(a.id) - posicao(b.id));
-  obrigatorio("#nav").innerHTML = String(
-    html`${itens.map((v) => {
-      const c = v.contagem?.() ?? "";
-      return html`<button data-go="${v.id}" aria-current="${atual === v.id}">${v.nome}<span class="count">${c}</span></button>`;
-    })}`,
-  );
+  const botao = (v: Vista, sub: boolean): Safe => {
+    const c = v.contagem?.() ?? "";
+    return html`<button class="${sub ? "item-sub" : ""}" data-go="${v.id}" aria-current="${atual === v.id}">${v.nome}<span class="count">${c}</span></button>`;
+  };
+  const desenhados = new Set<string>();
+  const blocos: Safe[] = [];
+  for (const v of itens) {
+    if (!v.grupo) {
+      blocos.push(botao(v, false));
+      continue;
+    }
+    if (desenhados.has(v.grupo)) continue;
+    desenhados.add(v.grupo);
+    const filhos = itens.filter((x) => x.grupo === v.grupo);
+    const aberto = gruposAbertos.has(v.grupo) || filhos.some((x) => x.id === atual);
+    blocos.push(html`<button class="nav-grupo" data-act="alternarGrupo" data-valor="${v.grupo}" aria-expanded="${aberto}">${v.grupo}<span class="seta" aria-hidden="true">›</span></button>${filhos.map((x) => html`<span class="nav-sub${aberto ? "" : " fechado"}">${botao(x, true)}</span>`)}`);
+  }
+  obrigatorio("#nav").innerHTML = String(html`${blocos}`);
 }
 
 export function render(): void {

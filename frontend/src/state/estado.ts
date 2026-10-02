@@ -26,6 +26,9 @@ export const ui = {
   tarefaPessoa: "todas",
   tarefaBusca: "",
   tarefaConcluidasTodas: false,
+  buscaFin: "",
+  finTipo: "todos",
+  finStatus: "todos",
 };
 
 /** Estado da conexão com os dados. */

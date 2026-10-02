@@ -727,6 +727,218 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/financeiro/municipios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Municipios */
+        get: operations["municipios_api_v1_financeiro_municipios_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/instituicoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Instituicoes */
+        get: operations["instituicoes_api_v1_financeiro_instituicoes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/plano-contas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Plano */
+        get: operations["listar_plano_api_v1_financeiro_plano_contas_get"];
+        put?: never;
+        /** Criar Conta */
+        post: operations["criar_conta_api_v1_financeiro_plano_contas_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/plano-contas/proximo-codigo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Proximo Codigo */
+        get: operations["proximo_codigo_api_v1_financeiro_plano_contas_proximo_codigo_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/plano-contas/{id_}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Atualizar Conta */
+        put: operations["atualizar_conta_api_v1_financeiro_plano_contas__id___put"];
+        post?: never;
+        /** Excluir Conta */
+        delete: operations["excluir_conta_api_v1_financeiro_plano_contas__id___delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/contas-bancarias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Contas Bancarias */
+        get: operations["listar_contas_bancarias_api_v1_financeiro_contas_bancarias_get"];
+        put?: never;
+        /** Criar Conta Bancaria */
+        post: operations["criar_conta_bancaria_api_v1_financeiro_contas_bancarias_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/contas-bancarias/{id_}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Atualizar Conta Bancaria */
+        put: operations["atualizar_conta_bancaria_api_v1_financeiro_contas_bancarias__id___put"];
+        post?: never;
+        /** Excluir Conta Bancaria */
+        delete: operations["excluir_conta_bancaria_api_v1_financeiro_contas_bancarias__id___delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/parceiros": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Parceiros */
+        get: operations["listar_parceiros_api_v1_financeiro_parceiros_get"];
+        put?: never;
+        /** Criar Parceiro */
+        post: operations["criar_parceiro_api_v1_financeiro_parceiros_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/parceiros/{id_}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Atualizar Parceiro */
+        put: operations["atualizar_parceiro_api_v1_financeiro_parceiros__id___put"];
+        post?: never;
+        /** Excluir Parceiro */
+        delete: operations["excluir_parceiro_api_v1_financeiro_parceiros__id___delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/titulos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Titulos */
+        get: operations["listar_titulos_api_v1_financeiro_titulos_get"];
+        put?: never;
+        /** Criar Titulo */
+        post: operations["criar_titulo_api_v1_financeiro_titulos_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/titulos/{id_}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Atualizar Titulo */
+        put: operations["atualizar_titulo_api_v1_financeiro_titulos__id___put"];
+        post?: never;
+        /** Excluir Titulo */
+        delete: operations["excluir_titulo_api_v1_financeiro_titulos__id___delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/fluxo-de-caixa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fluxo De Caixa */
+        get: operations["fluxo_de_caixa_api_v1_financeiro_fluxo_de_caixa_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/saude": {
         parameters: {
             query?: never;
@@ -944,6 +1156,42 @@ export interface components {
             /** Faturado */
             faturado: number;
         };
+        /** ContaBancariaEntrada */
+        ContaBancariaEntrada: {
+            /**
+             * Instituicao Financeira Id
+             * Format: uuid
+             */
+            instituicao_financeira_id: string;
+            /** Nome */
+            nome: string;
+            /**
+             * Saldo Inicial
+             * @default 0.00
+             */
+            saldo_inicial: number | string;
+        };
+        /** ContaBancariaLeitura */
+        ContaBancariaLeitura: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Instituicao Financeira Id
+             * Format: uuid
+             */
+            instituicao_financeira_id: string;
+            /** Instituicao Codigo */
+            instituicao_codigo: string;
+            /** Instituicao Nome */
+            instituicao_nome: string;
+            /** Nome */
+            nome: string;
+            /** Saldo Inicial */
+            saldo_inicial: number;
+        };
         /** DespesaAtualizar */
         DespesaAtualizar: {
             /**
@@ -1154,10 +1402,37 @@ export interface components {
             projeto?: components["schemas"]["PlanoProjeto"] | null;
             mensal?: components["schemas"]["PlanoMensal"] | null;
         };
+        /** FluxoDeCaixa */
+        FluxoDeCaixa: {
+            /** Ano */
+            ano: number;
+            /** Anos Disponiveis */
+            anos_disponiveis: number[];
+            /** Saldo Inicial */
+            saldo_inicial: number;
+            /** Meses */
+            meses: components["schemas"]["MesFluxo"][];
+            /** Total Entradas */
+            total_entradas: number;
+            /** Total Saidas */
+            total_saidas: number;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** InstituicaoLeitura */
+        InstituicaoLeitura: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Codigo */
+            codigo: string;
+            /** Nome */
+            nome: string;
         };
         /** InvestidorResumo */
         InvestidorResumo: {
@@ -1472,6 +1747,23 @@ export interface components {
             /** Quantidade */
             quantidade: number;
         };
+        /** MesFluxo */
+        MesFluxo: {
+            /** Mes */
+            mes: number;
+            /** Entradas Realizadas */
+            entradas_realizadas: number;
+            /** Entradas Previstas */
+            entradas_previstas: number;
+            /** Saidas Realizadas */
+            saidas_realizadas: number;
+            /** Saidas Previstas */
+            saidas_previstas: number;
+            /** Saldo Do Mes */
+            saldo_do_mes: number;
+            /** Saldo Acumulado */
+            saldo_acumulado: number;
+        };
         /** MesResultado */
         MesResultado: {
             /** Mes */
@@ -1537,6 +1829,18 @@ export interface components {
             coluna: "a_fazer" | "fazendo" | "revisao" | "concluido";
             /** Versao */
             versao: number;
+        };
+        /** MunicipioLeitura */
+        MunicipioLeitura: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Nome */
+            nome: string;
+            /** Uf */
+            uf: string;
         };
         /** NegocioAtualizar */
         NegocioAtualizar: {
@@ -1870,6 +2174,101 @@ export interface components {
             /** Orcamentos Aguardando */
             orcamentos_aguardando: components["schemas"]["OrcamentoAguardando"][];
         };
+        /** ParceiroEntrada */
+        ParceiroEntrada: {
+            /**
+             * Tipo Pessoa
+             * @default PJ
+             * @enum {string}
+             */
+            tipo_pessoa: "PJ" | "PF";
+            /** Cpf Cnpj */
+            cpf_cnpj: string;
+            /** Nome */
+            nome: string;
+            /** Endereco */
+            endereco?: string | null;
+            /** Cep */
+            cep?: string | null;
+            /**
+             * Municipio Id
+             * Format: uuid
+             */
+            municipio_id: string;
+        };
+        /** ParceiroLeitura */
+        ParceiroLeitura: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Tipo Pessoa */
+            tipo_pessoa: string;
+            /** Cpf Cnpj */
+            cpf_cnpj: string;
+            /** Nome */
+            nome: string;
+            /** Endereco */
+            endereco: string | null;
+            /** Cep */
+            cep: string | null;
+            /**
+             * Municipio Id
+             * Format: uuid
+             */
+            municipio_id: string;
+            /** Municipio Nome */
+            municipio_nome: string;
+            /** Uf */
+            uf: string;
+        };
+        /** PlanoContaEntrada */
+        PlanoContaEntrada: {
+            /** Plano Pai Id */
+            plano_pai_id?: string | null;
+            /** Codigo */
+            codigo: string;
+            /** Nome */
+            nome: string;
+            /**
+             * Tipo Conta
+             * @enum {string}
+             */
+            tipo_conta: "A" | "S";
+            /** Natureza */
+            natureza?: ("R" | "D") | null;
+        };
+        /** PlanoContaLeitura */
+        PlanoContaLeitura: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Plano Pai Id */
+            plano_pai_id: string | null;
+            /** Codigo */
+            codigo: string;
+            /** Nome */
+            nome: string;
+            /** Tipo Conta */
+            tipo_conta: string;
+            /** Natureza */
+            natureza: string;
+            /** Nivel */
+            nivel: number;
+            /**
+             * Possui Filhas
+             * @default false
+             */
+            possui_filhas: boolean;
+            /**
+             * Possui Titulos
+             * @default false
+             */
+            possui_titulos: boolean;
+        };
         /** PlanoMensal */
         PlanoMensal: {
             /** Valor */
@@ -2140,6 +2539,11 @@ export interface components {
             /** Etapas */
             etapas: components["schemas"]["EtapaLeitura"][];
         };
+        /** ProximoCodigo */
+        ProximoCodigo: {
+            /** Codigo */
+            codigo: string;
+        };
         /** ProximoFechamento */
         ProximoFechamento: {
             /**
@@ -2340,6 +2744,123 @@ export interface components {
             concluida_em: string | null;
             /** Checklist */
             checklist: components["schemas"]["ChecklistLeitura"][];
+        };
+        /** TituloEntrada */
+        TituloEntrada: {
+            /**
+             * Tipo Conta
+             * @enum {string}
+             */
+            tipo_conta: "P" | "R";
+            /**
+             * Conta Bancaria Id
+             * Format: uuid
+             */
+            conta_bancaria_id: string;
+            /**
+             * Plano Conta Id
+             * Format: uuid
+             */
+            plano_conta_id: string;
+            /**
+             * Parceiro Id
+             * Format: uuid
+             */
+            parceiro_id: string;
+            /** Data Emissao */
+            data_emissao?: string | null;
+            /**
+             * Data Vencimento
+             * Format: date
+             */
+            data_vencimento: string;
+            /** Valor Titulo */
+            valor_titulo: number | string;
+            /**
+             * Valor Desconto
+             * @default 0.00
+             */
+            valor_desconto: number | string;
+            /**
+             * Valor Multa
+             * @default 0.00
+             */
+            valor_multa: number | string;
+            /**
+             * Valor Juros
+             * @default 0.00
+             */
+            valor_juros: number | string;
+            /**
+             * Status
+             * @default A
+             * @enum {string}
+             */
+            status: "A" | "Q" | "C";
+            /** Data Pagamento */
+            data_pagamento?: string | null;
+            /** Valor Quitacao */
+            valor_quitacao?: number | string | null;
+            /** Anotacao */
+            anotacao?: string | null;
+        };
+        /** TituloLeitura */
+        TituloLeitura: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Tipo Conta */
+            tipo_conta: string;
+            /**
+             * Conta Bancaria Id
+             * Format: uuid
+             */
+            conta_bancaria_id: string;
+            /** Conta Bancaria Nome */
+            conta_bancaria_nome: string;
+            /**
+             * Plano Conta Id
+             * Format: uuid
+             */
+            plano_conta_id: string;
+            /** Plano Conta Codigo */
+            plano_conta_codigo: string;
+            /** Plano Conta Nome */
+            plano_conta_nome: string;
+            /**
+             * Parceiro Id
+             * Format: uuid
+             */
+            parceiro_id: string;
+            /** Parceiro Nome */
+            parceiro_nome: string;
+            /** Data Emissao */
+            data_emissao: string | null;
+            /**
+             * Data Vencimento
+             * Format: date
+             */
+            data_vencimento: string;
+            /** Valor Titulo */
+            valor_titulo: number;
+            /** Valor Desconto */
+            valor_desconto: number;
+            /** Valor Multa */
+            valor_multa: number;
+            /** Valor Juros */
+            valor_juros: number;
+            /** Valor Devido */
+            valor_devido: number;
+            /** Status */
+            status: string;
+            /** Data Pagamento */
+            data_pagamento: string | null;
+            /** Valor Quitacao */
+            valor_quitacao: number;
+            /** Anotacao */
+            anotacao: string | null;
         };
         /** TokenSaida */
         TokenSaida: {
@@ -4262,6 +4783,626 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Painel"];
+                };
+            };
+        };
+    };
+    municipios_api_v1_financeiro_municipios_get: {
+        parameters: {
+            query?: {
+                uf?: string | null;
+                busca?: string | null;
+                limite?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MunicipioLeitura"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    instituicoes_api_v1_financeiro_instituicoes_get: {
+        parameters: {
+            query?: {
+                busca?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstituicaoLeitura"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listar_plano_api_v1_financeiro_plano_contas_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanoContaLeitura"][];
+                };
+            };
+        };
+    };
+    criar_conta_api_v1_financeiro_plano_contas_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanoContaEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanoContaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    proximo_codigo_api_v1_financeiro_plano_contas_proximo_codigo_get: {
+        parameters: {
+            query?: {
+                pai_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProximoCodigo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_conta_api_v1_financeiro_plano_contas__id___put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanoContaEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanoContaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    excluir_conta_api_v1_financeiro_plano_contas__id___delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listar_contas_bancarias_api_v1_financeiro_contas_bancarias_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContaBancariaLeitura"][];
+                };
+            };
+        };
+    };
+    criar_conta_bancaria_api_v1_financeiro_contas_bancarias_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContaBancariaEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContaBancariaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_conta_bancaria_api_v1_financeiro_contas_bancarias__id___put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContaBancariaEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContaBancariaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    excluir_conta_bancaria_api_v1_financeiro_contas_bancarias__id___delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listar_parceiros_api_v1_financeiro_parceiros_get: {
+        parameters: {
+            query?: {
+                busca?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParceiroLeitura"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    criar_parceiro_api_v1_financeiro_parceiros_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParceiroEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParceiroLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_parceiro_api_v1_financeiro_parceiros__id___put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParceiroEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParceiroLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    excluir_parceiro_api_v1_financeiro_parceiros__id___delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listar_titulos_api_v1_financeiro_titulos_get: {
+        parameters: {
+            query?: {
+                tipo?: ("P" | "R") | null;
+                status?: ("A" | "Q" | "C") | null;
+                de?: string | null;
+                ate?: string | null;
+                busca?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TituloLeitura"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    criar_titulo_api_v1_financeiro_titulos_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TituloEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TituloLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_titulo_api_v1_financeiro_titulos__id___put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TituloEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TituloLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    excluir_titulo_api_v1_financeiro_titulos__id___delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    fluxo_de_caixa_api_v1_financeiro_fluxo_de_caixa_get: {
+        parameters: {
+            query: {
+                ano: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FluxoDeCaixa"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

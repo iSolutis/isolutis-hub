@@ -17,3 +17,7 @@ cd ../e2e && python seed.py && npm install && npx playwright install chromium &&
 
 Variáveis: `HUB_URL`, `HUB_EMAIL`, `HUB_SENHA`, `CHROMIUM_PATH` (para usar um Chromium já instalado).
 O teste cria registros; use uma base descartável.
+
+## Módulo financeiro
+
+`node financeiro.mjs` (mesmos pré-requisitos; exige o administrador e a carga de referências: `python -m app.financeiro.popular --fonte snapshot`). Gera um sufixo único por execução, então pode rodar várias vezes na mesma base.
