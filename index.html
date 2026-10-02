@@ -251,7 +251,8 @@ tfoot td{font-weight:600;background:var(--sunk);border-bottom:0}
       <p class="sub" style="margin:0">Use pelo menos 8 caracteres. É com ela que você vai entrar no Hub.</p>
       <label for="lgNova1">Nova senha</label><input id="lgNova1" type="password" autocomplete="new-password" minlength="8" required>
       <label for="lgNova2">Repita a senha</label><input id="lgNova2" type="password" autocomplete="new-password" minlength="8" required>
-      <button class="btn primary" type="submit">Salvar senha e entrar</button>
+      <button class="btn primary" type="submit">Salvar senha</button>
+      <button class="lg-link" type="button" id="lgCancelar" hidden>Cancelar</button>
     </form>
     <div id="lgFora" class="lg-form" hidden>
       <h1>Acesso não liberado</h1>
@@ -404,6 +405,26 @@ window.HubSupabase = (() => {
     } };
   }
 
+  /* gestão de usuários: chama a Edge Function "hub-admin", que roda no Supabase com a chave secreta */
+  function criarAdmin(){
+    const chamar = async body => {
+      const { data, error } = await sb.functions.invoke('hub-admin', { body });
+      if (error) {
+        let m = error.message || 'erro';
+        try { const j = await error.context.json(); if (j && j.erro) m = j.erro; } catch(_){}
+        if (/Failed to send a request|not found|404/i.test(m)) m = 'O painel de usuários ainda não foi ativado no Supabase: falta publicar a função "hub-admin".';
+        throw new Error(m);
+      }
+      if (data && data.erro) throw new Error(data.erro);
+      return data;
+    };
+    return {
+      listar: () => chamar({ acao: 'listar' }),
+      salvar: u => chamar({ acao: 'salvar', ...u }),
+      remover: email => chamar({ acao: 'remover', email })
+    };
+  }
+
   async function iniciar(){
     $('sair').onclick = sair; $('lgForaSair').onclick = sair;
     sb.auth.onAuthStateChange(ev => { if (ev === 'PASSWORD_RECOVERY') tipoLink = 'recovery'; });
@@ -418,16 +439,20 @@ window.HubSupabase = (() => {
     const precisaSenha = s => s && (tipoLink === 'recovery' || tipoLink === 'invite' || (s.user.invited_at && !(s.user.user_metadata || {}).senha_definida));
     if (precisaSenha(session)) await pedirNovaSenha();
     if (!session) session = await pedirLogin();
-    $('trocarSenha').onclick = async () => { await pedirNovaSenha(); $('login').hidden = true; };
+    $('trocarSenha').onclick = async () => {
+      $('lgCancelar').hidden = false;
+      $('lgCancelar').onclick = () => { $('login').hidden = true; $('lgCancelar').hidden = true; msg(''); };
+      await pedirNovaSenha(); $('login').hidden = true; $('lgCancelar').hidden = true;
+    };
     const email = session.user.email;
-    const { data: membros, error } = await sb.from('hub_membros').select('email,nome');
+    const { data: membros, error } = await sb.from('hub_membros').select('*');
     if (error) { msg('Não foi possível ler a equipe do Hub: ' + error.message, true); mostrar(''); throw error; }
     const eu = (membros || []).find(m => m.email.toLowerCase() === String(email).toLowerCase());
     if (!eu) { $('lgForaEmail').textContent = email; mostrar('lgFora'); return new Promise(() => {}); }
     $('login').hidden = true;
     $('contaEmail').textContent = eu.nome + ' · ' + email; $('conta').hidden = false;
     sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_OUT') location.replace(location.pathname); });
-    return { db: criarDb(), user: criarUser(eu, membros), room: criarRoom(eu), downloads: criarDownloads() };
+    return { db: criarDb(), user: criarUser(eu, membros), room: criarRoom(eu), downloads: criarDownloads(), admin: eu.admin ? criarAdmin() : null };
   }
 
   return { iniciar };
@@ -439,7 +464,7 @@ window.HubSupabase = (() => {
 const COLS = ['clientes','negocios','orcamentos','faturamento','produtos','despesas','projetos'];
 const state = {clientes:[],negocios:[],orcamentos:[],faturamento:[],produtos:[],despesas:[],projetos:[]};
 const loaded = {};
-let db = null, downloads = null, canWrite = true, dbMissing = false;
+let db = null, downloads = null, canWrite = true, dbMissing = false, adminApi = null;
 let view = 'painel';
 const ui = {busca:'', mostrarFechados:false, ano:new Date().getFullYear(), mes:null, orcStatus:'todos', despTipo:'todos', projStatus:'ativos'};
 
@@ -626,7 +651,7 @@ function render(){
   const el = $('#view');
   const banner = dbMissing ? `<div class="banner"><b>Os dados não carregaram.</b> Verifique a conexão com a internet e recarregue a página. Se continuar, saia e entre de novo com seu e-mail e senha.</div>`
     : !canWrite ? `<div class="banner">Você está vendo o Hub Comercial em modo leitura. Para cadastrar e editar, peça para incluir seu e-mail na equipe do Hub.</div>` : '';
-  el.innerHTML = banner + ({painel,clientes:vClientes,negocios:vNegocios,orcamentos:vOrcamentos,faturamento:vFaturamento,despesas:vDespesas,projetos:vProjetos,produtos:vProdutos}[view])();
+  el.innerHTML = banner + (({painel,clientes:vClientes,negocios:vNegocios,orcamentos:vOrcamentos,faturamento:vFaturamento,despesas:vDespesas,projetos:vProjetos,produtos:vProdutos,equipe:vEquipe}[view]) || painel)();
 }
 const podeAdd = (acao, rot) => canWrite && !dbMissing ? `<button class="btn primary" data-act="${acao}">${rot}</button>` : '';
 
@@ -1044,6 +1069,74 @@ function formDespesa(d={tipo:'despesa'}){
     });
 }
 
+/* ---------- Equipe: gestão de usuários (só administradores) ---------- */
+const equipe = {lista:null, fora:[], erro:'', carregando:false};
+async function carregarEquipe(forcar){
+  if (!adminApi || (equipe.carregando && !forcar)) return;
+  equipe.carregando = true; equipe.erro = '';
+  try { const r = await adminApi.listar(); equipe.lista = r.usuarios || []; equipe.fora = r.foraDaEquipe || []; }
+  catch(e){ equipe.erro = e.message || 'Não foi possível carregar a equipe.'; }
+  equipe.carregando = false;
+  if (view==='equipe') render();
+}
+function quandoAcesso(iso){ if(!iso) return 'nunca entrou'; const d=new Date(iso); return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' às '+pad(d.getHours())+':'+pad(d.getMinutes()); }
+function vEquipe(){
+  const head = `<div class="head"><div><h1>Equipe</h1><p>Quem pode entrar no Hub. Aqui você cadastra pessoas, define e troca senhas e escolhe quem é administrador.</p></div>
+    <div class="tools">${adminApi?'<button class="btn" data-act="recarregarEquipe">Atualizar</button><button class="btn primary" data-act="novoUsuario">Novo usuário</button>':''}</div></div>`;
+  if (!adminApi) return head + `<div class="empty"><b>Área de administradores</b>Só administradores veem e alteram a equipe.</div>`;
+  if (equipe.lista===null && !equipe.erro){ carregarEquipe(); return head + `<p class="sub">Carregando a equipe…</p>`; }
+  if (equipe.erro) return head + `<div class="banner" style="background:var(--bad-bg);color:var(--bad)">${esc(equipe.erro)}</div>`;
+  const l = [...equipe.lista].sort((a,b)=>(b.admin-a.admin)||a.nome.localeCompare(b.nome,'pt'));
+  return head + `<div class="tbl-wrap"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Acesso</th><th>Login</th><th>Último acesso</th></tr></thead><tbody>
+    ${l.map(u=>`<tr tabindex="0" data-open="usuario:${esc(u.email)}"><td><b>${esc(u.nome)}</b>${u.email===eu.id?' <span class="pill gold">você</span>':''}</td><td class="num">${esc(u.email)}</td>
+      <td>${u.admin?'<span class="pill info">Administrador</span>':'<span class="pill">Membro</span>'}</td>
+      <td>${u.temLogin?'<span class="pill ok">Ativo</span>':'<span class="pill warn">Sem senha</span>'}</td><td class="sub">${quandoAcesso(u.ultimoAcesso)}</td></tr>`).join('')}
+  </tbody></table></div>
+  ${equipe.fora.length?`<p class="sub" style="margin-top:12px">Logins no Supabase que não estão na equipe e por isso não acessam nada: ${equipe.fora.map(esc).join(', ')}.</p>`:''}`;
+}
+function senhaAleatoria(){ const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; const a=new Uint32Array(12); crypto.getRandomValues(a); return [...a].map(n=>c[n%c.length]).join(''); }
+function formUsuario(u){
+  const novo = !u; u = u || {email:'', nome:'', admin:false};
+  const souEu = u.email===eu.id;
+  abrirGaveta(novo?'Novo usuário':u.nome, `<div class="fields">
+      ${campo('Nome', inp('nome', u.nome, 'placeholder="Como aparece no Hub"'))}
+      ${campo('E-mail', inp('email', u.email, novo?'type="email" placeholder="email@empresa.com.br"':'type="email" readonly'))}
+      <div class="field full"><label for="f-senha">${novo?'Senha':'Nova senha'}</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><input name="senha" id="f-senha" type="text" autocomplete="off" style="flex:1 1 180px" placeholder="${novo?'Mínimo de 8 caracteres':'Deixe em branco para não trocar'}"><button class="btn" type="button" id="gerarSenha">Gerar senha</button></div>
+        <span class="sub">${novo?'A pessoa entra com este e-mail e esta senha. Ela pode trocar depois, em "Trocar senha".':'A senha atual deixa de valer assim que você salvar. Avise a pessoa.'}</span></div>
+      <label class="check full"><input type="checkbox" name="admin" id="f-admin" ${u.admin?'checked':''} ${souEu?'disabled':''}> Administrador (pode gerenciar a equipe)</label>
+    </div>
+    <div class="banner" id="senhaFeita" hidden style="background:var(--ok-bg);color:var(--ok)"></div>`,
+    `<button class="btn primary" data-salvar>${novo?'Criar usuário':'Salvar'}</button><span class="sp"></span>${!novo&&!souEu?'<button class="btn danger" data-excluir>Remover da equipe</button>':''}`,
+    (f,fechar)=>{
+      const L=$('#layer');
+      $('#gerarSenha').addEventListener('click', ()=>{ f.elements.senha.value = senhaAleatoria(); });
+      $('[data-salvar]',L).addEventListener('click', async e=>{
+        const nome=fv(f,'nome'), email=fv(f,'email').toLowerCase(), senha=fv(f,'senha');
+        if(!nome){ toast('Informe o nome.'); return; }
+        if(novo && !email){ toast('Informe o e-mail.'); return; }
+        if(novo && !senha){ toast('Defina uma senha ou clique em "Gerar senha".'); return; }
+        if(senha && senha.length<8){ toast('A senha precisa ter pelo menos 8 caracteres.'); return; }
+        e.target.disabled=true;
+        try {
+          await adminApi.salvar({email, nome, senha: senha||undefined, admin: souEu ? true : f.elements.admin.checked});
+          nomesCache[email] = {name:nome, avatarUrl:''};
+          await carregarEquipe(true);
+          if (senha){
+            const box=$('#senhaFeita'); box.hidden=false;
+            box.innerHTML = `<b>${novo?'Usuário criado.':'Senha alterada.'}</b> Envie para ${esc(nome.split(' ')[0])}: endereço <b>isolutis-hub.vercel.app</b>, e-mail <b>${esc(email)}</b> e senha <b class="num">${esc(senha)}</b>. <button class="btn" type="button" id="copiarAcesso" style="margin-left:6px">Copiar</button>`;
+            $('#copiarAcesso').addEventListener('click', async ()=>{ const t=`Hub Comercial iSolutis\nEndereço: https://isolutis-hub.vercel.app\nE-mail: ${email}\nSenha: ${senha}\nNo primeiro acesso, troque a senha em "Trocar senha".`; try{ await navigator.clipboard.writeText(t); toast('Copiado'); }catch(_){ toast('Não foi possível copiar. Selecione o texto e copie.'); } });
+            e.target.textContent='Salvo'; return;
+          }
+          toast('Salvo'); fechar();
+        } catch(err){ toast(err.message); e.target.disabled=false; }
+      });
+      $('[data-excluir]',L)?.addEventListener('click', async ()=>{
+        try { await adminApi.remover(u.email); await carregarEquipe(true); toast(u.nome+' removido da equipe'); fechar(); } catch(err){ toast(err.message); }
+      });
+    });
+}
+
 /* ---------- Produtos ---------- */
 const CATALOGO = [
   {nome:'Sistema sob medida · Simples', tipo:'projeto', descricao:'Um processo, um tipo de usuário. Construção em 2 a 4 semanas.'},
@@ -1371,6 +1464,7 @@ function abrir(ref){
   if (tipo==='produto') formProduto(byId('produtos',id));
   if (tipo==='desp') formDespesa(byId('despesas',id));
   if (tipo==='projeto') formProjeto(byId('projetos',id));
+  if (tipo==='usuario') formUsuario((equipe.lista||[]).find(u=>u.email===id));
 }
 document.addEventListener('click', async e=>{
   if (e.target.closest('.btn.wa')){ if (e.target.closest('.btn.wa[aria-disabled="true"]') && !e.target.closest('#waOrc')) toast('Cadastre o WhatsApp do cliente para usar este botão.'); return; }
@@ -1392,6 +1486,8 @@ document.addEventListener('click', async e=>{
     if (act==='novoProduto') formProduto();
     if (act==='novaDespesa') formDespesa({tipo:'despesa'});
     if (act==='novoProjeto') formProjeto({});
+    if (act==='novoUsuario') formUsuario();
+    if (act==='recarregarEquipe') carregarEquipe(true);
     if (act==='novoInvest') formDespesa({tipo:'investimento'});
     if (act==='limparMes'){ ui.mes=null; render(); }
     if (act==='csv') baixarCSV();
@@ -1430,6 +1526,7 @@ render();
   if (!plat){ dbMissing=true; sync.className='sync off'; sync.innerHTML='<span class="dot"></span>Sem conexão com o banco de dados'; render(); return; }
   const {db:d, user:u, downloads:dl, room:rm} = plat;
   db=d; downloads=dl; userApi=u; room=rm;
+  adminApi = plat.admin || null; if (adminApi) AREAS.push(['equipe','Equipe','']);
   if (u){
     try { const w=await u.can('data.write'); if (w===false) canWrite=false; } catch(_){}
     try { const m=await u.me(); eu.id=m.id||null; eu.nome=m.name||''; if (eu.id) nomesCache[eu.id]={name:m.name, avatarUrl:m.avatarUrl}; } catch(_){}

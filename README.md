@@ -31,3 +31,15 @@ Depois convide (ou remova) o usuário em **Authentication → Users**.
 ## Tabelas
 
 `hub_clientes`, `hub_negocios`, `hub_orcamentos`, `hub_faturamento`, `hub_produtos`, `hub_despesas` e `hub_projetos`. Cada linha tem `id`, `dados` (o registro em JSON), `criado_em`, `atualizado_em` e `atualizado_por`.
+
+## Painel de usuários (aba Equipe)
+
+Só administradores (`hub_membros.admin = true`) veem a aba **Equipe**, onde dá para criar usuários com senha, trocar a senha de qualquer pessoa, definir administradores e remover alguém. Nada disso depende de e-mail.
+
+A troca de senha precisa da chave secreta, que **fica só no Supabase**, dentro da Edge Function `hub-admin` (`supabase/functions/hub-admin/index.ts`). A página nunca vê essa chave.
+
+Para ativar:
+
+1. Rode `supabase/admin.sql` no SQL Editor (cria a coluna `admin` e marca a Soraya como administradora).
+2. **Edge Functions → Deploy a new function → Via Editor**, com o nome `hub-admin`. Cole o conteúdo de `supabase/functions/hub-admin/index.ts` e clique em **Deploy**.
+3. Nas configurações da função, desligue **Verify JWT** (ou "Enforce JWT verification"). A própria função confere o login e se a pessoa é administradora.
