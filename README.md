@@ -9,6 +9,8 @@ faturamento, despesas e investimentos, produtos, tarefas da equipe e gestão de 
 | Backend | Python 3.11+, FastAPI, SQLAlchemy 2 (async), Alembic | [`backend/`](backend) |
 | Banco | PostgreSQL 16+, modelagem relacional ([docs](docs/banco-de-dados.md)) | [`backend/migrations/`](backend/migrations) |
 
+> Módulo financeiro (plano de contas, contas bancárias, parceiros, títulos, fluxo de caixa): [`docs/modulo-financeiro.md`](docs/modulo-financeiro.md)
+>
 > Arquitetura, decisões e fluxos: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) · Migração dos dados do sistema anterior:
 > [`docs/MIGRACAO.md`](docs/MIGRACAO.md) · Modelo de dados: [`docs/banco-de-dados.md`](docs/banco-de-dados.md)
 
