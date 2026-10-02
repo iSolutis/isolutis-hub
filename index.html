@@ -60,6 +60,7 @@ img{max-width:100%}
 .conta{display:flex;flex-direction:column;gap:4px;padding:8px 8px 0;border-top:1px solid #24375c;font-size:11.5px;color:#93a3bd;min-width:0}
 .conta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .conta button{all:unset;cursor:pointer;align-self:flex-start;color:#e8edf4;font-weight:600;font-size:12.5px}
+.conta-b{display:flex;gap:16px;flex-wrap:wrap}
 .conta button:hover{color:#22C3CE}
 .conta button:focus-visible{outline:2px solid #22C3CE;outline-offset:2px}
 body{background:var(--bg);color:var(--ink);font:14px/1.5 var(--f-body)}
@@ -229,7 +230,7 @@ tfoot td{font-weight:600;background:var(--sunk);border-bottom:0}
     <nav id="nav" aria-label="Áreas do Hub Comercial"></nav>
     <div class="online" id="online" hidden aria-live="polite"></div>
     <div class="sync" id="sync"><span class="dot"></span>Conectando…</div>
-    <div class="conta" id="conta" hidden><span id="contaEmail"></span><button type="button" id="sair">Sair</button></div>
+    <div class="conta" id="conta" hidden><span id="contaEmail"></span><div class="conta-b"><button type="button" id="trocarSenha">Trocar senha</button><button type="button" id="sair">Sair</button></div></div>
   </aside>
   <main id="view"></main>
 </div>
@@ -271,7 +272,11 @@ window.HubSupabase = (() => {
   const CHAVE_PUBLICA = 'sb_publishable_wTyuZRM40gvpQSFZmY_cdg_S-CuK6Ci'; // chave pública: a proteção dos dados está nas regras do banco
   const tabela = col => 'hub_' + col;
   // o link do e-mail (convite ou troca de senha) chega com #...type=invite|recovery; leio antes do SDK limpar
-  const tipoLink = (location.hash.match(/type=([a-z]+)/) || [])[1] || '';
+  const urlLink = location.hash + '&' + location.search;
+  let tipoLink = (urlLink.match(/type=([a-z]+)/) || [])[1] || '';
+  // link vencido ou já usado: o Supabase devolve #error_code=otp_expired (ou parecido)
+  const erroLink = decodeURIComponent(((urlLink.match(/error_description=([^&]+)/) || [])[1] || '').replace(/\+/g, ' '));
+  const codigoErroLink = (urlLink.match(/error_code=([a-z_]+)/) || [])[1] || '';
   const sb = window.supabase.createClient(URL_SUPABASE, CHAVE_PUBLICA, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
   const $ = id => document.getElementById(id);
   const msg = (t, erro) => { const m = $('lgMsg'); m.textContent = t || ''; m.classList.toggle('erro', !!erro); };
@@ -310,9 +315,9 @@ window.HubSupabase = (() => {
         const a = $('lgNova1').value, b = $('lgNova2').value;
         if (a.length < 8) { msg('A senha precisa ter pelo menos 8 caracteres.', true); return; }
         if (a !== b) { msg('As duas senhas não são iguais.', true); return; }
-        const { error } = await sb.auth.updateUser({ password: a });
-        if (error) { msg('Não foi possível salvar a senha: ' + error.message, true); return; }
-        msg(''); history.replaceState(null, '', location.pathname); resolve();
+        const { error } = await sb.auth.updateUser({ password: a, data: { senha_definida: true } });
+        if (error) { msg(/different from the old/i.test(error.message) ? 'Essa já é a sua senha atual. Escolha uma diferente.' : 'Não foi possível salvar a senha: ' + error.message, true); return; }
+        msg('Senha salva.'); history.replaceState(null, '', location.pathname); resolve();
       };
     });
   }
@@ -401,9 +406,19 @@ window.HubSupabase = (() => {
 
   async function iniciar(){
     $('sair').onclick = sair; $('lgForaSair').onclick = sair;
+    sb.auth.onAuthStateChange(ev => { if (ev === 'PASSWORD_RECOVERY') tipoLink = 'recovery'; });
     let { data: { session } } = await sb.auth.getSession();
-    if (session && (tipoLink === 'recovery' || tipoLink === 'invite')) await pedirNovaSenha();
+    if (!session && codigoErroLink) {
+      msg(codigoErroLink === 'otp_expired'
+        ? 'O link do e-mail venceu ou já foi usado. Digite seu e-mail abaixo e clique em "Esqueci minha senha" para receber um novo.'
+        : 'O link do e-mail não funcionou (' + (erroLink || codigoErroLink) + '). Use "Esqueci minha senha" para receber um novo.', true);
+      history.replaceState(null, '', location.pathname);
+    }
+    // primeiro acesso de quem foi convidado: pede a senha mesmo que o link não diga o tipo
+    const precisaSenha = s => s && (tipoLink === 'recovery' || tipoLink === 'invite' || (s.user.invited_at && !(s.user.user_metadata || {}).senha_definida));
+    if (precisaSenha(session)) await pedirNovaSenha();
     if (!session) session = await pedirLogin();
+    $('trocarSenha').onclick = async () => { await pedirNovaSenha(); $('login').hidden = true; };
     const email = session.user.email;
     const { data: membros, error } = await sb.from('hub_membros').select('email,nome');
     if (error) { msg('Não foi possível ler a equipe do Hub: ' + error.message, true); mostrar(''); throw error; }
