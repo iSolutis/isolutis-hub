@@ -1,199 +1,467 @@
 from datetime import date
 
+import pytest
 from httpx import AsyncClient
+from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-API = "/api/v1"
+from app.financeiro.models import Empresa, InstituicaoFinanceira, Municipio
+from app.models import Usuario
+from app.security import gerar_hash
+from tests.conftest import SENHA
+
+F = "/api/v1/financeiro"
 ANO = date.today().year
+CNPJ = "11222333000181"
+CPF = "52998224725"
 
 
-async def test_lancamento_unico_e_serie_mensal(api: AsyncClient, novo_cliente):
-    c = await novo_cliente()
-    base = {
-        "cliente_id": c["id"],
-        "tipo": "mensal",
-        "descricao": "Manutenção",
-        "valor": 800,
-        "vencimento": f"{ANO}-01-31",
-    }
-    r = await api.post(f"{API}/faturamento", json={**base, "repetir": 3, "status": "recebido"})
-    assert r.status_code == 201
-    serie = r.json()
-    assert [x["descricao"] for x in serie] == ["Manutenção · 1/3", "Manutenção · 2/3", "Manutenção · 3/3"]
-    assert [x["vencimento"] for x in serie] == [
-        f"{ANO}-01-31",
-        f"{ANO}-02-28" if ANO % 4 else f"{ANO}-02-29",
-        f"{ANO}-03-31",
+@pytest.fixture
+async def ref(sessao: AsyncSession) -> dict:
+    """Referências mínimas (a carga completa é feita por app.financeiro.popular)."""
+    mun = Municipio(nome="Salvador", uf="BA")
+    banco = InstituicaoFinanceira(codigo="001", nome="Banco do Brasil S.A.")
+    outro = InstituicaoFinanceira(codigo="341", nome="Itaú Unibanco S.A.")
+    sessao.add_all([mun, banco, outro])
+    await sessao.flush()
+    return {"municipio": str(mun.id), "banco": str(banco.id), "outro_banco": str(outro.id)}
+
+
+async def _criar(api: AsyncClient, caminho: str, corpo: dict, esperado: int = 201) -> dict:
+    r = await api.post(f"{F}{caminho}", json=corpo)
+    assert r.status_code == esperado, r.text
+    return r.json()
+
+
+@pytest.fixture
+async def plano(api: AsyncClient) -> dict:
+    """1 Receita > 1.01 Contrato de Sistemas > 1.01.001 GT   ·   2 Despesa > 2.01 Pessoal > 2.01.001 Salário"""
+    rec = await _criar(api, "/plano-contas", {"codigo": "1", "nome": "Receita", "tipo_conta": "S", "natureza": "R"})
+    rec1 = await _criar(
+        api,
+        "/plano-contas",
+        {"plano_pai_id": rec["id"], "codigo": "1.01", "nome": "Contrato de Sistemas", "tipo_conta": "S"},
+    )
+    gt = await _criar(
+        api, "/plano-contas", {"plano_pai_id": rec1["id"], "codigo": "1.01.001", "nome": "GT", "tipo_conta": "A"}
+    )
+    desp = await _criar(api, "/plano-contas", {"codigo": "2", "nome": "Despesa", "tipo_conta": "S", "natureza": "D"})
+    desp1 = await _criar(
+        api, "/plano-contas", {"plano_pai_id": desp["id"], "codigo": "2.01", "nome": "Pessoal", "tipo_conta": "S"}
+    )
+    sal = await _criar(
+        api, "/plano-contas", {"plano_pai_id": desp1["id"], "codigo": "2.01.001", "nome": "Salário", "tipo_conta": "A"}
+    )
+    return {"receita": rec, "contrato": rec1, "gt": gt, "despesa": desp, "pessoal": desp1, "salario": sal}
+
+
+@pytest.fixture
+async def conta_bancaria(api: AsyncClient, ref: dict) -> dict:
+    return await _criar(
+        api,
+        "/contas-bancarias",
+        {"instituicao_financeira_id": ref["banco"], "nome": "Conta principal", "saldo_inicial": 1000},
+    )
+
+
+@pytest.fixture
+async def parceiro(api: AsyncClient, ref: dict) -> dict:
+    return await _criar(
+        api,
+        "/parceiros",
+        {
+            "tipo_pessoa": "PJ",
+            "cpf_cnpj": "11.222.333/0001-81",
+            "nome": "Fornecedor Alfa",
+            "municipio_id": ref["municipio"],
+        },
+    )
+
+
+# ============================================================================ acesso
+async def test_modulo_exige_administrador(http: AsyncClient, admin: Usuario, sessao: AsyncSession):
+    assert (await http.get(f"{F}/plano-contas")).status_code == 401
+    sessao.add(Usuario(email="membro@isolutis.com.br", nome="Membro", admin=False, senha_hash=gerar_hash(SENHA)))
+    await sessao.commit()
+    token = (await http.post("/api/v1/auth/login", json={"email": "membro@isolutis.com.br", "senha": SENHA})).json()[
+        "access_token"
     ]
-    assert [x["status"] for x in serie] == ["recebido", "previsto", "previsto"]  # só a primeira herda o status
-    assert serie[0]["recebido_em"] and serie[1]["recebido_em"] is None
-    assert len({x["grupo_id"] for x in serie}) == 1 and [x["parcela"] for x in serie] == [1, 2, 3]
-
-    unico = (await api.post(f"{API}/faturamento", json={**base, "descricao": "Avulso"})).json()[0]
-    assert unico["grupo_id"] is None and unico["parcela"] is None
+    r = await http.get(f"{F}/plano-contas", headers={"Authorization": f"Bearer {token}"})
+    assert r.status_code == 403 and r.json()["erro"]["codigo"] == "sem_permissao"
 
 
-async def test_lote_de_venda_fechada_parcela_sem_perder_centavos(api: AsyncClient, novo_cliente):
-    c = await novo_cliente()
-    r = await api.post(
-        f"{API}/faturamento/lote",
-        json={
-            "cliente_id": c["id"],
-            "titulo": "Portal",
-            "projeto": {"valor": 100, "parcelas": 3, "primeiro_vencimento": f"{ANO}-03-10"},
-            "mensal": {"valor": 800, "meses": 2, "primeira_mensalidade": f"{ANO}-04-10"},
+async def test_empresa_unica_foi_criada_pela_migracao(sessao: AsyncSession):
+    assert [e.nome for e in (await sessao.scalars(__import__("sqlalchemy").select(Empresa))).all()] == ["iSolutis"]
+
+
+# ============================================================================ US01 / RN01 plano de contas
+async def test_plano_de_contas_hierarquia_e_heranca(api: AsyncClient, plano: dict):
+    arvore = (await api.get(f"{F}/plano-contas")).json()
+    assert [c["codigo"] for c in arvore] == ["1", "1.01", "1.01.001", "2", "2.01", "2.01.001"]
+    por_codigo = {c["codigo"]: c for c in arvore}
+    assert [por_codigo[c]["nivel"] for c in ("1", "1.01", "1.01.001")] == [1, 2, 3]
+    assert por_codigo["1.01.001"]["natureza"] == "R" and por_codigo["2.01.001"]["natureza"] == "D"  # herdada do pai
+    assert por_codigo["1"]["possui_filhas"] and not por_codigo["1.01.001"]["possui_filhas"]
+
+
+async def test_natureza_enviada_na_filha_e_ignorada(api: AsyncClient, plano: dict):
+    filha = await _criar(
+        api,
+        "/plano-contas",
+        {
+            "plano_pai_id": plano["contrato"]["id"],
+            "codigo": "1.01.002",
+            "nome": "Outro",
+            "tipo_conta": "A",
+            "natureza": "D",
         },
     )
-    assert r.status_code == 201, r.text
-    lancs = r.json()
-    projeto = [x for x in lancs if x["tipo"] == "projeto"]
-    assert [x["valor"] for x in projeto] == [33.33, 33.33, 33.34] and sum(x["valor"] for x in projeto) == 100
-    assert projeto[0]["descricao"] == "Portal · parcela 1/3"
-    mensais = [x for x in lancs if x["tipo"] == "mensal"]
-    assert [x["descricao"] for x in mensais] == ["Manutenção mensal · Portal · 1/2", "Manutenção mensal · Portal · 2/2"]
-    assert all(x["status"] == "previsto" for x in lancs)
-    # séries distintas por tipo
-    assert projeto[0]["grupo_id"] != mensais[0]["grupo_id"]
-
-    assert (await api.post(f"{API}/faturamento/lote", json={"cliente_id": c["id"]})).status_code == 422
+    assert filha["natureza"] == "R"
 
 
-async def test_lote_marca_negocio_como_faturado(api: AsyncClient, novo_cliente):
-    c = await novo_cliente()
-    n = (await api.post(f"{API}/negocios", json={"titulo": "P", "cliente_id": c["id"]})).json()
-    await api.post(
-        f"{API}/faturamento/lote",
-        json={
-            "cliente_id": c["id"],
-            "negocio_id": n["id"],
-            "projeto": {"valor": 50, "primeiro_vencimento": f"{ANO}-05-01"},
-        },
-    )
-    assert (await api.get(f"{API}/negocios")).json()[0]["faturado"] is True
+@pytest.mark.parametrize(
+    ("corpo", "trecho"),
+    [
+        ({"codigo": "1.01", "nome": "x", "tipo_conta": "S", "natureza": "R"}, "número"),  # raiz com ponto
+        ({"codigo": "3", "nome": "x", "tipo_conta": "S"}, "natureza"),  # raiz sem natureza
+        ({"codigo": "1", "nome": "dup", "tipo_conta": "S", "natureza": "R"}, "já existe"),
+    ],
+)
+async def test_regras_de_raiz(api: AsyncClient, plano: dict, corpo: dict, trecho: str):
+    r = await api.post(f"{F}/plano-contas", json=corpo)
+    assert r.status_code == 422
+    assert trecho in r.text.lower()
 
 
-async def test_receber_editar_e_resumo(api: AsyncClient, novo_cliente):
-    c = await novo_cliente()
-    mk = lambda mes, valor, tipo="projeto": {  # noqa: E731
-        "cliente_id": c["id"],
-        "tipo": tipo,
-        "descricao": f"L{mes}",
-        "valor": valor,
-        "vencimento": f"{ANO}-{mes:02d}-10",
+async def test_regras_de_filhas(api: AsyncClient, plano: dict):
+    pai_sintetico, pai_analitico = plano["contrato"]["id"], plano["gt"]["id"]
+    casos = [
+        (
+            {"plano_pai_id": pai_analitico, "codigo": "1.01.001.001", "nome": "x", "tipo_conta": "A"},
+            "analítica não pode ter",
+        ),
+        ({"plano_pai_id": pai_sintetico, "codigo": "1.01.01", "nome": "x", "tipo_conta": "A"}, "código deve ser"),
+        ({"plano_pai_id": pai_sintetico, "codigo": "2.01.005", "nome": "x", "tipo_conta": "A"}, "código deve ser"),
+        ({"plano_pai_id": pai_sintetico, "codigo": "1.01.002", "nome": "x", "tipo_conta": "S"}, "terceiro nível"),
+        ({"plano_pai_id": pai_sintetico, "codigo": "1.01.001", "nome": "x", "tipo_conta": "A"}, "já existe"),
+    ]
+    for corpo, trecho in casos:
+        r = await api.post(f"{F}/plano-contas", json=corpo)
+        assert r.status_code == 422 and trecho in r.json()["erro"]["mensagem"].lower(), (corpo, r.text)
+
+
+async def test_proximo_codigo_sugerido(api: AsyncClient, plano: dict):
+    assert (await api.get(f"{F}/plano-contas/proximo-codigo")).json() == {"codigo": "3"}
+    assert (await api.get(f"{F}/plano-contas/proximo-codigo", params={"pai_id": plano["receita"]["id"]})).json() == {
+        "codigo": "1.02"
     }
-    a = (await api.post(f"{API}/faturamento", json=mk(1, 1000))).json()[0]
-    await api.post(f"{API}/faturamento", json=mk(1, 200, "mensal"))
-    await api.post(f"{API}/faturamento", json=mk(2, 500))
-
-    r = await api.post(f"{API}/faturamento/{a['id']}/receber")
-    assert r.json()["status"] == "recebido" and r.json()["recebido_em"] == date.today().isoformat()
-
-    resumo = (await api.get(f"{API}/faturamento/resumo", params={"ano": ANO})).json()
-    jan, fev = resumo["meses"][0], resumo["meses"][1]
-    assert (jan["recebido"], jan["previsto"], jan["recorrente"], jan["quantidade"]) == (1000, 200, 200, 2)
-    assert (fev["recebido"], fev["previsto"]) == (0, 500)
-    assert resumo["total_recebido"] == 1000 and resumo["total_previsto"] == 700 and ANO in resumo["anos_disponiveis"]
-    assert len(resumo["meses"]) == 12
-
-    # voltar para previsto limpa a data de recebimento (regra também garantida por CHECK)
-    corpo = {k: a[k] for k in ("cliente_id", "tipo", "descricao", "valor", "vencimento", "nf")} | {"status": "previsto"}
-    r = await api.put(f"{API}/faturamento/{a['id']}", json={**corpo, "versao": r.json()["versao"]})
-    assert r.json()["recebido_em"] is None
-
-    jan_lista = (await api.get(f"{API}/faturamento", params={"ano": ANO, "mes": 1})).json()
-    assert len(jan_lista) == 2
+    assert (await api.get(f"{F}/plano-contas/proximo-codigo", params={"pai_id": plano["contrato"]["id"]})).json() == {
+        "codigo": "1.01.002"
+    }
+    assert (await api.get(f"{F}/plano-contas/proximo-codigo", params={"pai_id": plano["gt"]["id"]})).status_code == 422
 
 
-async def test_exportar_csv(api: AsyncClient, novo_cliente):
-    c = await novo_cliente("Acme; Ltda")
-    await api.post(
-        f"{API}/faturamento",
-        json={
-            "cliente_id": c["id"],
-            "tipo": "projeto",
-            "descricao": 'Parcela "única"',
-            "valor": 1234.5,
-            "vencimento": f"{ANO}-06-05",
-            "nf": "NF-1",
-        },
+async def test_editar_e_excluir_conta_do_plano(api: AsyncClient, plano: dict):
+    gt = plano["gt"]
+    r = await api.put(
+        f"{F}/plano-contas/{gt['id']}",
+        json={"plano_pai_id": plano["contrato"]["id"], "codigo": "1.01.001", "nome": "GT Sistemas", "tipo_conta": "A"},
     )
-    r = await api.get(f"{API}/faturamento/exportar", params={"ano": ANO})
-    assert r.status_code == 200 and r.text.startswith("﻿")
-    linhas = r.text.lstrip("﻿").split("\r\n")
-    assert linhas[0] == '"Data";"Cliente";"Descrição";"Tipo";"Situação";"Valor";"Nota fiscal"'
+    assert r.status_code == 200 and r.json()["nome"] == "GT Sistemas"
+    # conta com filhas: não muda código nem vira analítica; não pode ser excluída
+    r = await api.put(
+        f"{F}/plano-contas/{plano['receita']['id']}",
+        json={"codigo": "9", "nome": "Receita", "tipo_conta": "S", "natureza": "R"},
+    )
+    assert r.status_code == 422 and "filhas" in r.json()["erro"]["mensagem"]
+    r = await api.put(
+        f"{F}/plano-contas/{plano['receita']['id']}",
+        json={"codigo": "1", "nome": "Receita", "tipo_conta": "A", "natureza": "R"},
+    )
+    assert r.status_code == 422
+    assert (await api.delete(f"{F}/plano-contas/{plano['receita']['id']}")).status_code == 422
+    assert (await api.delete(f"{F}/plano-contas/{gt['id']}")).status_code == 204
+    assert (await api.delete(f"{F}/plano-contas/{gt['id']}")).status_code == 404
+
+
+# ============================================================================ US02 / RN02 contas bancárias
+async def test_contas_bancarias_crud_e_duplicidade(api: AsyncClient, ref: dict):
+    c = await _criar(
+        api,
+        "/contas-bancarias",
+        {"instituicao_financeira_id": ref["banco"], "nome": "Principal", "saldo_inicial": 2500.5},
+    )
+    assert c["instituicao_codigo"] == "001" and c["saldo_inicial"] == 2500.5
+    # mesma instituição + mesmo nome (sem diferenciar maiúsculas/espaços) na empresa: recusado
+    r = await api.post(
+        f"{F}/contas-bancarias", json={"instituicao_financeira_id": ref["banco"], "nome": "  principal "}
+    )
+    assert r.status_code == 422 and "já existe" in r.json()["erro"]["mensagem"].lower()
+    # outra instituição com o mesmo nome é permitido
+    await _criar(api, "/contas-bancarias", {"instituicao_financeira_id": ref["outro_banco"], "nome": "Principal"})
+    r = await api.put(
+        f"{F}/contas-bancarias/{c['id']}",
+        json={"instituicao_financeira_id": ref["banco"], "nome": "Principal PJ", "saldo_inicial": 0},
+    )
+    assert r.status_code == 200 and r.json()["nome"] == "Principal PJ"
+    assert len((await api.get(f"{F}/contas-bancarias")).json()) == 2
     assert (
-        linhas[1] == f'"05/06/{ANO}";"Acme; Ltda";"Parcela ""única""";"Projeto sob medida";"Previsto";"1234,50";"NF-1"'
-    )
-
-
-async def _categoria(api: AsyncClient) -> str:
-    return (await api.get(f"{API}/despesas/opcoes")).json()["categorias"][0]["id"]
-
-
-async def test_despesa_recorrente_pagar_e_resumo_do_resultado(api: AsyncClient, novo_cliente):
-    cat = await _categoria(api)
-    r = await api.post(
-        f"{API}/despesas",
-        json={
-            "data": f"{ANO}-01-05",
-            "descricao": "Hospedagem",
-            "valor": 100,
-            "categoria_id": cat,
-            "status": "pago",
-            "repetir": 3,
-        },
-    )
-    ds = r.json()
-    assert [d["status"] for d in ds] == ["pago", "a_pagar", "a_pagar"] and ds[0]["pago_em"] == f"{ANO}-01-05"
-    assert ds[0]["categoria_nome"] == "Servidores e infraestrutura" and ds[2]["descricao"] == "Hospedagem · 3/3"
-
-    pago = (await api.post(f"{API}/despesas/{ds[1]['id']}/pagar")).json()
-    assert pago["status"] == "pago" and pago["pago_em"] == date.today().isoformat()
-
-    c = await novo_cliente()
-    lanc = (
         await api.post(
-            f"{API}/faturamento",
-            json={
-                "cliente_id": c["id"],
-                "tipo": "projeto",
-                "descricao": "x",
-                "valor": 1000,
-                "vencimento": f"{ANO}-01-20",
-                "status": "recebido",
-            },
+            f"{F}/contas-bancarias",
+            json={"instituicao_financeira_id": "00000000-0000-0000-0000-000000000000", "nome": "x"},
         )
-    ).json()[0]
-    assert lanc["status"] == "recebido"
-
-    resumo = (await api.get(f"{API}/despesas/resumo", params={"ano": ANO})).json()
-    assert resumo["recebido_no_ano"] == 1000
-    assert resumo["despesas_pagas"] == 200 and resumo["despesas_a_pagar"] == 100
-    assert resumo["resultado"] == 800  # recebido menos despesas PAGAS
-    assert resumo["meses"][0] == {"mes": 1, "recebido": 1000, "despesas": 100, "resultado": 900, "investimentos": 0}
+    ).status_code == 422
+    assert (await api.delete(f"{F}/contas-bancarias/{c['id']}")).status_code == 204
 
 
-async def test_investimento_cria_investidor_e_agrega_por_pessoa(api: AsyncClient):
-    corpo = {
-        "data": f"{ANO}-02-01",
-        "descricao": "Aporte",
-        "valor": 3000,
-        "investidor": "Soraya Sá",
-        "forma": "Dinheiro (aporte)",
+# ============================================================================ US04 parceiros
+async def test_parceiros_validam_documento_e_unicidade(api: AsyncClient, ref: dict):
+    base = {
+        "tipo_pessoa": "PJ",
+        "nome": "Alfa",
+        "municipio_id": ref["municipio"],
+        "cep": "40.000-000",
+        "endereco": " Rua A, 10 ",
     }
-    inv = (await api.post(f"{API}/investimentos", json=corpo)).json()
-    assert inv["investidor_nome"] == "Soraya Sá"
-    await api.post(
-        f"{API}/investimentos", json={**corpo, "valor": 1000, "investidor": "soraya sá"}
-    )  # mesmo nome (citext)
-    await api.post(
-        f"{API}/investimentos", json={**corpo, "data": f"{ANO - 1}-02-01", "valor": 1000, "investidor": "Jefferson"}
+    r = await api.post(f"{F}/parceiros", json={**base, "cpf_cnpj": "11.222.333/0001-80"})
+    assert r.status_code == 422 and "CNPJ inválido" in r.json()["erro"]["mensagem"]
+    p = await _criar(api, "/parceiros", {**base, "cpf_cnpj": "11.222.333/0001-81"})
+    assert (
+        p["cpf_cnpj"] == CNPJ
+        and p["cep"] == "40000000"
+        and p["endereco"] == "Rua A, 10"
+        and (p["municipio_nome"], p["uf"]) == ("Salvador", "BA")
     )
-    resumo = (await api.get(f"{API}/despesas/resumo", params={"ano": ANO})).json()
-    assert resumo["investido_no_ano"] == 4000 and resumo["investido_total"] == 5000
-    assert resumo["investidores"][0] == {"nome": "Soraya Sá", "no_ano": 4000, "total": 4000, "percentual": 80}
-    opc = (await api.get(f"{API}/despesas/opcoes")).json()
-    assert opc["investidores"] == ["Jefferson", "Soraya Sá"]
+    r = await api.post(f"{F}/parceiros", json={**base, "nome": "Duplicado", "cpf_cnpj": CNPJ})
+    assert r.status_code == 422 and "já existe" in r.json()["erro"]["mensagem"].lower()
+    pf = await _criar(
+        api,
+        "/parceiros",
+        {"tipo_pessoa": "PF", "cpf_cnpj": "529.982.247-25", "nome": "Maria", "municipio_id": ref["municipio"]},
+    )
+    assert pf["cpf_cnpj"] == CPF and pf["cep"] is None
+    assert (
+        await api.post(f"{F}/parceiros", json={**base, "tipo_pessoa": "PF", "cpf_cnpj": CNPJ})
+    ).status_code == 422  # CNPJ marcado como PF
+    assert (
+        await api.post(f"{F}/parceiros", json={**base, "cpf_cnpj": "52998224726", "tipo_pessoa": "PF", "cep": "123"})
+    ).status_code == 422
+    achados = (await api.get(f"{F}/parceiros", params={"busca": "mar"})).json()
+    assert [x["nome"] for x in achados] == ["Maria"]
+    assert [x["nome"] for x in (await api.get(f"{F}/parceiros", params={"busca": "11.222"})).json()] == ["Alfa"]
+    r = await api.put(f"{F}/parceiros/{p['id']}", json={**base, "cpf_cnpj": CNPJ, "nome": "Alfa Renomeada"})
+    assert r.json()["nome"] == "Alfa Renomeada"
+    assert (await api.delete(f"{F}/parceiros/{pf['id']}")).status_code == 204
 
-    r = await api.put(f"{API}/investimentos/{inv['id']}", json={**corpo, "valor": 3500, "versao": inv["versao"]})
-    assert r.json()["valor"] == 3500
-    assert (await api.delete(f"{API}/investimentos/{inv['id']}")).status_code == 204
+
+# ============================================================================ US03 / RN03 / RN04 títulos
+def _titulo(plano: dict, conta: dict, parceiro: dict, **extra) -> dict:
+    return {
+        "tipo_conta": "R", "conta_bancaria_id": conta["id"], "plano_conta_id": plano["gt"]["id"], "parceiro_id": parceiro["id"],
+        "data_emissao": f"{ANO}-01-05", "data_vencimento": f"{ANO}-01-20", "valor_titulo": 1000, **extra,
+    }  # fmt: skip
+
+
+async def test_titulo_so_em_conta_analitica_e_com_natureza_compativel(
+    api: AsyncClient, plano: dict, conta_bancaria: dict, parceiro: dict
+):
+    r = await api.post(
+        f"{F}/titulos", json=_titulo(plano, conta_bancaria, parceiro, plano_conta_id=plano["contrato"]["id"])
+    )
+    assert r.status_code == 422 and "conta analítica" in r.json()["erro"]["mensagem"]  # RN03
+    r = await api.post(
+        f"{F}/titulos", json=_titulo(plano, conta_bancaria, parceiro, tipo_conta="P")
+    )  # a pagar numa conta de receita
+    assert r.status_code == 422 and "despesa" in r.json()["erro"]["mensagem"]  # RN04
+    r = await api.post(
+        f"{F}/titulos", json=_titulo(plano, conta_bancaria, parceiro, plano_conta_id=plano["salario"]["id"])
+    )  # a receber em despesa
+    assert r.status_code == 422
+    ok = await _criar(
+        api, "/titulos", _titulo(plano, conta_bancaria, parceiro, tipo_conta="P", plano_conta_id=plano["salario"]["id"])
+    )
+    assert ok["status"] == "A" and ok["plano_conta_codigo"] == "2.01.001" and ok["parceiro_nome"] == "Fornecedor Alfa"
+
+
+async def test_titulo_valores_quitacao_e_cancelamento(
+    api: AsyncClient, plano: dict, conta_bancaria: dict, parceiro: dict
+):
+    base = _titulo(plano, conta_bancaria, parceiro, valor_desconto=50, valor_multa=10, valor_juros=5.25)
+    t = await _criar(api, "/titulos", base)
+    assert t["valor_devido"] == 965.25 and t["valor_quitacao"] == 0 and t["data_pagamento"] is None
+    # quitar exige a data; sem valor assume o valor devido
+    r = await api.put(f"{F}/titulos/{t['id']}", json={**base, "status": "Q"})
+    assert r.status_code == 422 and "data de pagamento" in r.json()["erro"]["mensagem"]
+    q = (await api.put(f"{F}/titulos/{t['id']}", json={**base, "status": "Q", "data_pagamento": f"{ANO}-01-22"})).json()
+    assert (q["status"], q["valor_quitacao"], q["data_pagamento"]) == ("Q", 965.25, f"{ANO}-01-22")
+    # reabrir limpa a quitação; cancelar também
+    aberto = (
+        await api.put(
+            f"{F}/titulos/{t['id']}",
+            json={**base, "status": "A", "data_pagamento": f"{ANO}-01-22", "valor_quitacao": 10},
+        )
+    ).json()
+    assert (aberto["data_pagamento"], aberto["valor_quitacao"]) == (None, 0)
+    assert (await api.put(f"{F}/titulos/{t['id']}", json={**base, "status": "C"})).json()["status"] == "C"
+    # validações
+    assert (await api.post(f"{F}/titulos", json={**base, "valor_titulo": 0})).status_code == 422
+    assert (
+        await api.post(f"{F}/titulos", json={**base, "valor_desconto": 1020})
+    ).status_code == 422  # desconto maior que o valor devido
+    assert (
+        await api.post(f"{F}/titulos", json={**base, "data_emissao": f"{ANO}-02-01"})
+    ).status_code == 422  # emissão depois do vencimento
+    assert (await api.post(f"{F}/titulos", json={**base, "status": "X"})).status_code == 422
+
+
+async def test_titulo_filtros_e_exclusao_com_bloqueios(
+    api: AsyncClient, plano: dict, conta_bancaria: dict, parceiro: dict
+):
+    a = await _criar(api, "/titulos", _titulo(plano, conta_bancaria, parceiro))
+    b = await _criar(
+        api,
+        "/titulos",
+        _titulo(
+            plano,
+            conta_bancaria,
+            parceiro,
+            tipo_conta="P",
+            plano_conta_id=plano["salario"]["id"],
+            data_vencimento=f"{ANO}-03-10",
+            valor_titulo=300,
+        ),
+    )
+    assert [t["id"] for t in (await api.get(f"{F}/titulos")).json()] == [a["id"], b["id"]]  # por vencimento
+    assert [t["id"] for t in (await api.get(f"{F}/titulos", params={"tipo": "P"})).json()] == [b["id"]]
+    assert [t["id"] for t in (await api.get(f"{F}/titulos", params={"de": f"{ANO}-02-01"})).json()] == [b["id"]]
+    assert (await api.get(f"{F}/titulos", params={"status": "Q"})).json() == []
+    assert len((await api.get(f"{F}/titulos", params={"busca": "alfa"})).json()) == 2
+    # com título lançado, conta bancária / parceiro / conta do plano não podem ser excluídos nem mudar de natureza
+    assert (await api.delete(f"{F}/contas-bancarias/{conta_bancaria['id']}")).status_code == 422
+    assert (await api.delete(f"{F}/parceiros/{parceiro['id']}")).status_code == 422
+    assert (await api.delete(f"{F}/plano-contas/{plano['gt']['id']}")).status_code == 422
+    r = await api.put(
+        f"{F}/plano-contas/{plano['gt']['id']}",
+        json={"plano_pai_id": plano["contrato"]["id"], "codigo": "1.01.001", "nome": "GT", "tipo_conta": "A"},
+    )
+    assert r.status_code == 200
+    assert (await api.delete(f"{F}/titulos/{a['id']}")).status_code == 204
+    assert (await api.delete(f"{F}/titulos/{a['id']}")).status_code == 404
+
+
+# ============================================================================ US05 fluxo de caixa
+async def test_fluxo_de_caixa_mensal(api: AsyncClient, plano: dict, conta_bancaria: dict, parceiro: dict):
+    rec = _titulo(plano, conta_bancaria, parceiro, valor_titulo=1000)
+    pag = _titulo(
+        plano,
+        conta_bancaria,
+        parceiro,
+        tipo_conta="P",
+        plano_conta_id=plano["salario"]["id"],
+        valor_titulo=400,
+        data_vencimento=f"{ANO}-01-25",
+    )
+    await _criar(
+        api, "/titulos", {**rec, "status": "Q", "data_pagamento": f"{ANO}-01-21"}
+    )  # entrada realizada em janeiro
+    await _criar(
+        api, "/titulos", {**rec, "data_vencimento": f"{ANO}-02-10", "valor_titulo": 500, "valor_juros": 20}
+    )  # entrada prevista em fevereiro (520 devidos)
+    await _criar(api, "/titulos", pag)  # saída prevista em janeiro
+    await _criar(
+        api,
+        "/titulos",
+        {
+            **pag,
+            "data_vencimento": f"{ANO}-02-25",
+            "valor_titulo": 100,
+            "status": "Q",
+            "data_pagamento": f"{ANO}-02-26",
+        },
+    )  # saída realizada em fevereiro
+    await _criar(api, "/titulos", {**rec, "status": "C", "valor_titulo": 9999})  # cancelado não entra
+    await _criar(
+        api,
+        "/titulos",
+        {
+            **rec,
+            "status": "Q",
+            "data_emissao": None,
+            "data_vencimento": f"{ANO - 1}-12-10",
+            "data_pagamento": f"{ANO - 1}-12-12",
+            "valor_titulo": 250,
+        },
+    )  # realizado antes do ano: vira saldo
+
+    f = (await api.get(f"{F}/fluxo-de-caixa", params={"ano": ANO})).json()
+    assert f["saldo_inicial"] == 1250  # 1000 da conta bancária + 250 recebidos em dezembro do ano anterior
+    jan, fev, mar = f["meses"][0], f["meses"][1], f["meses"][2]
+    assert (
+        jan["entradas_realizadas"],
+        jan["entradas_previstas"],
+        jan["saidas_realizadas"],
+        jan["saidas_previstas"],
+    ) == (1000, 0, 0, 400)
+    assert (jan["saldo_do_mes"], jan["saldo_acumulado"]) == (600, 1850)
+    assert (fev["entradas_previstas"], fev["saidas_realizadas"], fev["saldo_do_mes"], fev["saldo_acumulado"]) == (
+        520,
+        100,
+        420,
+        2270,
+    )
+    assert mar["saldo_do_mes"] == 0 and mar["saldo_acumulado"] == 2270 and len(f["meses"]) == 12
+    assert (f["total_entradas"], f["total_saidas"]) == (1520, 500)
+    assert ANO in f["anos_disponiveis"] and ANO - 1 in f["anos_disponiveis"]
+
+
+# ============================================================================ o banco repete as regras (defesa em profundidade)
+async def _sql_deve_falhar(sessao: AsyncSession, sql: str, params: dict | None = None) -> str:
+    """Executa o SQL num SAVEPOINT, espera que o banco o recuse e devolve a mensagem do banco."""
+    with pytest.raises(DBAPIError) as e:
+        async with sessao.begin_nested():
+            await sessao.execute(text(sql), params or {})
+    return str(e.value.orig)
+
+
+async def test_banco_impoe_hierarquia_e_regras_do_titulo(
+    api: AsyncClient, sessao: AsyncSession, plano: dict, conta_bancaria: dict, parceiro: dict
+):
+    empresa = await sessao.scalar(text("select id from companies limit 1"))
+    ins = "insert into plano_contas (company_id, plano_pai_id, codigo, nome, tipo_conta, natureza, nivel) values (:c, :p, :cod, 'x', :t, :n, :nv)"
+    # filha de conta analítica
+    erro = await _sql_deve_falhar(
+        sessao, ins, {"c": empresa, "p": plano["gt"]["id"], "cod": "1.01.001.001", "t": "A", "n": "R", "nv": 3}
+    )
+    assert "chk" in erro.lower() or "check" in erro.lower() or "analítica" in erro or "nivel" in erro.lower()
+    # código fora do padrão do nível
+    erro = await _sql_deve_falhar(
+        sessao, ins, {"c": empresa, "p": plano["receita"]["id"], "cod": "1.1", "t": "A", "n": "R", "nv": 2}
+    )
+    assert "ck_plano_contas_codigo" in erro
+    # código sem o prefixo do pai (o trigger também deriva a natureza e o nível)
+    erro = await _sql_deve_falhar(
+        sessao, ins, {"c": empresa, "p": plano["receita"]["id"], "cod": "2.09", "t": "S", "n": "R", "nv": 2}
+    )
+    assert "começar com o código do pai" in erro
+    # título em conta sintética e com natureza trocada
+    tit = "insert into titulo_financeiro (company_id, conta_bancaria_id, plano_conta_id, parceiro_id, tipo_conta, data_vencimento, valor_titulo) values (:c, :cb, :pc, :pa, :t, current_date, 10)"
+    base = {"c": empresa, "cb": conta_bancaria["id"], "pa": parceiro["id"]}
+    assert "conta analítica" in await _sql_deve_falhar(sessao, tit, {**base, "pc": plano["contrato"]["id"], "t": "R"})
+    assert "despesa" in await _sql_deve_falhar(sessao, tit, {**base, "pc": plano["gt"]["id"], "t": "P"})
+    # quitado sem data de pagamento
+    ins_q = "insert into titulo_financeiro (company_id, conta_bancaria_id, plano_conta_id, parceiro_id, tipo_conta, data_vencimento, valor_titulo, status, valor_quitacao) values (:c, :cb, :pc, :pa, 'R', current_date, 10, 'Q', 10)"
+    assert "ck_titulo_financeiro_quitacao" in await _sql_deve_falhar(sessao, ins_q, {**base, "pc": plano["gt"]["id"]})
+
+
+async def test_banco_isola_empresas(sessao: AsyncSession, plano: dict):
+    """FKs compostas: uma conta de outra empresa não pode ser pai nem receber título."""
+    outra = Empresa(nome="Outra Empresa")
+    sessao.add(outra)
+    await sessao.flush()
+    erro = await _sql_deve_falhar(
+        sessao,
+        "insert into plano_contas (company_id, plano_pai_id, codigo, nome, tipo_conta, natureza, nivel) values (:c, :p, '1.01', 'x', 'S', 'R', 2)",
+        {"c": outra.id, "p": plano["receita"]["id"]},
+    )
+    assert "fk_plano_contas_pai" in erro or "conta pai" in erro
