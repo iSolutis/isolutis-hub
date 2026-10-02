@@ -39,7 +39,7 @@ do $$
 declare t text;
 begin
   foreach t in array array['hub_clientes','hub_negocios','hub_orcamentos','hub_faturamento',
-                           'hub_produtos','hub_despesas','hub_projetos'] loop
+                           'hub_produtos','hub_despesas','hub_projetos','hub_tarefas'] loop
     execute format('create table if not exists public.%I (
         id             text primary key,
         dados          jsonb not null default ''{}''::jsonb,

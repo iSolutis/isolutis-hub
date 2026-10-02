@@ -88,6 +88,17 @@ nav .count{font:500 11px var(--f-mono);color:#93a3bd}
 .on-n b{font-size:12.5px;color:#e8edf4;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .on-n small{font-size:11px;color:#93a3bd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .banner.conflito{margin:0;background:var(--bad-bg);color:var(--bad)}
+.tboard{grid-auto-columns:minmax(250px,1fr)}
+.tcol .col-h{align-items:center}
+.tcol.concluido .col-h{border-color:var(--ok)}.tcol.fazendo .col-h{border-color:var(--gold)}.tcol.revisao .col-h{border-color:var(--info)}
+.tcard{border-left:3px solid var(--line);gap:5px}
+.tcard.p-alta{border-left-color:var(--bad)}.tcard.p-media{border-left-color:var(--warn)}.tcard.p-baixa{border-left-color:var(--line)}
+.tcol.concluido .tcard .t{text-decoration:line-through;color:var(--muted)}
+.tresp{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.av.mini{width:20px;height:20px;font-size:9px;background:var(--accent);color:var(--accent-ink);box-shadow:none}
+.av.mini:after{display:none}
+.ck{display:flex;flex-direction:column;gap:4px}
+.ck-i{display:flex;align-items:center;gap:8px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:6px;cursor:pointer}
 .pcard:hover{border-color:var(--muted)}
@@ -369,7 +380,8 @@ window.HubSupabase = (() => {
     return {
       can: async () => true,
       me: async () => ({ id: eu.email.toLowerCase(), name: eu.nome, avatarUrl: '' }),
-      profiles: async ids => { const r = {}; ids.forEach(i => r[i] = perfil(i)); return r; }
+      profiles: async ids => { const r = {}; ids.forEach(i => r[i] = perfil(i)); return r; },
+      membros: () => membros.map(m => ({ id: m.email.toLowerCase(), nome: m.nome }))
     };
   }
 
@@ -462,12 +474,12 @@ window.HubSupabase = (() => {
 <script>
 (() => {
 'use strict';
-const COLS = ['clientes','negocios','orcamentos','faturamento','produtos','despesas','projetos'];
-const state = {clientes:[],negocios:[],orcamentos:[],faturamento:[],produtos:[],despesas:[],projetos:[]};
+const COLS = ['clientes','negocios','orcamentos','faturamento','produtos','despesas','projetos','tarefas'];
+const state = {clientes:[],negocios:[],orcamentos:[],faturamento:[],produtos:[],despesas:[],projetos:[],tarefas:[]};
 const loaded = {};
 let db = null, downloads = null, canWrite = true, dbMissing = false, adminApi = null;
 let view = 'painel';
-const ui = {busca:'', mostrarFechados:false, ano:new Date().getFullYear(), mes:null, orcStatus:'todos', despTipo:'todos', projStatus:'ativos'};
+const ui = {busca:'', mostrarFechados:false, ano:new Date().getFullYear(), mes:null, orcStatus:'todos', despTipo:'todos', projStatus:'ativos', tarefaPessoa:'todas', tarefaBusca:'', tarefaConcluidasTodas:false};
 
 const ETAPAS = [
   {id:'lead', nome:'Lead'},
@@ -615,7 +627,7 @@ function verificarConflito(col){
   }
 }
 const iniciais = n => (n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0].toUpperCase()).join('');
-const AREA_NOME = {painel:'Painel', clientes:'Clientes', negocios:'Negócios', orcamentos:'Orçamentos', faturamento:'Faturamento', despesas:'Despesas', produtos:'Produtos', projetos:'Projetos'};
+const AREA_NOME = {painel:'Painel', clientes:'Clientes', negocios:'Negócios', orcamentos:'Orçamentos', faturamento:'Faturamento', despesas:'Despesas', produtos:'Produtos', projetos:'Projetos', tarefas:'Tarefas', equipe:'Equipe'};
 async function desenharOnline(peers){
   const el = $('#online'); if (!el) return;
   const porPessoa = new Map();
@@ -635,11 +647,11 @@ async function desenharOnline(peers){
 /* ---------- navegação ---------- */
 const AREAS = [
   ['painel','Painel',null],['clientes','Clientes','clientes'],['negocios','Negócios e funil','negocios'],
-  ['orcamentos','Orçamentos','orcamentos'],['projetos','Projetos','projetos'],['faturamento','Faturamento','faturamento'],['despesas','Despesas e investimentos','despesas'],['produtos','Produtos','produtos']
+  ['orcamentos','Orçamentos','orcamentos'],['projetos','Projetos','projetos'],['tarefas','Tarefas','tarefas'],['faturamento','Faturamento','faturamento'],['despesas','Despesas e investimentos','despesas'],['produtos','Produtos','produtos']
 ];
 function renderNav(){
   $('#nav').innerHTML = AREAS.map(([id,nome,col])=>{
-    const c = col==='negocios' ? state.negocios.filter(n=>ABERTAS.includes(n.etapa)).length : col==='projetos' ? state.projetos.filter(p=>p.status!=='entregue').length : col ? state[col].length : '';
+    const c = col==='negocios' ? state.negocios.filter(n=>ABERTAS.includes(n.etapa)).length : col==='projetos' ? state.projetos.filter(p=>p.status!=='entregue').length : col==='tarefas' ? state.tarefas.filter(t=>t.coluna!=='concluido' && t.responsavel===eu.id).length : col ? state[col].length : '';
     return `<button data-go="${id}" aria-current="${view===id}">${nome}<span class="count">${c===''?'':c}</span></button>`;
   }).join('');
 }
@@ -652,7 +664,7 @@ function render(){
   const el = $('#view');
   const banner = dbMissing ? `<div class="banner"><b>Os dados não carregaram.</b> Verifique a conexão com a internet e recarregue a página. Se continuar, saia e entre de novo com seu e-mail e senha.</div>`
     : !canWrite ? `<div class="banner">Você está vendo o Hub Comercial em modo leitura. Para cadastrar e editar, peça para incluir seu e-mail na equipe do Hub.</div>` : '';
-  el.innerHTML = banner + (({painel,clientes:vClientes,negocios:vNegocios,orcamentos:vOrcamentos,faturamento:vFaturamento,despesas:vDespesas,projetos:vProjetos,produtos:vProdutos,equipe:vEquipe}[view]) || painel)();
+  el.innerHTML = banner + (({painel,clientes:vClientes,negocios:vNegocios,orcamentos:vOrcamentos,faturamento:vFaturamento,despesas:vDespesas,projetos:vProjetos,tarefas:vTarefas,produtos:vProdutos,equipe:vEquipe}[view]) || painel)();
 }
 const podeAdd = (acao, rot) => canWrite && !dbMissing ? `<button class="btn primary" data-act="${acao}">${rot}</button>` : '';
 
@@ -1070,6 +1082,100 @@ function formDespesa(d={tipo:'despesa'}){
     });
 }
 
+/* ---------- Tarefas: Kanban da equipe ---------- */
+const COLUNAS_TAREFA = [
+  {id:'a_fazer', nome:'A fazer'},
+  {id:'fazendo', nome:'Fazendo'},
+  {id:'revisao', nome:'Em revisão'},
+  {id:'concluido', nome:'Concluído'}
+];
+const PRIORIDADES = {alta:['Alta','bad'], media:['Média','warn'], baixa:['Baixa','']};
+const PESO_PRIORIDADE = {alta:0, media:1, baixa:2};
+const membrosEquipe = () => (userApi && userApi.membros) ? userApi.membros() : [];
+const nomeMembro = id => (membrosEquipe().find(m=>m.id===id)||{}).nome || '';
+function ordenarTarefas(a,b){
+  return (PESO_PRIORIDADE[a.prioridade]??1)-(PESO_PRIORIDADE[b.prioridade]??1) || (a.prazo||'9999').localeCompare(b.prazo||'9999') || (a.criadoEm||'').localeCompare(b.criadoEm||'');
+}
+function vTarefas(){
+  const h = hoje(), q = ui.tarefaBusca.toLowerCase(), p = ui.tarefaPessoa;
+  const membros = membrosEquipe();
+  const filtradas = state.tarefas.filter(t =>
+    (p==='todas' || (p==='minhas' ? t.responsavel===eu.id : p==='sem' ? !t.responsavel : t.responsavel===p)) &&
+    (!q || [t.titulo, t.descricao, nomeCliente(t.clienteId), byId('projetos',t.projetoId)?.titulo].join(' ').toLowerCase().includes(q)));
+  const atrasadas = state.tarefas.filter(t=>t.coluna!=='concluido' && t.prazo && t.prazo<h).length;
+  const minhas = state.tarefas.filter(t=>t.coluna!=='concluido' && t.responsavel===eu.id).length;
+  const filtros = [['todas','Todas'],['minhas','Minhas'],...membros.filter(m=>m.id!==eu.id).map(m=>[m.id, m.nome.split(' ')[0]]),['sem','Sem responsável']];
+  return `<div class="head"><div><h1>Tarefas da equipe</h1><p>${minhas} tarefa${minhas===1?'':'s'} com você${atrasadas?` · <b style="color:var(--bad)">${atrasadas} atrasada${atrasadas===1?'':'s'}</b>`:''}. Arraste um cartão para mudar de coluna.</p></div>
+    <div class="tools"><input class="search" id="tbusca" type="search" placeholder="Buscar tarefa, cliente ou projeto" value="${esc(ui.tarefaBusca)}">${podeAdd('novaTarefa','Nova tarefa')}</div></div>
+  <div class="seg" role="group" aria-label="Filtrar por pessoa" style="margin-bottom:14px;flex-wrap:wrap">${filtros.map(([k,r])=>`<button data-tpessoa="${esc(k)}" aria-pressed="${p===k}">${esc(r)}</button>`).join('')}</div>
+  ${!state.tarefas.length ? `<div class="empty" style="margin-bottom:14px"><b>Nenhuma tarefa ainda</b>Crie as tarefas da semana, escolha quem é o responsável e o prazo. Cada pessoa filtra pelas suas em "Minhas".${canWrite&&!dbMissing?'<br><button class="btn primary" data-act="novaTarefa">Criar a primeira tarefa</button>':''}</div>`:''}
+  <div class="board tboard">${COLUNAS_TAREFA.map(c=>{
+    let ts = filtradas.filter(t=>(t.coluna||'a_fazer')===c.id);
+    let escondidas = 0;
+    if (c.id==='concluido'){ ts.sort((a,b)=>(b.concluidaEm||'').localeCompare(a.concluidaEm||'')); if(!ui.tarefaConcluidasTodas && ts.length>12){ escondidas=ts.length-12; ts=ts.slice(0,12); } }
+    else ts.sort(ordenarTarefas);
+    return `<section class="col tcol ${c.id}" data-coluna="${c.id}"><div class="col-h"><b>${c.nome} <span class="num">${filtradas.filter(t=>(t.coluna||'a_fazer')===c.id).length}</span></b>${c.id!=='concluido'&&canWrite&&!dbMissing?`<button class="btn ghost" data-act="novaTarefa" data-coluna="${c.id}" aria-label="Nova tarefa em ${c.nome}" style="padding:0 6px">+</button>`:''}</div>
+      ${ts.map(t=>{ const atr = t.coluna!=='concluido' && t.prazo && t.prazo<h, hojeV = t.prazo===h; const [pr,pcls]=PRIORIDADES[t.prioridade]||PRIORIDADES.media;
+        const resp = nomeMembro(t.responsavel); const vinc = t.projetoId ? byId('projetos',t.projetoId)?.titulo : t.clienteId ? nomeCliente(t.clienteId) : '';
+        const feitos = (t.checklist||[]).filter(i=>i.feito).length, totalCk = (t.checklist||[]).length;
+        return `<article class="card tcard p-${t.prioridade||'media'}" draggable="${canWrite}" data-id="${t.id}" data-open="tarefa:${t.id}" tabindex="0">
+          <span class="t">${esc(t.titulo)}</span>
+          ${vinc?`<span class="sub">${esc(vinc)}</span>`:''}
+          <span class="m"><span>${t.prioridade&&t.prioridade!=='media'?`<span class="pill ${pcls}">${pr}</span> `:''}${totalCk?`<span class="sub">☑ ${feitos}/${totalCk}</span>`:''}</span><span class="${atr?'late':''}" style="${hojeV?'color:var(--warn);font-weight:600':''}">${t.prazo?(atr?'atrasada · ':hojeV?'hoje · ':'')+dataBR(t.prazo).slice(0,5):''}</span></span>
+          ${resp?`<span class="tresp"><i class="av mini">${esc(iniciais(resp))}</i>${esc(resp.split(' ')[0])}</span>`:'<span class="sub">sem responsável</span>'}
+        </article>`; }).join('')}
+      ${escondidas?`<button class="btn ghost" data-act="verConcluidas">Mostrar mais ${escondidas}</button>`:''}
+      ${c.id==='concluido'&&ui.tarefaConcluidasTodas&&filtradas.filter(t=>t.coluna==='concluido').length>12?`<button class="btn ghost" data-act="verConcluidas">Mostrar só as recentes</button>`:''}
+    </section>`; }).join('')}</div>`;
+}
+async function moverTarefa(id, coluna){
+  const t = byId('tarefas', id); if(!t || (t.coluna||'a_fazer')===coluna) return;
+  const d = {...t, coluna}; delete d.id;
+  if (coluna==='concluido') d.concluidaEm = new Date().toISOString(); else delete d.concluidaEm;
+  if (await salvar('tarefas', id, d)!==null) toast(coluna==='concluido' ? 'Tarefa concluída' : 'Movida para '+COLUNAS_TAREFA.find(c=>c.id===coluna).nome);
+}
+function formTarefa(t={coluna:'a_fazer'}){
+  gavetaReg = {col:'tarefas', reg:t};
+  const novo = !t.id;
+  const checklist = (t.checklist||[]).map(i=>({...i}));
+  const membros = membrosEquipe();
+  const projs = state.projetos.filter(p=>p.status!=='entregue' || p.id===t.projetoId);
+  abrirGaveta(novo?'Nova tarefa':t.titulo, `<div class="fields">
+      ${campo('O que precisa ser feito', inp('titulo', t.titulo, 'placeholder="Ex.: Enviar proposta revisada para a distribuidora"'), true)}
+      ${campo('Coluna', sel('coluna', COLUNAS_TAREFA.map(c=>[c.id,c.nome]), t.coluna||'a_fazer'))}
+      ${campo('Responsável', sel('responsavel', [['','Sem responsável'],...membros.map(m=>[m.id, m.nome+(m.id===eu.id?' (você)':'')])], t.responsavel ?? (novo?eu.id:'')))}
+      ${campo('Prazo', inp('prazo', t.prazo, 'type="date"'))}
+      ${campo('Prioridade', sel('prioridade', Object.entries(PRIORIDADES).map(([k,v])=>[k,v[0]]), t.prioridade||'media'))}
+      ${campo('Cliente', sel('clienteId', [['','Nenhum'],...[...state.clientes].sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt')).map(c=>[c.id,c.nome])], t.clienteId))}
+      ${campo('Projeto', sel('projetoId', [['','Nenhum'],...projs.map(p=>[p.id, p.titulo+' · '+nomeCliente(p.clienteId)])], t.projetoId))}
+      ${campo('Detalhes', `<textarea name="descricao" id="f-descricao" placeholder="Contexto, links, o que é preciso para considerar pronta…">${esc(t.descricao||'')}</textarea>`, true)}
+    </div>
+    <div><h2 style="margin-bottom:6px">Checklist</h2><div id="ckBox" class="ck"></div>
+      <div style="display:flex;gap:8px;margin-top:8px"><input id="ckNovo" class="search" style="flex:1;width:auto" placeholder="Adicionar item e apertar Enter"><button class="btn" type="button" id="ckAdd">Adicionar</button></div></div>`,
+    `${bSalvar()}${!novo&&t.coluna!=='concluido'&&canWrite?'<button class="btn" data-concluir>Concluir</button>':''}<span class="sp"></span>${!novo&&canWrite?'<button class="btn danger" data-excluir>Excluir</button>':''}`,
+    (f,fechar)=>{
+      const L=$('#layer'), box=$('#ckBox');
+      const desenha = ()=>{ box.innerHTML = checklist.length ? checklist.map((i,k)=>`<label class="ck-i"><input type="checkbox" data-ck="${k}" ${i.feito?'checked':''}><span style="${i.feito?'text-decoration:line-through;color:var(--muted)':''}">${esc(i.texto)}</span><button type="button" class="btn ghost" data-ckrm="${k}" aria-label="Remover item" style="padding:0 6px;margin-left:auto">×</button></label>`).join('') : '<p class="sub" style="margin:0">Sem itens. Use para quebrar a tarefa em passos.</p>'; };
+      const add = ()=>{ const v=$('#ckNovo').value.trim(); if(!v) return; checklist.push({texto:v, feito:false}); $('#ckNovo').value=''; desenha(); $('#ckNovo').focus(); };
+      $('#ckAdd').addEventListener('click', add);
+      $('#ckNovo').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); add(); } });
+      box.addEventListener('change', e=>{ const k=e.target.dataset.ck; if(k!==undefined){ checklist[k].feito=e.target.checked; desenha(); } });
+      box.addEventListener('click', e=>{ const b=e.target.closest('[data-ckrm]'); if(b){ e.preventDefault(); checklist.splice(Number(b.dataset.ckrm),1); desenha(); } });
+      desenha();
+      f.elements.projetoId.addEventListener('change', ()=>{ const p=byId('projetos', f.elements.projetoId.value); if(p && !f.elements.clienteId.value) f.elements.clienteId.value=p.clienteId; });
+      const coletar = (colunaForcada)=>{
+        const titulo=fv(f,'titulo'); if(!titulo){ toast('Descreva o que precisa ser feito.'); return null; }
+        const coluna = colunaForcada || fv(f,'coluna');
+        const d = {titulo, coluna, responsavel:fv(f,'responsavel'), prazo:fv(f,'prazo'), prioridade:fv(f,'prioridade'), clienteId:fv(f,'clienteId'), projetoId:fv(f,'projetoId'), descricao:fv(f,'descricao'), checklist, criadoEm:t.criadoEm||new Date().toISOString(), ...(t.criadoPor?{criadoPor:t.criadoPor}:{})};
+        if (coluna==='concluido') d.concluidaEm = (t.coluna==='concluido' && t.concluidaEm) || new Date().toISOString();
+        return d;
+      };
+      $('[data-salvar]',L)?.addEventListener('click', async()=>{ const d=coletar(); if(!d) return; if(await salvar('tarefas', t.id, d)!==null){ toast(novo?'Tarefa criada':'Tarefa salva'); fechar(); } });
+      $('[data-concluir]',L)?.addEventListener('click', async()=>{ const d=coletar('concluido'); if(!d) return; if(await salvar('tarefas', t.id, d)!==null){ toast('Tarefa concluída'); fechar(); } });
+      $('[data-excluir]',L)?.addEventListener('click', async()=>{ if(await excluir('tarefas', t.id)){ toast('Tarefa excluída'); fechar(); } });
+    });
+}
+
 /* ---------- Equipe: gestão de usuários (só administradores) ---------- */
 const equipe = {lista:null, fora:[], erro:'', carregando:false};
 async function carregarEquipe(forcar){
@@ -1465,6 +1571,7 @@ function abrir(ref){
   if (tipo==='produto') formProduto(byId('produtos',id));
   if (tipo==='desp') formDespesa(byId('despesas',id));
   if (tipo==='projeto') formProjeto(byId('projetos',id));
+  if (tipo==='tarefa') formTarefa(byId('tarefas',id));
   if (tipo==='usuario') formUsuario((equipe.lista||[]).find(u=>u.email===id));
 }
 document.addEventListener('click', async e=>{
@@ -1475,6 +1582,7 @@ document.addEventListener('click', async e=>{
   if (pg){ e.stopPropagation(); const x=byId('despesas',pg.dataset.pagar); if(x){ const d={...x,status:'pago',pagoEm:hoje()}; delete d.id; if(await salvar('despesas', x.id, d)!==null) toast('Despesa marcada como paga'); } return; }
   const df = e.target.closest('[data-despf]'); if (df){ ui.despTipo=df.dataset.despf; render(); return; }
   const pf = e.target.closest('[data-projf]'); if (pf){ ui.projStatus=pf.dataset.projf; render(); return; }
+  const tp = e.target.closest('[data-tpessoa]'); if (tp){ ui.tarefaPessoa=tp.dataset.tpessoa; render(); return; }
   const pn = e.target.closest('[data-projneg]'); if (pn){ const n=byId('negocios',pn.dataset.projneg); if(n) formProjeto(projetoDoNegocio(n)); return; }
   const g = e.target.closest('main [data-go]'); if (g){ go(g.dataset.go); return; }
   const a = e.target.closest('[data-act]');
@@ -1487,6 +1595,8 @@ document.addEventListener('click', async e=>{
     if (act==='novoProduto') formProduto();
     if (act==='novaDespesa') formDespesa({tipo:'despesa'});
     if (act==='novoProjeto') formProjeto({});
+    if (act==='novaTarefa') formTarefa({coluna:a.dataset.coluna||'a_fazer'});
+    if (act==='verConcluidas'){ ui.tarefaConcluidasTodas=!ui.tarefaConcluidasTodas; render(); }
     if (act==='novoUsuario') formUsuario();
     if (act==='recarregarEquipe') carregarEquipe(true);
     if (act==='novoInvest') formDespesa({tipo:'investimento'});
@@ -1500,13 +1610,13 @@ document.addEventListener('click', async e=>{
   const of = e.target.closest('[data-orcf]'); if (of){ ui.orcStatus=of.dataset.orcf; render(); }
 });
 document.addEventListener('keydown', e=>{ if (e.key==='Enter' && e.target.matches('[data-open],[data-mes]')) e.target.click(); });
-$('#view').addEventListener('input', e=>{ if (e.target.id==='busca'){ ui.busca=e.target.value; const pos=e.target.selectionStart; render(); const b=$('#busca'); b.focus(); b.setSelectionRange(pos,pos); } });
+$('#view').addEventListener('input', e=>{ if (e.target.id==='tbusca'){ ui.tarefaBusca=e.target.value; const pos=e.target.selectionStart; render(); const b=$('#tbusca'); b.focus(); b.setSelectionRange(pos,pos); return; } if (e.target.id==='busca'){ ui.busca=e.target.value; const pos=e.target.selectionStart; render(); const b=$('#busca'); b.focus(); b.setSelectionRange(pos,pos); } });
 $('#view').addEventListener('change', e=>{ if (e.target.id==='fechados'){ ui.mostrarFechados=e.target.checked; render(); } if (e.target.id==='ano'){ ui.ano=Number(e.target.value); ui.mes=null; render(); } });
 // arrastar cartões entre etapas
 $('#view').addEventListener('dragstart', e=>{ const c=e.target.closest('.card'); if(c){ e.dataTransfer.setData('text/plain', c.dataset.id); e.dataTransfer.effectAllowed='move'; } });
 $('#view').addEventListener('dragover', e=>{ const col=e.target.closest('.col'); if(col){ e.preventDefault(); $$('.col.over').forEach(x=>x!==col&&x.classList.remove('over')); col.classList.add('over'); } });
 $('#view').addEventListener('dragleave', e=>{ const col=e.target.closest('.col'); if(col && !col.contains(e.relatedTarget)) col.classList.remove('over'); });
-$('#view').addEventListener('drop', e=>{ const col=e.target.closest('.col'); if(!col) return; e.preventDefault(); col.classList.remove('over'); const id=e.dataTransfer.getData('text/plain'); if(id && canWrite) moverEtapa(id, col.dataset.etapa); });
+$('#view').addEventListener('drop', e=>{ const col=e.target.closest('.col'); if(!col) return; e.preventDefault(); col.classList.remove('over'); const id=e.dataTransfer.getData('text/plain'); if(!id || !canWrite) return; if (col.dataset.coluna) moverTarefa(id, col.dataset.coluna); else moverEtapa(id, col.dataset.etapa); });
 
 async function baixarCSV(){
   const ano=ui.ano, linhas=[['Data','Cliente','Descrição','Tipo','Situação','Valor','Nota fiscal']];

@@ -30,7 +30,7 @@ Depois convide (ou remova) o usuário em **Authentication → Users**.
 
 ## Tabelas
 
-`hub_clientes`, `hub_negocios`, `hub_orcamentos`, `hub_faturamento`, `hub_produtos`, `hub_despesas` e `hub_projetos`. Cada linha tem `id`, `dados` (o registro em JSON), `criado_em`, `atualizado_em` e `atualizado_por`.
+`hub_clientes`, `hub_negocios`, `hub_orcamentos`, `hub_faturamento`, `hub_produtos`, `hub_despesas`, `hub_projetos` e `hub_tarefas` (Kanban da equipe; em bancos já criados, rode `supabase/tarefas.sql`). Cada linha tem `id`, `dados` (o registro em JSON), `criado_em`, `atualizado_em` e `atualizado_por`.
 
 ## Painel de usuários (aba Equipe)
 
