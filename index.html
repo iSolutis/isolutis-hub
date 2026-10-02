@@ -293,7 +293,7 @@ window.HubSupabase = (() => {
   const $ = id => document.getElementById(id);
   const msg = (t, erro) => { const m = $('lgMsg'); m.textContent = t || ''; m.classList.toggle('erro', !!erro); };
   const novoId = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
-  const converter = e => ({ code: e && e.code === '42501' ? 'invalid_argument' : 'unavailable', message: (e && e.message) || 'erro' });
+  const converter = e => ({ code: e && e.code === '42501' ? 'invalid_argument' : e && e.code === 'PGRST205' ? 'tabela_ausente' : 'unavailable', message: (e && e.message) || 'erro' });
 
   function mostrar(qual){ $('login').hidden = false; ['lgEntrar','lgNova','lgFora'].forEach(id => $(id).hidden = id !== qual); }
 
@@ -1648,7 +1648,7 @@ render();
   sync.className='sync on'; sync.innerHTML='<span class="dot"></span>Dados da equipe sincronizados';
   for (const c of COLS){
     db.collection(c).limit(1000).onSnapshot(s=>{ state[c]=s.docs.map(x=>({...x.data(), id:x.id})); loaded[c]=true; render(); verificarConflito(c); },
-      err=>{ console.error(c, err); sync.className='sync off'; sync.innerHTML='<span class="dot"></span>Conexão interrompida. Recarregue a página.'; });
+      err=>{ console.error(c, err); sync.className='sync off'; sync.innerHTML = err && err.code==='tabela_ausente' ? '<span class="dot"></span>Falta criar a tabela "'+esc(AREA_NOME[c]||c)+'" no Supabase. O resto do Hub funciona normalmente.' : '<span class="dot"></span>Conexão interrompida. Recarregue a página.'; });
   }
 })();
 })();
