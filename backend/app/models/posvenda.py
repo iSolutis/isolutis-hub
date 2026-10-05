@@ -6,11 +6,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.constantes import StatusEtapa
 from app.domain.projeto import progresso
-from app.models.base import Base, ComAuditoria
+from app.models.base import Base, ComAuditoria, ComEmpresa
 from app.models.parceiro import Parceiro
 
 
-class Projeto(ComAuditoria, Base):
+class Projeto(ComAuditoria, ComEmpresa, Base):
     __tablename__ = "projetos"
 
     titulo: Mapped[str]
@@ -40,7 +40,7 @@ class Projeto(ComAuditoria, Base):
         return progresso(StatusEtapa(e.status) for e in self.etapas)
 
 
-class ProjetoEtapa(ComAuditoria, Base):
+class ProjetoEtapa(ComAuditoria, ComEmpresa, Base):
     __tablename__ = "projeto_etapas"
 
     projeto_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projetos.id"))
@@ -56,7 +56,7 @@ class ProjetoEtapa(ComAuditoria, Base):
     projeto: Mapped[Projeto] = relationship(back_populates="etapas", lazy="raise")
 
 
-class Tarefa(ComAuditoria, Base):
+class Tarefa(ComAuditoria, ComEmpresa, Base):
     __tablename__ = "tarefas"
 
     titulo: Mapped[str]
@@ -80,7 +80,7 @@ class Tarefa(ComAuditoria, Base):
     )
 
 
-class TarefaChecklist(ComAuditoria, Base):
+class TarefaChecklist(ComAuditoria, ComEmpresa, Base):
     __tablename__ = "tarefa_checklist"
 
     tarefa_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tarefas.id"))

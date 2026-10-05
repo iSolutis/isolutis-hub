@@ -22,7 +22,7 @@ from typing import Any
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import SessionLocal
+from app.db import SessionLocal, definir_empresa_da_transacao, definir_usuario_da_transacao
 from app.models import (
     CategoriaDespesa,
     Despesa,
@@ -41,14 +41,15 @@ from app.models import (
     Tarefa,
     TarefaChecklist,
     Usuario,
+    UsuarioEmpresa,
 )  # fmt: skip
 from app.scripts import legado as lg
 from app.services.parceiros import empresa_atual
 
 
 class Importador:
-    def __init__(self, sessao: AsyncSession, origem: lg.Origem) -> None:
-        self.sessao, self.origem, self.rel = sessao, origem, lg.Relatorio()
+    def __init__(self, sessao: AsyncSession, origem: lg.Origem, empresa_id: uuid.UUID) -> None:
+        self.sessao, self.origem, self.empresa_id, self.rel = sessao, origem, empresa_id, lg.Relatorio()
         self.ids: dict[str, dict[str, uuid.UUID]] = defaultdict(dict)  # colecao -> id antigo -> id novo
         self.usuarios_por_email: dict[str, Usuario] = {}
         self.categorias: dict[str, CategoriaDespesa] = {}
@@ -133,11 +134,18 @@ class Importador:
             existente = self.usuarios_por_email.get(email)
             if existente:
                 await self._registrar("hub_membros", linha.id, existente.id)
-                continue
-            nome = lg.texto(linha.dados.get("nome")) or email
-            u = Usuario(email=email, nome=nome, admin=bool(linha.dados.get("admin")), senha_hash=None)
-            await self._adicionar("hub_membros", linha, u)
-            self.usuarios_por_email[email] = u
+                usuario = existente
+                papel = "admin" if bool(linha.dados.get("admin")) else "membro"
+            else:
+                nome = lg.texto(linha.dados.get("nome")) or email
+                usuario = Usuario(email=email, nome=nome, admin=False, senha_hash=None)
+                await self._adicionar("hub_membros", linha, usuario)
+                self.usuarios_por_email[email] = usuario
+                papel = "admin" if bool(linha.dados.get("admin")) else "membro"
+            usuario.admin = False
+            membership = await self.sessao.get(UsuarioEmpresa, (self.empresa_id, usuario.id))
+            if membership is None:
+                self.sessao.add(UsuarioEmpresa(empresa_id=self.empresa_id, usuario_id=usuario.id, papel=papel, ativo=usuario.ativo))
 
     async def _indice_de_municipios(self) -> dict[tuple[str, str | None], list[uuid.UUID]]:
         """(nome sem acento, UF) e (nome sem acento, None) -> ids; usado para casar a cidade em texto livre."""
@@ -184,7 +192,7 @@ class Importador:
             if cidade and municipio_id is None:
                 campos["obs"] = lg.acrescentar_obs(campos["obs"], f"[cidade informada: {cidade}]")
             parceiro = Parceiro(
-                company_id=empresa.id, municipio_id=municipio_id, papeis=[ParceiroPapel(papel="cliente")],
+                empresa_id=empresa.id, municipio_id=municipio_id, papeis=[ParceiroPapel(papel="cliente")],
                 **campos, **self._carimbos(linha),
             )  # fmt: skip
             await self._adicionar("hub_clientes", linha, parceiro)
@@ -376,9 +384,18 @@ class Importador:
             await self._adicionar("hub_tarefas", linha, tarefa)
 
 
-async def executar(origem: lg.Origem, simular: bool) -> lg.Relatorio:
+async def executar(origem: lg.Origem, simular: bool, empresa_id: uuid.UUID, usuario_id: uuid.UUID) -> lg.Relatorio:
     async with SessionLocal() as sessao:
-        rel = await Importador(sessao, origem).importar()
+        usuario = await sessao.get(Usuario, usuario_id)
+        if usuario is None or not usuario.ativo:
+            raise SystemExit("Usuário importador inexistente ou inativo.")
+        await definir_usuario_da_transacao(sessao, usuario_id)
+        associacao = await sessao.get(UsuarioEmpresa, (empresa_id, usuario_id))
+        if associacao is None or not associacao.ativo or associacao.papel != "admin":
+            raise SystemExit("O usuário importador precisa ser administrador ativo da empresa informada.")
+        await definir_empresa_da_transacao(sessao, empresa_id)
+        sessao.info["empresa_id"] = empresa_id
+        rel = await Importador(sessao, origem, empresa_id).importar()
         if simular:
             await sessao.rollback()
         else:
@@ -402,9 +419,11 @@ def main() -> None:
     fonte.add_argument("--json-dir", type=Path, help="pasta com hub_<tabela>.json")
     fonte.add_argument("--origem-url", help="connection string (somente leitura) do Postgres do Supabase")
     ap.add_argument("--simular", action="store_true", help="executa e desfaz, só mostrando o relatório")
+    ap.add_argument("--empresa-id", required=True, type=uuid.UUID, help="UUID da empresa proprietária dos registros importados")
+    ap.add_argument("--usuario-id", required=True, type=uuid.UUID, help="UUID do administrador que autoriza a importação")
     args = ap.parse_args()
     origem = lg.OrigemJson(args.json_dir) if args.json_dir else lg.OrigemPostgres(args.origem_url)
-    rel = asyncio.run(executar(origem, args.simular))
+    rel = asyncio.run(executar(origem, args.simular, args.empresa_id, args.usuario_id))
     imprimir(rel, args.simular)
     sys.exit(0)
 

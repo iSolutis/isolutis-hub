@@ -31,7 +31,7 @@ from app.services.parceiros import empresa_atual  # noqa: F401  (reexportado par
 
 async def _obter(sessao: AsyncSession, modelo, id_: UUID, empresa: Empresa, nome: str):  # noqa: ANN001, ANN202
     obj = await sessao.get(modelo, id_)
-    if obj is None or getattr(obj, "company_id", empresa.id) != empresa.id:
+    if obj is None or getattr(obj, "empresa_id", empresa.id) != empresa.id:
         raise NaoEncontrado(nome)
     return obj
 
@@ -56,7 +56,7 @@ async def listar_instituicoes(sessao: AsyncSession, busca: str | None) -> list[I
 
 # ============================================================================= plano de contas
 async def listar_plano(sessao: AsyncSession, empresa: Empresa) -> list[dict]:
-    contas = list((await sessao.scalars(select(PlanoConta).where(PlanoConta.company_id == empresa.id))).all())
+    contas = list((await sessao.scalars(select(PlanoConta).where(PlanoConta.empresa_id == empresa.id))).all())
     com_filhas = {c.plano_pai_id for c in contas if c.plano_pai_id}
     com_titulos = set((await sessao.scalars(select(TituloFinanceiro.plano_conta_id).distinct())).all())
     contas.sort(key=lambda c: regras.chave_de_ordenacao(c.codigo))
@@ -73,7 +73,7 @@ async def proximo_codigo(sessao: AsyncSession, empresa: Empresa, pai_id: UUID | 
     if pai_id is None:
         irmaos = (
             await sessao.scalars(
-                select(PlanoConta.codigo).where(PlanoConta.company_id == empresa.id, PlanoConta.plano_pai_id.is_(None))
+                select(PlanoConta.codigo).where(PlanoConta.empresa_id == empresa.id, PlanoConta.plano_pai_id.is_(None))
             )
         ).all()
         return regras.proximo_codigo(list(irmaos), None)
@@ -107,7 +107,7 @@ async def _validar_conta(sessao: AsyncSession, empresa: Empresa, d: PlanoContaEn
 async def criar_conta(sessao: AsyncSession, empresa: Empresa, d: PlanoContaEntrada) -> PlanoConta:
     nivel, natureza = await _validar_conta(sessao, empresa, d)
     conta = PlanoConta(
-        company_id=empresa.id, plano_pai_id=d.plano_pai_id, codigo=d.codigo.strip(), nome=d.nome.strip(),
+        empresa_id=empresa.id, plano_pai_id=d.plano_pai_id, codigo=d.codigo.strip(), nome=d.nome.strip(),
         tipo_conta=d.tipo_conta, natureza=natureza, nivel=nivel,
     )  # fmt: skip
     sessao.add(conta)
@@ -171,7 +171,7 @@ def _linha_conta(c: ContaBancaria) -> dict:
 async def listar_contas_bancarias(sessao: AsyncSession, empresa: Empresa) -> list[dict]:
     consulta = (
         select(ContaBancaria).options(joinedload(ContaBancaria.instituicao))
-        .where(ContaBancaria.company_id == empresa.id).order_by(ContaBancaria.nome)
+        .where(ContaBancaria.empresa_id == empresa.id).order_by(ContaBancaria.nome)
     )  # fmt: skip
     return [_linha_conta(c) for c in (await sessao.scalars(consulta)).all()]
 
@@ -184,7 +184,7 @@ async def _conta_completa(sessao: AsyncSession, id_: UUID) -> dict:
 async def criar_conta_bancaria(sessao: AsyncSession, empresa: Empresa, d: ContaBancariaEntrada) -> dict:
     await _exigir_instituicao(sessao, d.instituicao_financeira_id)
     conta = ContaBancaria(
-        company_id=empresa.id,
+        empresa_id=empresa.id,
         instituicao_financeira_id=d.instituicao_financeira_id,
         nome=d.nome.strip(),
         saldo_inicial=d.saldo_inicial,
@@ -246,7 +246,7 @@ def _consulta_titulos(empresa: Empresa) -> Select:
     return (
         select(TituloFinanceiro)
         .options(joinedload(TituloFinanceiro.conta_bancaria), joinedload(TituloFinanceiro.plano_conta), joinedload(TituloFinanceiro.parceiro))
-        .where(TituloFinanceiro.company_id == empresa.id)
+        .where(TituloFinanceiro.empresa_id == empresa.id)
     )  # fmt: skip
 
 
@@ -259,7 +259,7 @@ async def listar_titulos(
     ate: date | None,
     busca: str | None,
 ) -> list[dict]:
-    consulta = _consulta_titulos(empresa).order_by(TituloFinanceiro.data_vencimento, TituloFinanceiro.created_at)
+    consulta = _consulta_titulos(empresa).order_by(TituloFinanceiro.data_vencimento, TituloFinanceiro.created_at, TituloFinanceiro.id)
     if tipo:
         consulta = consulta.where(TituloFinanceiro.tipo_conta == tipo)
     if status:
@@ -310,7 +310,7 @@ async def _campos_validados(sessao: AsyncSession, empresa: Empresa, d: TituloEnt
 
 async def criar_titulo(sessao: AsyncSession, empresa: Empresa, d: TituloEntrada) -> dict:
     campos = await _campos_validados(sessao, empresa, d)
-    titulo = TituloFinanceiro(company_id=empresa.id, **campos)
+    titulo = TituloFinanceiro(empresa_id=empresa.id, **campos)
     sessao.add(titulo)
     await confirmar(sessao)
     return await _titulo_completo(sessao, empresa, titulo.id)
@@ -341,9 +341,10 @@ async def fluxo_de_caixa(sessao: AsyncSession, empresa: Empresa, ano: int) -> di
 
     async def somar(coluna_data, valor, tipo: str, status: str) -> dict[int, Decimal]:  # noqa: ANN001
         mes = extract("month", coluna_data)
+        inicio, fim = date(ano, 1, 1), date(ano + 1, 1, 1)
         linhas = await sessao.execute(
             select(mes, func.coalesce(func.sum(valor), 0))
-            .where(t.company_id == empresa.id, t.tipo_conta == tipo, t.status == status, extract("year", coluna_data) == ano)
+            .where(t.empresa_id == empresa.id, t.tipo_conta == tipo, t.status == status, coluna_data >= inicio, coluna_data < fim)
             .group_by(mes)
         )  # fmt: skip
         return {int(m): v for m, v in linhas.all()}
@@ -354,11 +355,11 @@ async def fluxo_de_caixa(sessao: AsyncSession, empresa: Empresa, ano: int) -> di
     sai_prev = await somar(t.data_vencimento, devido, "P", "A")
 
     base = await sessao.scalar(
-        select(func.coalesce(func.sum(ContaBancaria.saldo_inicial), 0)).where(ContaBancaria.company_id == empresa.id)
+        select(func.coalesce(func.sum(ContaBancaria.saldo_inicial), 0)).where(ContaBancaria.empresa_id == empresa.id)
     )
     anterior = await sessao.execute(
         select(t.tipo_conta, func.coalesce(func.sum(t.valor_quitacao), 0))
-        .where(t.company_id == empresa.id, t.status == "Q", t.data_pagamento < date(ano, 1, 1))
+        .where(t.empresa_id == empresa.id, t.status == "Q", t.data_pagamento < date(ano, 1, 1))
         .group_by(t.tipo_conta)
     )  # fmt: skip
     mov = dict(anterior.all())
@@ -376,7 +377,7 @@ async def fluxo_de_caixa(sessao: AsyncSession, empresa: Empresa, ano: int) -> di
         for coluna in (t.data_vencimento, t.data_pagamento)
         for (a,) in (
             await sessao.execute(
-                select(extract("year", coluna)).where(t.company_id == empresa.id, coluna.is_not(None)).distinct()
+                select(extract("year", coluna)).where(t.empresa_id == empresa.id, coluna.is_not(None)).distinct()
             )
         ).all()
     }

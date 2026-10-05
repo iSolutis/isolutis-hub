@@ -85,6 +85,28 @@ async function iniciarApp(usuario: Usuario): Promise<void> {
   tempoReal.presenca({ area: abaSalva(), editando: null });
 }
 
+async function selecionarEmpresa(): Promise<boolean> {
+  const empresas = await api.empresas.listar();
+  if (!empresas.length) throw new Error("Usuário sem associação ativa a uma empresa.");
+  const seletor = obrigatorio<HTMLSelectElement>("#empresaAtiva");
+  seletor.replaceChildren(...empresas.map((e) => {
+    const opcao = document.createElement("option");
+    opcao.value = e.id;
+    opcao.textContent = e.nome;
+    return opcao;
+  }));
+  const salvo = sessaoToken.empresa();
+  seletor.value = empresas.some((e) => e.id === salvo) ? salvo! : empresas[0].id;
+  sessaoToken.definirEmpresa(seletor.value);
+  const ativa = empresas.find((e) => e.id === seletor.value)!;
+  seletor.hidden = empresas.length < 2;
+  seletor.addEventListener("change", () => {
+    sessaoToken.definirEmpresa(seletor.value);
+    location.reload();
+  });
+  return ativa.papel === "admin";
+}
+
 async function principal(): Promise<void> {
   iniciarEventos();
   ligarBuscas();
@@ -109,6 +131,14 @@ async function principal(): Promise<void> {
     }
   }
   if (!usuario) usuario = await pedirLogin();
+  try {
+    usuario.admin = await selecionarEmpresa();
+  } catch (erro) {
+    console.error(erro);
+    sessaoToken.definir(null);
+    usuario = await pedirLogin("Não foi possível selecionar uma empresa para esta conta.");
+    usuario.admin = await selecionarEmpresa();
+  }
   await iniciarApp(usuario);
 }
 

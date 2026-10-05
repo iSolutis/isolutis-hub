@@ -26,7 +26,7 @@ function abrir(): void {
   const socket = new WebSocket(urlWebSocket());
   ws = socket;
   socket.onopen = () => {
-    socket.send(JSON.stringify({ tipo: "auth", token: sessaoToken.obter() }));
+    socket.send(JSON.stringify({ tipo: "auth", token: sessaoToken.obter(), empresa_id: sessaoToken.empresa() }));
     tentativas = 0;
     ouvintes?.conexao(true);
     enviarPresenca();

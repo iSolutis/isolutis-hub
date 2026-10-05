@@ -41,6 +41,14 @@ class ComAuditoria:
     atualizado_por: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), server_onupdate=FetchedValue())
     versao: Mapped[int] = mapped_column(server_default=text("1"), server_onupdate=FetchedValue())
 
+
+class ComEmpresa:
+    """Coluna de tenant nas entidades cujo ciclo de vida pertence a uma empresa."""
+
+    empresa_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), server_default=text("app_empresa_id()"), nullable=False
+    )
+
     @declared_attr.directive
     def __mapper_args__(cls) -> dict[str, object]:  # noqa: N805
         # `versao` é incrementada pelo trigger do banco; o ORM só a usa como guarda (UPDATE ... WHERE versao = :lida).

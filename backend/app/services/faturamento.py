@@ -29,10 +29,16 @@ def _consulta():
 
 
 async def listar(sessao: AsyncSession, ano: int | None = None, mes: int | None = None) -> list[LancamentoReceita]:
-    consulta = _consulta().order_by(LancamentoReceita.vencimento, LancamentoReceita.criado_em)
-    if ano:
-        consulta = consulta.where(extract("year", LancamentoReceita.vencimento) == ano)
-    if mes:
+    consulta = _consulta().order_by(LancamentoReceita.vencimento, LancamentoReceita.criado_em, LancamentoReceita.id)
+    if ano and mes:
+        inicio = date(ano, mes, 1)
+        fim = date(ano + 1, 1, 1) if mes == 12 else date(ano, mes + 1, 1)
+        consulta = consulta.where(LancamentoReceita.vencimento >= inicio, LancamentoReceita.vencimento < fim)
+    elif ano:
+        consulta = consulta.where(
+            LancamentoReceita.vencimento >= date(ano, 1, 1), LancamentoReceita.vencimento < date(ano + 1, 1, 1)
+        )
+    elif mes:
         consulta = consulta.where(extract("month", LancamentoReceita.vencimento) == mes)
     return list((await sessao.scalars(consulta)).all())
 
@@ -170,7 +176,7 @@ async def resumo(sessao: AsyncSession, ano: int) -> dict:
                 func.coalesce(func.sum(LancamentoReceita.valor).filter(LancamentoReceita.tipo == "mensal"), 0),
                 func.count(),
             )
-            .where(extract("year", LancamentoReceita.vencimento) == ano)
+            .where(LancamentoReceita.vencimento >= date(ano, 1, 1), LancamentoReceita.vencimento < date(ano + 1, 1, 1))
             .group_by(mes)
         )
     ).all()

@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     ambiente: str = Field("desenvolvimento", description="desenvolvimento | producao | teste")
     database_url: str = "postgresql+psycopg://hub:hub@localhost:5432/hub_dev"
+    migration_database_url: str | None = None
     secret_key: str = _CHAVE_DE_DESENVOLVIMENTO
     token_minutos: int = 60 * 12
     cors_origins: list[str] = ["http://localhost:5173"]

@@ -19,6 +19,7 @@ from app.models import (
     PapelParceiro,
     Parceiro,
     ParceiroPapel,
+    ParceiroTag,
     Projeto,
     Tarefa,
 )
@@ -28,10 +29,11 @@ PAPEL_CLIENTE = "cliente"
 
 
 async def empresa_atual(sessao: AsyncSession) -> Empresa:
-    """O sistema atende uma empresa só: a mais antiga cadastrada em `companies`."""
-    empresa = await sessao.scalar(select(Empresa).order_by(Empresa.created_at).limit(1))
+    """Resolve a empresa validada na dependência da requisição; scripts devem defini-la explicitamente."""
+    empresa_id = sessao.info.get("empresa_id")
+    empresa = await sessao.get(Empresa, empresa_id) if isinstance(empresa_id, UUID) else None
     if empresa is None:
-        raise RegraDeNegocio("Nenhuma empresa cadastrada.")
+        raise RegraDeNegocio("Defina uma empresa ativa antes de acessar os dados operacionais.")
     return empresa
 
 
@@ -40,11 +42,23 @@ def consulta() -> object:
 
 
 async def listar(
-    sessao: AsyncSession, empresa: Empresa, papel: str | None = None, busca: str | None = None
+    sessao: AsyncSession, empresa: Empresa, papel: str | None = None, busca: str | None = None,
+    tag_ids: Iterable[UUID] | None = None,
 ) -> list[Parceiro]:
-    q = consulta().where(Parceiro.company_id == empresa.id).order_by(Parceiro.nome)  # type: ignore[attr-defined]
+    q = consulta().where(Parceiro.empresa_id == empresa.id).order_by(Parceiro.nome)  # type: ignore[attr-defined]
     if papel:
-        q = q.where(exists().where(ParceiroPapel.parceiro_id == Parceiro.id, ParceiroPapel.papel == papel))
+        q = q.where(exists().where(
+            ParceiroPapel.empresa_id == empresa.id,
+            ParceiroPapel.parceiro_id == Parceiro.id,
+            ParceiroPapel.papel == papel,
+        ))
+    tags = set(tag_ids or ())
+    if tags:
+        q = q.where(exists().where(
+            ParceiroTag.empresa_id == empresa.id,
+            ParceiroTag.parceiro_id == Parceiro.id,
+            ParceiroTag.tag_id.in_(tags),
+        ))
     if busca:
         digitos = regras.so_digitos(busca)
         criterio = Parceiro.nome.ilike(f"%{busca.strip()}%")
@@ -55,9 +69,13 @@ async def listar(
 
 
 async def obter_completo(sessao: AsyncSession, empresa: Empresa, id_: UUID, papel: str | None = None) -> Parceiro:
-    q = consulta().where(Parceiro.id == id_, Parceiro.company_id == empresa.id)  # type: ignore[attr-defined]
+    q = consulta().where(Parceiro.id == id_, Parceiro.empresa_id == empresa.id)  # type: ignore[attr-defined]
     if papel:
-        q = q.where(exists().where(ParceiroPapel.parceiro_id == Parceiro.id, ParceiroPapel.papel == papel))
+        q = q.where(exists().where(
+            ParceiroPapel.empresa_id == empresa.id,
+            ParceiroPapel.parceiro_id == Parceiro.id,
+            ParceiroPapel.papel == papel,
+        ))
     parceiro = (await sessao.scalars(q.execution_options(populate_existing=True))).unique().first()
     if parceiro is None:
         raise NaoEncontrado("Cliente" if papel == PAPEL_CLIENTE else "Parceiro")
@@ -108,7 +126,7 @@ async def _vinculos_como_cliente(sessao: AsyncSession, id_: UUID) -> int:
 async def criar(sessao: AsyncSession, empresa: Empresa, campos: dict, papeis: Iterable[str]) -> Parceiro:
     await _validar(sessao, campos)
     codigos = await _papeis_validos(sessao, papeis)
-    parceiro = Parceiro(company_id=empresa.id, **campos, papeis=[ParceiroPapel(papel=c) for c in sorted(codigos)])
+    parceiro = Parceiro(empresa_id=empresa.id, **campos, papeis=[ParceiroPapel(papel=c) for c in sorted(codigos)])
     sessao.add(parceiro)
     await _confirmar(sessao)
     return await obter_completo(sessao, empresa, parceiro.id)

@@ -17,7 +17,7 @@ from app.models.base import Base
 
 
 class Empresa(Base):
-    __tablename__ = "companies"
+    __tablename__ = "empresa"
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
@@ -52,6 +52,9 @@ class PapelParceiro(Base):
 class ParceiroPapel(Base):
     __tablename__ = "parceiro_papel"
 
+    empresa_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=text("app_empresa_id()")
+    )
     parceiro_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("parceiro_negocio.id"), primary_key=True)
     papel: Mapped[str] = mapped_column(ForeignKey("papel_parceiro.codigo"), primary_key=True)
 
@@ -62,7 +65,7 @@ class Parceiro(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
-    company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id"))
+    empresa_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("empresa.id"))
     tipo_pessoa: Mapped[str] = mapped_column(default="PJ")
     cpf_cnpj: Mapped[str | None]
     nome: Mapped[str]

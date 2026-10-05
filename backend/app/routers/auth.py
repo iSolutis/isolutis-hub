@@ -20,7 +20,9 @@ async def login(dados: LoginEntrada, sessao: Sessao, request: Request) -> TokenS
         limitador_de_login.registrar_falha(chave)
         raise
     limitador_de_login.zerar(chave)
-    return TokenSaida(access_token=criar_token(usuario.id), usuario=UsuarioLeitura.model_validate(usuario))
+    return TokenSaida(
+        access_token=criar_token(usuario.id, usuario.versao_sessao), usuario=UsuarioLeitura.model_validate(usuario)
+    )
 
 
 @router.get("/eu", response_model=UsuarioLeitura)

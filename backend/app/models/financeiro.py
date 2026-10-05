@@ -6,12 +6,12 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, ComAuditoria
+from app.models.base import Base, ComAuditoria, ComEmpresa
 from app.models.parceiro import Parceiro
 from app.models.usuario import CategoriaDespesa, Investidor
 
 
-class LancamentoReceita(ComAuditoria, Base):
+class LancamentoReceita(ComAuditoria, ComEmpresa, Base):
     """Conta a receber/recebida (no sistema anterior: "faturamento")."""
 
     __tablename__ = "lancamentos_receita"
@@ -37,7 +37,7 @@ class LancamentoReceita(ComAuditoria, Base):
         return self.cliente.nome
 
 
-class Despesa(ComAuditoria, Base):
+class Despesa(ComAuditoria, ComEmpresa, Base):
     __tablename__ = "despesas"
 
     data: Mapped[date]
@@ -59,7 +59,7 @@ class Despesa(ComAuditoria, Base):
         return self.categoria.nome
 
 
-class Investimento(ComAuditoria, Base):
+class Investimento(ComAuditoria, ComEmpresa, Base):
     __tablename__ = "investimentos"
 
     data: Mapped[date]

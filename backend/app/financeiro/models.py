@@ -30,7 +30,7 @@ class InstituicaoFinanceira(Carimbos, Base):
 class PlanoConta(Carimbos, Base):
     __tablename__ = "plano_contas"
 
-    company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id"))
+    empresa_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("empresa.id"))
     plano_pai_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("plano_contas.id"))
     codigo: Mapped[str]
     nome: Mapped[str]
@@ -42,7 +42,7 @@ class PlanoConta(Carimbos, Base):
 class ContaBancaria(Carimbos, Base):
     __tablename__ = "conta_bancaria"
 
-    company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id"))
+    empresa_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("empresa.id"))
     instituicao_financeira_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("instituicao_financeira.id"))
     nome: Mapped[str]
     saldo_inicial: Mapped[Decimal] = mapped_column(default=Decimal("0.00"))
@@ -53,7 +53,7 @@ class ContaBancaria(Carimbos, Base):
 class TituloFinanceiro(Carimbos, Base):
     __tablename__ = "titulo_financeiro"
 
-    company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id"))
+    empresa_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("empresa.id"))
     conta_bancaria_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("conta_bancaria.id"))
     plano_conta_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("plano_contas.id"))
     parceiro_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("parceiro_negocio.id"))

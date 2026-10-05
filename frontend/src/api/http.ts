@@ -1,6 +1,7 @@
 /** Cliente HTTP único da aplicação: token, formato de erro da API e download de arquivos. */
 const BASE = `${import.meta.env.VITE_API_URL ?? ""}/api/v1`;
 const CHAVE_TOKEN = "hub.token";
+const CHAVE_EMPRESA = "hub.empresa";
 
 export class ErroApi extends Error {
   constructor(
@@ -16,8 +17,10 @@ export class ErroApi extends Error {
 type Consulta = Record<string, string | number | boolean | null | undefined>;
 
 let token: string | null = null;
+let empresa: string | null = null;
 try {
   token = localStorage.getItem(CHAVE_TOKEN);
+  empresa = localStorage.getItem(CHAVE_EMPRESA);
 } catch {
   /* armazenamento indisponível (modo privado): a sessão vale só até recarregar */
 }
@@ -34,6 +37,14 @@ export const sessaoToken = {
     }
   },
   obter: (): string | null => token,
+  empresa: (): string | null => empresa,
+  definirEmpresa(valor: string | null): void {
+    empresa = valor;
+    try {
+      if (valor) localStorage.setItem(CHAVE_EMPRESA, valor);
+      else localStorage.removeItem(CHAVE_EMPRESA);
+    } catch { /* armazenamento indisponível */ }
+  },
   aoExpirar(fn: () => void): void {
     ouvintesSessaoExpirada.push(fn);
   },
@@ -67,6 +78,7 @@ async function converterErro(resposta: Response): Promise<ErroApi> {
 async function enviar(metodo: string, caminho: string, opcoes: { corpo?: unknown; consulta?: Consulta } = {}): Promise<Response> {
   const cabecalhos: Record<string, string> = { Accept: "application/json" };
   if (token) cabecalhos.Authorization = `Bearer ${token}`;
+  if (empresa) cabecalhos["X-Empresa-ID"] = empresa;
   if (opcoes.corpo !== undefined) cabecalhos["Content-Type"] = "application/json";
   let resposta: Response;
   try {

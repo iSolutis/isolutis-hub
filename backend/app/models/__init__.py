@@ -4,6 +4,7 @@ from app.models.financeiro import Despesa, Investimento, LancamentoReceita
 from app.models.parceiro import Empresa, Municipio, PapelParceiro, Parceiro, ParceiroPapel
 from app.models.posvenda import Projeto, ProjetoEtapa, Tarefa, TarefaChecklist
 from app.models.usuario import CategoriaDespesa, Investidor, Usuario
+from app.models.tenant import ParceiroTag, TagParceiro, UsuarioEmpresa
 
 __all__ = [
     "Base",
@@ -26,4 +27,7 @@ __all__ = [
     "CategoriaDespesa",
     "Investidor",
     "Usuario",
+    "UsuarioEmpresa",
+    "TagParceiro",
+    "ParceiroTag",
 ]

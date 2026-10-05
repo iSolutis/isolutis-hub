@@ -19,16 +19,22 @@ from app.services.faturamento import anos_disponiveis
 
 
 def _ano(coluna, ano: int | None):  # noqa: ANN001
-    return extract("year", coluna) == ano
+    return (coluna >= date(ano, 1, 1)) & (coluna < date(ano + 1, 1, 1))
 
 
 # ----------------------------------------------------------------------------- despesas
 async def listar(sessao: AsyncSession, ano: int | None = None, mes: int | None = None) -> list[Despesa]:
-    consulta = select(Despesa).options(joinedload(Despesa.categoria)).order_by(Despesa.data, Despesa.criado_em)
+    consulta = select(Despesa).options(joinedload(Despesa.categoria)).order_by(Despesa.data, Despesa.criado_em, Despesa.id)
     if ano:
-        consulta = consulta.where(_ano(Despesa.data, ano))
+        if mes:
+            inicio = date(ano, mes, 1)
+            fim = date(ano + 1, 1, 1) if mes == 12 else date(ano, mes + 1, 1)
+            consulta = consulta.where(Despesa.data >= inicio, Despesa.data < fim)
+        else:
+            consulta = consulta.where(_ano(Despesa.data, ano))
     if mes:
-        consulta = consulta.where(extract("month", Despesa.data) == mes)
+        if not ano:
+            consulta = consulta.where(extract("month", Despesa.data) == mes)
     return list((await sessao.scalars(consulta)).all())
 
 

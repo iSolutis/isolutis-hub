@@ -64,6 +64,10 @@ async def definir_usuario_da_transacao(sessao: AsyncSession, usuario_id: UUID) -
     await sessao.execute(text("select set_config('app.usuario_id', :u, true)"), {"u": str(usuario_id)})
 
 
+async def definir_empresa_da_transacao(sessao: AsyncSession, empresa_id: UUID) -> None:
+    await sessao.execute(text("select set_config('app.empresa_id', :e, true)"), {"e": str(empresa_id)})
+
+
 # --- Tempo real: avisa os clientes conectados depois que a transação é confirmada --------------------
 _CHAVE = "recursos_alterados"
 
@@ -81,7 +85,7 @@ def _coletar_recursos(sessao: Session, _contexto: object) -> None:
 def _publicar(sessao: Session) -> None:
     alterados = sessao.info.pop(_CHAVE, None)
     if alterados:
-        agendar_publicacao(alterados)
+        agendar_publicacao(alterados, sessao.info.get("empresa_id"))
 
 
 @event.listens_for(Session, "after_rollback")

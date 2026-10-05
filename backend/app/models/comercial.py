@@ -10,11 +10,11 @@ from app.domain.constantes import StatusOrcamento
 from app.domain.datas import hoje
 from app.domain.orcamento import ItemCalculavel, TotaisOrcamento, status_efetivo, valido_ate
 from app.domain.orcamento import totais as totais_orcamento
-from app.models.base import Base, ComAuditoria
+from app.models.base import Base, ComAuditoria, ComEmpresa
 from app.models.parceiro import Parceiro
 
 
-class Produto(ComAuditoria, Base):
+class Produto(ComAuditoria, ComEmpresa, Base):
     __tablename__ = "produtos"
 
     nome: Mapped[str]
@@ -25,7 +25,7 @@ class Produto(ComAuditoria, Base):
     descricao: Mapped[str | None]
 
 
-class Negocio(ComAuditoria, Base):
+class Negocio(ComAuditoria, ComEmpresa, Base):
     __tablename__ = "negocios"
 
     titulo: Mapped[str]
@@ -49,7 +49,7 @@ class Negocio(ComAuditoria, Base):
         return self.cliente.nome
 
 
-class Orcamento(ComAuditoria, Base):
+class Orcamento(ComAuditoria, ComEmpresa, Base):
     __tablename__ = "orcamentos"
 
     # Gerado pelo trigger do banco (AAAA-NNN, atômico) e devolvido por RETURNING.
@@ -93,7 +93,7 @@ class Orcamento(ComAuditoria, Base):
         return self.totais.mensal
 
 
-class OrcamentoItem(ComAuditoria, Base):
+class OrcamentoItem(ComAuditoria, ComEmpresa, Base):
     __tablename__ = "orcamento_itens"
 
     orcamento_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("orcamentos.id"))

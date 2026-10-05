@@ -47,6 +47,7 @@ class Leitura(BaseModel):
 
 class Auditoria(Leitura):
     id: UUID
+    empresa_id: UUID
     criado_em: datetime
     atualizado_em: datetime
     criado_por: UUID | None

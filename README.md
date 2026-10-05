@@ -41,8 +41,11 @@ O teste de ponta a ponta no navegador está em [`e2e/`](e2e/README.md). A CI (`.
 
 ## Produção
 
-Uma imagem única (API + site): `docker build -f backend/Dockerfile -t isolutis-hub .` e `docker compose up --build`
-(defina `HUB_SECRET_KEY`). O contêiner aplica as migrações ao iniciar. Variáveis em
+Uma imagem única (API + site): `docker compose build` (defina `HUB_SECRET_KEY`), aplique as migrações uma vez com
+`docker compose --profile migrate run --rm migrate` e inicie a aplicação com `docker compose up -d app`.
+Separar a migração permite executá-la como etapa única do release antes de iniciar ou atualizar as réplicas da API.
+Em deploys com banco gerenciado, rode `alembic upgrade head` como job de release usando a mesma imagem e configuração.
+Variáveis em
 [`backend/.env.example`](backend/.env.example). Coloque atrás de HTTPS (o login usa token no cabeçalho `Authorization`).
 
 ## Acesso e equipe

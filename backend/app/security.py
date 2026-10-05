@@ -29,17 +29,25 @@ def precisa_rehash(hash_: str) -> bool:
     return _hasher.check_needs_rehash(hash_)
 
 
-def criar_token(usuario_id: UUID) -> str:
+def criar_token(usuario_id: UUID, versao_sessao: int = 0) -> str:
     cfg = get_settings()
     agora = datetime.now(UTC)
-    payload = {"sub": str(usuario_id), "iat": agora, "exp": agora + timedelta(minutes=cfg.token_minutos)}
+    payload = {
+        "sub": str(usuario_id),
+        "sv": versao_sessao,
+        "iat": agora,
+        "exp": agora + timedelta(minutes=cfg.token_minutos),
+    }
     return jwt.encode(payload, cfg.secret_key, algorithm=ALGORITMO)
 
 
-def ler_token(token: str) -> UUID | None:
-    """Devolve o id do usuário do token, ou None se inválido/expirado."""
+def ler_token(token: str) -> tuple[UUID, int] | None:
+    """Devolve (id, versão da sessão), ou None se inválido/expirado."""
     try:
         dados = jwt.decode(token, get_settings().secret_key, algorithms=[ALGORITMO])
-        return UUID(dados["sub"])
+        versao = dados.get("sv", 0)  # tokens anteriores à versão de sessão continuam válidos até expirarem
+        if not isinstance(versao, int) or versao < 0:
+            return None
+        return UUID(dados["sub"]), versao
     except (jwt.PyJWTError, KeyError, ValueError):
         return None

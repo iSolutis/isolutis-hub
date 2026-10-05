@@ -47,7 +47,8 @@ vivem no servidor**; **a integridade final é do banco** (CHECK, FK, UNIQUE, tri
 - **Agregações no SQL.** Painel, resumo mensal de faturamento e resultado (recebido − despesas pagas) são calculados no
   banco; o navegador não baixa todos os registros para somar.
 - **Autenticação própria.** E-mail + senha (Argon2id), JWT assinado de curta duração, usuário reconsultado a cada
-  requisição (desativar alguém vale na hora), freio a tentativas de login por e-mail+IP, cabeçalhos de segurança e CSP.
+  requisição (desativar alguém vale na hora), versão de sessão incrementada quando a senha muda (tokens anteriores deixam
+  de valer), freio a tentativas de login por e-mail+IP, cabeçalhos de segurança e CSP.
   Troca de senha pelo próprio usuário; redefinição pelo administrador (sem depender de e-mail).
 - **Tempo real sem polling.** Depois de cada `commit`, um hook da sessão publica quais recursos mudaram; os clientes
   recarregam só o necessário. A sala vive em memória (instância única); para várias instâncias troque por
@@ -95,7 +96,11 @@ descreva o que realmente aparece, sem alterar o visual.
 ## Limitações conhecidas
 
 - A presença/tempo real assume **uma instância** da API (ver acima).
+- O limitador de tentativas de login também é local ao processo; com várias instâncias, mova-o para armazenamento compartilhado.
 - O token de sessão fica no `localStorage` (como o sistema anterior). Mitigações: CSP restritiva e HTML escapado por padrão.
   Para endurecer ainda mais, migre para cookie `HttpOnly` + proteção CSRF.
 - Sem recuperação de senha por e-mail (decisão herdada: o administrador redefine).
 - Listas carregam todos os registros (adequado para uma equipe pequena); se crescer, adicione paginação nos serviços.
+- Migrações devem ser executadas como etapa única do release antes de iniciar as réplicas (`docker compose --profile migrate run --rm migrate`),
+  não por cada processo da API.
+- `/api/saude` verifica apenas o processo; `/api/prontidao` também valida a conexão com o PostgreSQL e pode ser usado como readiness probe.

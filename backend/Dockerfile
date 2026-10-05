@@ -17,4 +17,4 @@ COPY backend/migrations ./migrations
 COPY --from=frontend /front/dist ./static
 ENV HUB_FRONTEND_DIST=/app/static HUB_AMBIENTE=producao
 EXPOSE 8000
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]

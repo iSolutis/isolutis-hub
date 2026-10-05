@@ -26,11 +26,11 @@ Os "modais" usam a gaveta lateral do sistema (o mesmo componente de todos os for
 
 | Regra | Backend | Banco |
 |---|---|---|
-| RN01 hierarquia de até 3 níveis, códigos `1`, `1.01`, `1.01.001`, únicos por empresa | `regras.codigo_valido`, serviços | `ck_plano_contas_*`, `uq_plano_contas_company_codigo`, trigger `tg_plano_contas_regras` |
+| RN01 hierarquia de até 3 níveis, códigos `1`, `1.01`, `1.01.001`, únicos por empresa | `regras.codigo_valido`, serviços | `ck_plano_contas_*`, `uq_plano_contas_empresa_codigo`, trigger `tg_plano_contas_regras` |
 | RN01 filhas herdam características do pai (natureza, nível) | derivadas em `_validar_conta` | trigger (sobrescreve qualquer valor enviado) |
 | RN01 conta sintética nunca recebe lançamento; analítica não tem filhas; nível 3 sempre analítico | serviços (mensagens claras) | trigger + `ck_plano_contas_nivel3_analitico` |
-| RN01 um plano por empresa | tabela única por `company_id` (FKs compostas impedem misturar empresas) | `fk_*_company`, FKs `(id, company_id)` |
-| RN02 sem contas bancárias iguais na empresa | mensagem amigável | índice único `(company_id, instituição, lower(nome))` |
+| RN01 um plano por empresa | tabela única por `empresa_id` (FKs compostas impedem misturar empresas) | `fk_*_empresa`, FKs `(id, empresa_id)` |
+| RN02 sem contas bancárias iguais na empresa | mensagem amigável | índice único `(empresa_id, instituição, lower(nome))` |
 | RN03 título só em conta analítica | `_campos_validados` | trigger `tg_titulo_financeiro_regras` |
 | RN04 a pagar → despesa; a receber → receita | filtro na tela + validação no serviço | mesmo trigger |
 | Quitação coerente (Q ⇔ data e valor pagos) | serviço normaliza | `ck_titulo_financeiro_quitacao` |
@@ -63,8 +63,7 @@ A migração cria as tabelas **vazias**; a carga é um passo de implantação (r
 3. `titulo_financeiro.plano_conta_id` referencia `plano_contas` (o plano escrevia `plano_conta`, tabela inexistente).
 4. `titulo_financeiro.tipo_conta` é **P/R** (pagar/receber); a descrição do plano ("sintética ou analítica") era cópia da outra tabela.
 5. `DATETIME` (inexistente no PostgreSQL) virou `date` para emissão, vencimento e pagamento; `TIMESTAMP` virou `timestamptz` (UTC).
-6. Tabela `companies` criada com uma empresa (iSolutis): o plano referencia `companies.id`, que não existia neste sistema. O backend usa a
-   empresa mais antiga cadastrada; as FKs deixam o módulo pronto para multiempresa.
+6. A migração `0005_multi_tenant` renomeia `companies` para `empresa`, preserva a UUID da iSolutis e atribui cada dado financeiro a `empresa_id`. O contexto vem do cabeçalho `X-Empresa-ID`, validado por membership ativo; não se escolhe mais a empresa mais antiga.
 7. Coluna `UF` do município ficou `uf` (o PostgreSQL normaliza identificadores sem aspas).
 8. `updated_at` é mantido por trigger; as tabelas novas não usam as colunas de auditoria/versão das demais (seguem o plano à risca).
 
