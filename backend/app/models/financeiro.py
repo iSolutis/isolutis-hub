@@ -32,5 +32,5 @@ class LancamentoReceita(ComAuditoria, ComEmpresa, Base):
 
     cliente: Mapped[Parceiro] = relationship(lazy="raise", foreign_keys=[cliente_id])
 
-    # Só o nome, sem depender de enxergar o cadastro do cliente (RLS por dono): ver app_nome_cliente na 0013.
+    # Só o nome, sem depender de enxergar o cadastro do cliente (RLS por dono): ver app_nome_cliente na 0015.
     cliente_nome: Mapped[str] = column_property(func.app_nome_cliente(cliente_id))

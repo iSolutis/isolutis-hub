@@ -84,11 +84,11 @@ A presença deixa de transmitir o título do registro em edição (`"editando um
 
 ## Migration Plan
 
-1. Migração `0013`: tabelas `equipe`, `equipe_membro`, `equipe_lider`, `projeto_participante`, `transferencia_dono`; coluna `parceiro_negocio.responsavel_id`; índices; funções de escopo; gatilhos; conversão das `tenant_*` escopadas em `RESTRICTIVE` + políticas de escopo; carga do dono dos clientes (responsável do negócio mais recente).
+1. Migração `0015`: tabelas `equipe`, `equipe_membro`, `equipe_lider`, `projeto_participante`, `transferencia_dono`; coluna `parceiro_negocio.responsavel_id`; índices; funções de escopo; gatilhos; conversão das `tenant_*` escopadas em `RESTRICTIVE` + políticas de escopo; carga do dono dos clientes (responsável do negócio mais recente).
 2. Validar em branch do Neon: suíte de testes SQL de escopo + `EXPLAIN ANALYZE`.
 3. Deploy do backend e frontend juntos, logo após a migração.
 4. Admin monta as equipes.
-5. Rollback: `0013_down` remove políticas de escopo, devolve `tenant_*` a permissivas, remove funções/gatilhos/tabelas/coluna (equipes, participantes e donos de cliente são perdidos); reverter o app.
+5. Rollback: `0015_down` remove políticas de escopo, devolve `tenant_*` a permissivas, remove funções/gatilhos/tabelas/coluna (equipes, participantes e donos de cliente são perdidos); reverter o app.
 
 ## Ajustes feitos na implementação
 

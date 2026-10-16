@@ -1,4 +1,4 @@
--- 0015 · fim do módulo Despesas/Investimentos.
+-- 0013 · fim do módulo Despesas/Investimentos.
 --
 -- Despesas passam a ser títulos a pagar; investimentos, títulos a receber de um sócio (conta de aporte).
 -- Os dados antigos eram fictícios e são descartados, sem migração (decisão registrada na change

@@ -1,4 +1,4 @@
--- 0012 · Cadastro completo da empresa, logomarca e paleta de cores.
+-- 0014 · Cadastro completo da empresa, logomarca e paleta de cores.
 --
 -- Todas as colunas são anuláveis: empresas existentes continuam válidas e completam o cadastro pela tela
 -- "Dados da empresa". `nome` segue como nome de exibição no Hub.

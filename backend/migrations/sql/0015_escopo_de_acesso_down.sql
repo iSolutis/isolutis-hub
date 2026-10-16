@@ -1,4 +1,4 @@
--- Desfaz 0013: volta ao isolamento só por empresa. Equipes, participantes, donos de cliente e o registro de
+-- Desfaz 0015: volta ao isolamento só por empresa. Equipes, participantes, donos de cliente e o registro de
 -- transferências são descartados.
 DROP TRIGGER IF EXISTS tg_parceiro_negocio_escopo ON parceiro_negocio;
 DROP TRIGGER IF EXISTS tg_negocios_escopo ON negocios;

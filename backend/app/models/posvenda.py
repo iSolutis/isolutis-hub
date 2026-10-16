@@ -31,7 +31,7 @@ class Projeto(ComAuditoria, ComEmpresa, Base):
         back_populates="projeto", cascade="all, delete-orphan", order_by="ProjetoEtapa.ordem", lazy="raise"
     )
 
-    # Só o nome, sem depender de enxergar o cadastro do cliente (RLS por dono): ver app_nome_cliente na 0013.
+    # Só o nome, sem depender de enxergar o cadastro do cliente (RLS por dono): ver app_nome_cliente na 0015.
     cliente_nome: Mapped[str] = column_property(func.app_nome_cliente(cliente_id))
 
     @property
@@ -90,7 +90,7 @@ class TarefaChecklist(ComAuditoria, ComEmpresa, Base):
     tarefa: Mapped[Tarefa] = relationship(back_populates="checklist", lazy="raise")
 
 
-# Permissão de edição calculada pelo banco para a pessoa da requisição (escopo de acesso, migração 0013).
+# Permissão de edição calculada pelo banco para a pessoa da requisição (escopo de acesso, migração 0015).
 Projeto.pode_editar = column_property(func.app_pode_editar_projeto(Projeto.id))  # type: ignore[attr-defined]
 ProjetoEtapa.pode_editar = column_property(func.app_pode_editar_etapa(ProjetoEtapa.id))  # type: ignore[attr-defined]
 Tarefa.pode_editar = column_property(func.app_pode_editar_tarefa(Tarefa.id))  # type: ignore[attr-defined]

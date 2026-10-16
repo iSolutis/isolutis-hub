@@ -119,7 +119,7 @@ class Parceiro(Base):
     obs: Mapped[str | None]
     endereco: Mapped[str | None]
     cep: Mapped[str | None]
-    # Dono do cliente (carteira): define quem o enxerga e edita (RLS por escopo, migração 0013).
+    # Dono do cliente (carteira): define quem o enxerga e edita (RLS por escopo, migração 0015).
     responsavel_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("usuarios.id"))
     municipio_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("municipio.id"))
     # Carimbos mantidos pelo trigger (mesmos nomes de atributo das demais entidades: criado_em/atualizado_em)

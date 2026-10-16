@@ -1,4 +1,4 @@
--- Reverte a 0015 recriando as tabelas VAZIAS (os dados descartados não voltam).
+-- Reverte a 0013 recriando as tabelas VAZIAS (os dados descartados não voltam).
 CREATE TABLE categorias_despesa (
   id              uuid        NOT NULL DEFAULT gen_random_uuid(),
   empresa_id      uuid        NOT NULL DEFAULT app_empresa_id(),
