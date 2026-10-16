@@ -1,0 +1,33 @@
+/* Módulo financeiro: árvore do plano de contas e linhas de ação nas tabelas.
+   Usa só os tokens existentes (tokens.css), então acompanha o tema claro/escuro. */
+.fin-acoes{display:flex;gap:4px;justify-content:flex-end;white-space:nowrap}
+.fin-acoes .btn{min-height:0;padding:3px 9px;font-size:var(--text-xs)}
+.tree{list-style:none;margin:0;padding:0}
+.tree .tree{margin-left:22px;border-left:1px dashed var(--line);padding-left:6px}
+.tree-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;border:1px solid transparent}
+.tree-row:hover{background:var(--sunk)}
+.tree-row[aria-selected="true"]{background:var(--teal-pale);border-color:var(--teal-mid)}
+.tree-row:focus-visible{outline:2px solid var(--teal-mid);outline-offset:1px}
+.tree-caret{all:unset;cursor:pointer;width:18px;height:18px;display:grid;place-items:center;color:var(--muted);border-radius:4px;flex:none}
+.tree-caret:hover{background:var(--line)}
+.tree-caret.vazio{visibility:hidden;cursor:default}
+.tree-caret i{font-style:normal;transition:transform .15s}
+.tree-caret[aria-expanded="true"] i{transform:rotate(90deg)}
+.tree-cod{font:500 13px var(--f-mono);color:var(--teal-texto);min-width:64px}
+.tree-nome{flex:1;min-width:0}
+.tree-nome.sintetica{font-weight:600}
+.tree-pills{display:flex;gap:6px;flex:none}
+.tree-actions{display:none;gap:4px;flex:none}
+.tree-actions button{all:unset;cursor:pointer;width:24px;height:24px;display:grid;place-items:center;font-size:var(--text-sm);border-radius:4px;color:var(--muted);transition:background .1s}
+.tree-actions button:hover{background:var(--line)}
+.tree-actions button:focus-visible{outline:2px solid var(--teal-mid);outline-offset:1px}
+.tree-actions button[disabled]{opacity:.5;cursor:not-allowed}
+.tree-row:hover .tree-actions{display:flex}
+.tree-row:focus-visible .tree-actions{display:flex}
+@media (prefers-forced-colors:active){.tree-actions{display:flex}}
+.fin-filtros{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.fluxo td.ent{color:var(--ok-texto)}.fluxo td.sai{color:var(--bad-texto)}
+
+@media (max-width:860px){
+  .tree-pills{display:none}
+}

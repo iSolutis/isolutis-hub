@@ -1,0 +1,73 @@
+/* Identidade visual da empresa: logomarca própria no menu, tela "Dados da empresa" (logomarca) e tela "Aparência" */
+.visualmente-oculto{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* Logo da empresa acima do menu: caixa clara para qualquer logomarca ficar legível no menu escuro */
+.brand .logo-propria img:not(.marca-min){width:auto;max-width:100%;max-height:66px;padding:6px 10px;border-radius:var(--r-md);background:#fff;object-fit:contain}
+.brand .logo-propria .marca-min{width:40px;height:40px;padding:3px;border-radius:var(--r-sm);background:#fff;object-fit:contain}
+
+.empresa-form{margin-top:var(--esp-2)}
+.logo-empresa{display:flex;align-items:center;gap:var(--esp-5);flex-wrap:wrap}
+.logo-previa{display:grid;place-items:center;width:240px;height:110px;padding:var(--esp-3);border:1px dashed var(--line-strong);border-radius:var(--r-lg);background:repeating-conic-gradient(var(--sunk) 0 25%,var(--surface) 0 50%) 0 0/16px 16px}
+.logo-previa img{max-width:100%;max-height:100%;object-fit:contain}
+.logo-previa.vazia span{padding:0 var(--esp-3);text-align:center;font-size:var(--text-sm);color:var(--muted);background:var(--surface)}
+.logo-acoes{display:flex;flex-wrap:wrap;align-items:center;gap:var(--esp-2);max-width:360px}
+.logo-acoes label.btn{cursor:pointer}
+.logo-acoes .sub{flex-basis:100%;margin:var(--esp-1) 0 0}
+.logo-acoes input[type="file"]:focus-visible+label,.logo-acoes label.btn:focus-within{outline:2px solid var(--teal-mid);outline-offset:1px}
+
+.aparencia{margin-top:var(--esp-2)}
+.paletas{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:var(--esp-3)}
+.paleta-opcao{display:flex;align-items:center;gap:var(--esp-3);min-height:52px;padding:var(--esp-2) var(--esp-3);border:1px solid var(--line-strong);border-radius:var(--r-lg);background:var(--surface);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.paleta-opcao:hover{border-color:var(--teal)}
+.paleta-opcao[aria-checked="true"]{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal-pale)}
+.paleta-opcao .ico{margin-left:auto;color:var(--teal-texto)}
+.paleta-opcao:focus-visible{outline:2px solid var(--teal-mid);outline-offset:2px}
+.paleta-amostra{display:inline-flex;flex:none;overflow:hidden;border-radius:var(--r-full);box-shadow:0 0 0 1px var(--line)}
+.paleta-amostra i{display:block;width:16px;height:28px}
+
+.cor-entrada{display:flex;align-items:center;gap:var(--esp-2)}
+.cor-entrada input[type="color"]{flex:none;width:52px;height:var(--controle-md);padding:2px;border:1px solid var(--line-strong);border-radius:var(--r-md);background:var(--surface);cursor:pointer}
+.cor-entrada input[type="text"]{width:110px;font-family:var(--f-mono);text-transform:lowercase}
+.cor-campo .sub{margin:var(--esp-1) 0 0}
+
+.previa-paleta{display:grid;grid-template-columns:180px minmax(0,1fr);margin-top:var(--esp-5);overflow:hidden;border:1px solid var(--line);border-radius:var(--r-lg)}
+.previa-lateral{display:flex;flex-direction:column;gap:var(--esp-1);padding:var(--esp-4) var(--esp-3);background:var(--side-bg);color:var(--side-ink);font-size:var(--text-sm)}
+.previa-lateral b{margin-bottom:var(--esp-2);color:var(--side-ink-forte);font-family:var(--f-display)}
+.previa-lateral span{padding:6px 10px;border-radius:var(--r-md)}
+.previa-lateral .ativo{background:var(--side-ativo);color:var(--side-ink-forte)}
+.previa-conteudo{padding:var(--esp-4) var(--esp-5);background:var(--canvas)}
+.previa-conteudo b{font-family:var(--f-display);color:var(--ink)}
+.previa-conteudo .sub{margin:2px 0 var(--esp-3)}
+.previa-link{color:var(--teal-texto);text-decoration:underline}
+.previa-barra{height:8px;margin-top:var(--esp-4);border-radius:var(--r-full);background:var(--bar-b)}
+.previa-barra i{display:block;width:62%;height:100%;border-radius:inherit;background:var(--bar-a)}
+
+@media (max-width:640px){
+  .previa-paleta{grid-template-columns:minmax(0,1fr)}
+  .logo-previa{width:100%}
+}
+
+/* Escopo de acesso: dono, somente leitura, participantes e equipes */
+.campo-fixo{display:flex;align-items:center;min-height:var(--controle-md);padding:0 var(--esp-3);border:1px dashed var(--line-strong);border-radius:var(--r-md);color:var(--muted);background:var(--sunk)}
+.aviso-leitura{display:inline-flex;align-items:center;gap:var(--esp-2);font-size:var(--text-sm);color:var(--muted)}
+.aviso-leitura::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.secao-participantes{margin-top:var(--esp-5)}
+.secao-participantes h2{margin:0}
+.participantes{list-style:none;margin:var(--esp-2) 0;padding:0;display:flex;flex-direction:column;gap:var(--esp-1)}
+.participantes li{display:flex;align-items:center;justify-content:space-between;gap:var(--esp-2);padding:6px var(--esp-3);border:1px solid var(--line);border-radius:var(--r-md)}
+.resumo-leitura{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--esp-3);margin:0 0 var(--esp-4)}
+.resumo-leitura dt{font-size:var(--text-xs);color:var(--muted)}
+.resumo-leitura dd{margin:2px 0 0;font-weight:500}
+.texto-leitura{white-space:pre-wrap;margin:0 0 var(--esp-3)}
+.etapa.minha{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal-pale)}
+.equipes{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--esp-4)}
+.equipe-card{padding:var(--esp-4) var(--esp-5);cursor:pointer}
+.equipe-card:hover{border-color:var(--teal)}
+.equipe-card h2{margin:0 0 var(--esp-2)}
+.equipe-card dl{margin:0;display:flex;flex-direction:column;gap:var(--esp-2)}
+.equipe-card dt{font-size:var(--text-xs);color:var(--muted)}
+.equipe-card dd{margin:0}
+.escolhas{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--esp-3);display:flex;flex-direction:column;gap:6px;max-height:320px;overflow:auto}
+.escolhas legend{padding:0 var(--esp-1);font-weight:600}
+.duas-colunas{display:grid;grid-template-columns:1fr 1fr;gap:var(--esp-3)}
+@media (max-width:640px){.duas-colunas{grid-template-columns:1fr}}
