@@ -2,9 +2,9 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, func
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
 
 from app.models.base import Base, ComAuditoria, ComEmpresa
 from app.models.parceiro import Parceiro
@@ -33,9 +33,8 @@ class LancamentoReceita(ComAuditoria, ComEmpresa, Base):
 
     cliente: Mapped[Parceiro] = relationship(lazy="raise", foreign_keys=[cliente_id])
 
-    @property
-    def cliente_nome(self) -> str:
-        return self.cliente.nome
+    # Só o nome, sem depender de enxergar o cadastro do cliente (RLS por dono): ver app_nome_cliente na 0013.
+    cliente_nome: Mapped[str] = column_property(func.app_nome_cliente(cliente_id))
 
 
 class Despesa(ComAuditoria, ComEmpresa, Base):

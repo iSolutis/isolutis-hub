@@ -8,7 +8,7 @@ preenche criado_por/atualizado_por/versao a partir dele.
 from collections.abc import AsyncIterator
 from uuid import UUID
 
-from sqlalchemy import event, text
+from sqlalchemy import Connection, event, text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import Session
 
@@ -62,11 +62,32 @@ async def get_session() -> AsyncIterator[AsyncSession]:
 
 
 async def definir_usuario_da_transacao(sessao: AsyncSession, usuario_id: UUID) -> None:
+    sessao.info["usuario_id"] = usuario_id
     await sessao.execute(text("select set_config('app.usuario_id', :u, true)"), {"u": str(usuario_id)})
 
 
 async def definir_empresa_da_transacao(sessao: AsyncSession, empresa_id: UUID) -> None:
+    sessao.info["empresa_id"] = empresa_id
     await sessao.execute(text("select set_config('app.empresa_id', :e, true)"), {"e": str(empresa_id)})
+
+
+async def definir_escopo_da_transacao(sessao: AsyncSession) -> None:
+    """Calcula no banco quem a pessoa enxerga (ela + liderados; admin vê tudo). Ver migração 0013."""
+    sessao.info["escopo"] = True
+    await sessao.execute(text("select app_definir_escopo()"))
+
+
+@event.listens_for(Session, "after_begin")
+def _reaplicar_contexto(sessao: Session, _transacao: object, conexao: Connection) -> None:
+    """As variáveis da requisição são locais à transação: cada nova transação da sessão (ex.: leitura depois de
+    um commit) recebe de novo usuário, empresa e escopo; sem isso o RLS esconderia tudo."""
+    usuario, empresa = sessao.info.get("usuario_id"), sessao.info.get("empresa_id")
+    if usuario:
+        conexao.execute(text("select set_config('app.usuario_id', :u, true)"), {"u": str(usuario)})
+    if empresa:
+        conexao.execute(text("select set_config('app.empresa_id', :e, true)"), {"e": str(empresa)})
+    if usuario and empresa and sessao.info.get("escopo"):
+        conexao.execute(text("select app_definir_escopo()"))
 
 
 # --- Tempo real: avisa os clientes conectados depois que a transação é confirmada --------------------

@@ -21,6 +21,9 @@ from fastapi import WebSocket
 log = logging.getLogger(__name__)
 
 
+EDITANDO = "um registro"
+
+
 @dataclass
 class Conexao:
     ws: WebSocket
@@ -47,7 +50,9 @@ class Sala:
 
     async def atualizar_presenca(self, con: Conexao, area: str, editando: str | None) -> None:
         con.area = area[:40]
-        con.editando = editando[:40] if editando else None
+        # O título do registro não é transmitido: a presença vai para a empresa inteira, e nem todos enxergam
+        # aquele registro (escopo de acesso). Só se informa que a pessoa está editando algo.
+        con.editando = EDITANDO if editando else None
         await self._enviar_presenca(con.empresa_id)
 
     def pessoas(self, empresa_id: UUID) -> list[dict[str, object]]:

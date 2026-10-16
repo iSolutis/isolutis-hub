@@ -280,6 +280,99 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/equipes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Equipes */
+        get: operations["listar_equipes_api_v1_equipes_get"];
+        put?: never;
+        /** Criar Equipe */
+        post: operations["criar_equipe_api_v1_equipes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/equipes/{id_}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Atualizar Equipe */
+        put: operations["atualizar_equipe_api_v1_equipes__id___put"];
+        post?: never;
+        /** Excluir Equipe */
+        delete: operations["excluir_equipe_api_v1_equipes__id___delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/escopo/pessoas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pessoas Atribuiveis
+         * @description Quem a pessoa pode pôr como dono: todos (admin), ela e os liderados (líder) ou só ela.
+         */
+        get: operations["pessoas_atribuiveis_api_v1_escopo_pessoas_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/escopo/eu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Meu Escopo
+         * @description Para a interface: se a pessoa é admin, se lidera alguém e quantas equipes a empresa tem.
+         */
+        get: operations["meu_escopo_api_v1_escopo_eu_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/escopo/transferir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transferir */
+        post: operations["transferir_api_v1_escopo_transferir_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projetos": {
         parameters: {
             query?: never;
@@ -292,6 +385,26 @@ export interface paths {
         put?: never;
         /** Criar */
         post: operations["criar_api_v1_projetos_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projetos/referencias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Referencias
+         * @description Id e título dos projetos que a pessoa vê, ou das tarefas que executa (sem acesso ao projeto).
+         */
+        get: operations["referencias_api_v1_projetos_referencias_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -345,6 +458,61 @@ export interface paths {
         post?: never;
         /** Excluir */
         delete: operations["excluir_api_v1_projetos__id___delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projetos/{id_}/etapas/{etapa_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Atualizar Etapa
+         * @description O responsável da etapa atualiza só a sua etapa (o projeto inteiro exige permissão no projeto).
+         */
+        patch: operations["atualizar_etapa_api_v1_projetos__id___etapas__etapa_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/projetos/{id_}/participantes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Participantes */
+        get: operations["participantes_api_v1_projetos__id___participantes_get"];
+        put?: never;
+        /** Incluir Participante */
+        post: operations["incluir_participante_api_v1_projetos__id___participantes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projetos/{id_}/participantes/{usuario_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Retirar Participante */
+        delete: operations["retirar_participante_api_v1_projetos__id___participantes__usuario_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1540,6 +1708,8 @@ export interface components {
             cep?: string | null;
             /** Municipio Id */
             municipio_id?: string | null;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /** Versao */
             versao: number;
         };
@@ -1572,6 +1742,8 @@ export interface components {
             cep?: string | null;
             /** Municipio Id */
             municipio_id?: string | null;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
         };
         /** ClienteLeitura */
         ClienteLeitura: {
@@ -1601,6 +1773,8 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /** Tipo Pessoa */
             tipo_pessoa: string;
             /** Cpf Cnpj */
@@ -1689,6 +1863,8 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /** Tipo Pessoa */
             tipo_pessoa: string;
             /** Cpf Cnpj */
@@ -2078,6 +2254,53 @@ export interface components {
             /** Segmento */
             segmento?: string | null;
         };
+        /** EquipeEntrada */
+        EquipeEntrada: {
+            /** Nome */
+            nome: string;
+            /** Lideres */
+            lideres?: string[];
+            /** Membros */
+            membros?: string[];
+        };
+        /** EquipeLeitura */
+        EquipeLeitura: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Nome */
+            nome: string;
+            /** Lideres */
+            lideres: string[];
+            /** Membros */
+            membros: string[];
+        };
+        /**
+         * EtapaAtualizacao
+         * @description O que o responsável de uma etapa altera nela, sem precisar editar o projeto inteiro.
+         */
+        EtapaAtualizacao: {
+            /**
+             * Versao
+             * @description Versão lida; se informada, protege contra edição concorrente.
+             */
+            versao?: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "a_fazer" | "andamento" | "concluida";
+            /** Inicio */
+            inicio?: string | null;
+            /** Fim */
+            fim?: string | null;
+            /** Descricao */
+            descricao?: string | null;
+            /** Entregaveis */
+            entregaveis?: string | null;
+        };
         /** EtapaEntrada */
         EtapaEntrada: {
             /** Id */
@@ -2112,6 +2335,12 @@ export interface components {
         };
         /** EtapaLeitura */
         EtapaLeitura: {
+            /**
+             * Pode Editar
+             * @description A pessoa da requisição pode alterar este registro (escopo).
+             * @default true
+             */
+            pode_editar: boolean;
             /**
              * Id
              * Format: uuid
@@ -2734,6 +2963,12 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /**
+             * Pode Editar
+             * @description A pessoa da requisição pode alterar este registro (escopo).
+             * @default true
+             */
+            pode_editar: boolean;
             /** Titulo */
             titulo: string;
             /**
@@ -2892,6 +3127,12 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /**
+             * Pode Editar
+             * @description A pessoa da requisição pode alterar este registro (escopo).
+             * @default true
+             */
+            pode_editar: boolean;
             /** Numero */
             numero: string;
             /**
@@ -3027,6 +3268,8 @@ export interface components {
             cep?: string | null;
             /** Municipio Id */
             municipio_id?: string | null;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /**
              * Tipo Pessoa
              * @default PJ
@@ -3064,6 +3307,8 @@ export interface components {
             cep?: string | null;
             /** Municipio Id */
             municipio_id?: string | null;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /**
              * Tipo Pessoa
              * @default PJ
@@ -3101,6 +3346,8 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /** Tipo Pessoa */
             tipo_pessoa: string;
             /** Cpf Cnpj */
@@ -3133,6 +3380,24 @@ export interface components {
             uf: string | null;
             /** Papeis */
             papeis: string[];
+        };
+        /** ParticipanteEntrada */
+        ParticipanteEntrada: {
+            /**
+             * Usuario Id
+             * Format: uuid
+             */
+            usuario_id: string;
+        };
+        /** PessoaReferencia */
+        PessoaReferencia: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Nome */
+            nome: string;
         };
         /** PlanoContaEntrada */
         PlanoContaEntrada: {
@@ -3441,6 +3706,12 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /**
+             * Pode Editar
+             * @description A pessoa da requisição pode alterar este registro (escopo).
+             * @default true
+             */
+            pode_editar: boolean;
             /** Titulo */
             titulo: string;
             /**
@@ -3474,6 +3745,16 @@ export interface components {
             progresso: number;
             /** Etapas */
             etapas: components["schemas"]["EtapaLeitura"][];
+        };
+        /** ProjetoReferencia */
+        ProjetoReferencia: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Titulo */
+            titulo: string;
         };
         /** ProximoCodigo */
         ProximoCodigo: {
@@ -3696,6 +3977,12 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /**
+             * Pode Editar
+             * @description A pessoa da requisição pode alterar este registro (escopo).
+             * @default true
+             */
+            pode_editar: boolean;
             /** Titulo */
             titulo: string;
             /** Coluna */
@@ -3844,6 +4131,24 @@ export interface components {
              */
             token_type: string;
             usuario: components["schemas"]["UsuarioLeitura"];
+        };
+        /** TransferenciaEntrada */
+        TransferenciaEntrada: {
+            /**
+             * Entidade
+             * @enum {string}
+             */
+            entidade: "cliente" | "negocio" | "projeto" | "tarefa";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Para
+             * @description Novo dono; nulo deixa o registro sem dono (só líder/admin).
+             */
+            para: string | null;
         };
         /** TrocarSenhaEntrada */
         TrocarSenhaEntrada: {
@@ -4608,6 +4913,237 @@ export interface operations {
             };
         };
     };
+    listar_equipes_api_v1_equipes_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EquipeLeitura"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    criar_equipe_api_v1_equipes_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EquipeEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EquipeLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_equipe_api_v1_equipes__id___put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EquipeEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EquipeLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    excluir_equipe_api_v1_equipes__id___delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pessoas_atribuiveis_api_v1_escopo_pessoas_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PessoaReferencia"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    meu_escopo_api_v1_escopo_eu_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transferir_api_v1_escopo_transferir_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransferenciaEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     listar_api_v1_projetos_get: {
         parameters: {
             query?: never;
@@ -4661,6 +5197,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjetoLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    referencias_api_v1_projetos_referencias_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjetoReferencia"][];
                 };
             };
             /** @description Validation Error */
@@ -4797,6 +5364,148 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_etapa_api_v1_projetos__id___etapas__etapa_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+                etapa_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EtapaAtualizacao"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjetoLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    participantes_api_v1_projetos__id___participantes_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    incluir_participante_api_v1_projetos__id___participantes_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParticipanteEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retirar_participante_api_v1_projetos__id___participantes__usuario_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+                usuario_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
             };
             /** @description Validation Error */
             422: {

@@ -45,6 +45,7 @@ class ChecklistLeitura(Leitura):
 
 
 class TarefaLeitura(Auditoria):
+    pode_editar: bool = Field(True, description="A pessoa da requisição pode alterar este registro (escopo).")
     titulo: str
     coluna: str
     responsavel_id: UUID | None

@@ -40,3 +40,36 @@ Para bootstrap/redefinição de acesso, use `python -m app.scripts.criar_admin -
 ## Limites operacionais atuais
 
 A role runtime local é criada pelo script de inicialização apenas quando o volume PostgreSQL é novo. Volumes existentes não são alterados automaticamente; provisionamento de role, credenciais e grants requer o procedimento do DBA. O ensaio em cópia de produção e a coleta de baseline/EXPLAIN precisam ser feitos com dados e workload representativos antes do cutover.
+
+## Escopo de acesso dentro da empresa (migração 0013)
+
+Além do isolamento entre empresas, a 0013 restringe **dentro** da empresa o que cada pessoa vê e edita (change OpenSpec `escopo-de-acesso`):
+
+- **Papel** (admin, financeiro, comercial, membro) continua liberando áreas; **equipes** (`equipe`, `equipe_lider`, `equipe_membro`) definem de quem a pessoa enxerga registros: ela e toda a árvore que lidera. Admin vê tudo; a área financeira não é escopada.
+- **Dono**: `responsavel_id` em clientes (`parceiro_negocio`), negócios, projetos, etapas e tarefas; o orçamento segue o negócio. O dono do cliente vê tudo do cliente; registro sem dono herda a visibilidade do registro acima e, sem nenhum dono acima, é visível a todos da área.
+- **Projetos**: participantes (responsável, responsáveis de etapa e `projeto_participante`) veem o projeto inteiro e editam só o que é seu; quem só executa uma tarefa vê só ela.
+- **Imposição**: as políticas `tenant_*` dessas tabelas viraram `RESTRICTIVE` e ganharam políticas permissivas `escopo_*` de leitura e escrita. Troca de dono e vínculo com cliente são conferidos pelo gatilho `app_validar_escopo`, que registra as transferências em `transferencia_dono` (leitura só para admin).
+- **Contexto por transação**: a API grava `app.usuario_id` e `app.empresa_id` e chama `app_definir_escopo()`, que grava `app.usuarios_visiveis`, `app.ve_tudo`, `app.ve_financeiro` e `app.lider`. A sessão reaplica esse contexto em toda nova transação (`after_begin` em `app/db.py`). Sem contexto, as funções falham fechadas (ninguém no escopo, sem admin).
+- **Funções `SECURITY DEFINER`** (`app_dono_cliente`, `app_pode_ver_*`, `app_pode_editar_*`, `app_clientes_referencia`…) leem tabelas com `row_security = off`, como `app_empresa_admin`. Por isso a identidade migradora precisa poder ignorar RLS (superusuário, `BYPASSRLS` ou, no Neon, o papel proprietário do banco), e todas as funções filtram explicitamente por `app_empresa_id()`.
+
+### Deploy
+
+1. Aplique a 0013 primeiro numa branch do Neon: `alembic upgrade head`, depois `pytest tests/test_escopo_sql.py tests/test_escopo_api.py` apontando para ela.
+2. Publique backend e frontend logo após a migração.
+3. **Monte as equipes imediatamente** (Administração › Equipes). Até lá, cada pessoa vê só o que é dela, mais o que não tem dono, e os líderes perdem a visão do time.
+4. Revise os donos atribuídos aos clientes (o responsável do negócio mais recente com cada um).
+5. Rollback: `alembic downgrade 0012` descarta equipes, participantes, donos de cliente e o registro de transferências.
+
+### Desempenho medido (PostgreSQL 16 local, `hub_runtime`)
+
+Carga sintética: 40 pessoas, 3.000 clientes, 10.000 negócios, 2.000 projetos e 20.000 tarefas numa empresa.
+
+| Consulta | Visíveis | Tempo |
+|---|---|---|
+| `count(*)` negócios, líder de 9 pessoas | 3.350 | 118 ms |
+| `count(*)` tarefas, líder | 8.512 | 475 ms |
+| `count(*)` negócios, comercial sem liderança | 487 | 86 ms |
+| `count(*)` projetos, comercial | 99 | 25 ms |
+| `count(*)` tarefas, admin (atalho `app_ve_tudo`) | 20.000 | 16 ms |
+
+As regras são funções avaliadas linha a linha, então os planos usam varredura sequencial; o custo cresce com o tamanho da tabela, não com o que a pessoa vê. Para os volumes atuais (centenas a poucos milhares de registros por empresa) isso fica em dezenas de milissegundos. **Pendência:** acima de ~10 mil tarefas ou negócios por empresa, pré-calcular por transação os conjuntos de projetos e clientes visíveis e reescrever as políticas como predicados indexáveis.

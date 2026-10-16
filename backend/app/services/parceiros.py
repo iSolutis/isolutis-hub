@@ -1,6 +1,7 @@
 """Cadastro único de parceiros (hub de papéis): regras compartilhadas por clientes e pelo módulo financeiro."""
 
 from collections.abc import Iterable
+from types import SimpleNamespace
 from uuid import UUID
 
 from sqlalchemy import exists, func, select
@@ -23,6 +24,7 @@ from app.models import (
     Projeto,
     Tarefa,
 )
+from app.services import escopo
 from app.services.base import conferir_versao, confirmar
 
 PAPEL_CLIENTE = "cliente"
@@ -87,6 +89,14 @@ async def exigir_cliente(sessao: AsyncSession, id_: UUID) -> Parceiro:
     return await obter_completo(sessao, await empresa_atual(sessao), id_, PAPEL_CLIENTE)
 
 
+async def cliente_para_documento(sessao: AsyncSession, id_: UUID, nome: str) -> Parceiro | SimpleNamespace:
+    """Cliente completo para o documento se a pessoa enxerga o cadastro; senão, só o nome (escopo de acesso)."""
+    try:
+        return await exigir_cliente(sessao, id_)
+    except NaoEncontrado:
+        return SimpleNamespace(nome=nome, contato=None, cargo=None, cpf_cnpj=None, tipo_pessoa="PJ")
+
+
 async def listar_papeis(sessao: AsyncSession) -> list[PapelParceiro]:
     return list(
         (await sessao.scalars(select(PapelParceiro).where(PapelParceiro.ativo).order_by(PapelParceiro.nome))).all()
@@ -125,6 +135,7 @@ async def _vinculos_como_cliente(sessao: AsyncSession, id_: UUID) -> int:
 
 async def criar(sessao: AsyncSession, empresa: Empresa, campos: dict, papeis: Iterable[str]) -> Parceiro:
     await _validar(sessao, campos)
+    campos["responsavel_id"] = await escopo.dono_padrao(sessao, "responsavel_id" in campos, campos.get("responsavel_id"))
     codigos = await _papeis_validos(sessao, papeis)
     parceiro = Parceiro(empresa_id=empresa.id, **campos, papeis=[ParceiroPapel(papel=c) for c in sorted(codigos)])
     sessao.add(parceiro)
@@ -136,6 +147,7 @@ async def atualizar(
     sessao: AsyncSession, empresa: Empresa, id_: UUID, campos: dict, versao: int, papeis: Iterable[str] | None = None
 ) -> Parceiro:
     parceiro = await obter_completo(sessao, empresa, id_)
+    await escopo.exigir_edicao(sessao, "cliente", id_)
     conferir_versao(parceiro, versao)
     await _validar(sessao, campos)
     for nome, valor in campos.items():

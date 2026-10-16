@@ -8,8 +8,8 @@ from sqlalchemy.orm import selectinload
 from app.errors import NaoEncontrado
 from app.models import Projeto, Tarefa, TarefaChecklist
 from app.schemas.tarefa import ChecklistEntrada, MoverTarefa, TarefaAtualizar, TarefaEntrada
+from app.services import escopo
 from app.services.base import aplicar, conferir_versao, confirmar, obter
-from app.services.parceiros import exigir_cliente
 
 
 def consulta():
@@ -51,16 +51,21 @@ def _sincronizar_checklist(tarefa: Tarefa, itens: list[ChecklistEntrada]) -> Non
     tarefa.checklist[:] = novos
 
 
-async def _validar_vinculos(sessao: AsyncSession, dados: TarefaEntrada) -> None:
-    if dados.cliente_id:
-        await exigir_cliente(sessao, dados.cliente_id)
-    if dados.projeto_id:
+async def _validar_vinculos(sessao: AsyncSession, dados: TarefaEntrada, atual: Tarefa | None = None) -> None:
+    """Só confere o que mudou: quem executa uma tarefa avulsa não enxerga o projeto dela, mas pode editá-la."""
+    if dados.projeto_id and (atual is None or dados.projeto_id != atual.projeto_id):
         await obter(sessao, Projeto, dados.projeto_id, "Projeto")
+    if atual is None or dados.cliente_id != atual.cliente_id:
+        await escopo.exigir_vinculo_cliente(sessao, dados.cliente_id, projeto_id=dados.projeto_id)
 
 
 async def criar(sessao: AsyncSession, dados: TarefaEntrada) -> Tarefa:
     await _validar_vinculos(sessao, dados)
-    tarefa = Tarefa(**dados.model_dump(exclude={"checklist", "coluna"}), checklist=[])
+    campos = dados.model_dump(exclude={"checklist", "coluna"})
+    campos["responsavel_id"] = await escopo.dono_padrao(
+        sessao, "responsavel_id" in dados.model_fields_set, dados.responsavel_id
+    )
+    tarefa = Tarefa(**campos, checklist=[])
     _definir_coluna(tarefa, dados.coluna)
     _sincronizar_checklist(tarefa, dados.checklist)
     sessao.add(tarefa)
@@ -70,8 +75,9 @@ async def criar(sessao: AsyncSession, dados: TarefaEntrada) -> Tarefa:
 
 async def atualizar(sessao: AsyncSession, id_: UUID, dados: TarefaAtualizar) -> Tarefa:
     tarefa = await obter_completo(sessao, id_)
+    await escopo.exigir_edicao(sessao, "tarefa", id_)
     conferir_versao(tarefa, dados.versao)
-    await _validar_vinculos(sessao, dados)
+    await _validar_vinculos(sessao, dados, tarefa)
     aplicar(tarefa, dados.model_dump(), ignorar=("versao", "checklist", "coluna"))
     _definir_coluna(tarefa, dados.coluna)
     _sincronizar_checklist(tarefa, dados.checklist)
@@ -81,6 +87,7 @@ async def atualizar(sessao: AsyncSession, id_: UUID, dados: TarefaAtualizar) -> 
 
 async def mover(sessao: AsyncSession, id_: UUID, dados: MoverTarefa) -> Tarefa:
     tarefa = await obter_completo(sessao, id_)
+    await escopo.exigir_edicao(sessao, "tarefa", id_)
     conferir_versao(tarefa, dados.versao)
     _definir_coluna(tarefa, dados.coluna)
     await confirmar(sessao)
@@ -88,5 +95,7 @@ async def mover(sessao: AsyncSession, id_: UUID, dados: MoverTarefa) -> Tarefa:
 
 
 async def excluir(sessao: AsyncSession, id_: UUID) -> None:
-    await sessao.delete(await obter(sessao, Tarefa, id_, "Tarefa"))
+    tarefa = await obter(sessao, Tarefa, id_, "Tarefa")
+    await escopo.exigir_edicao(sessao, "tarefa", id_)
+    await sessao.delete(tarefa)
     await confirmar(sessao)

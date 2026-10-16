@@ -51,3 +51,57 @@ class Convite(Base):
     expira_em: Mapped[datetime] = mapped_column(nullable=False)
     usado_em: Mapped[datetime | None] = mapped_column(nullable=True)
     criado_em: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
+
+
+class Equipe(Base):
+    """Equipe da empresa: os líderes enxergam e administram os registros dos membros (e dos liderados deles)."""
+
+    __tablename__ = "equipe"
+
+    empresa_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("empresa.id"), server_default=text("app_empresa_id()"))
+    nome: Mapped[str]
+    criado_em: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+class EquipeMembro(Base):
+    __tablename__ = "equipe_membro"
+
+    equipe_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("equipe.id"), primary_key=True)
+    usuario_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("usuarios.id"), primary_key=True)
+    empresa_id: Mapped[uuid.UUID] = mapped_column(server_default=text("app_empresa_id()"))
+
+
+class EquipeLider(Base):
+    __tablename__ = "equipe_lider"
+
+    equipe_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("equipe.id"), primary_key=True)
+    usuario_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("usuarios.id"), primary_key=True)
+    empresa_id: Mapped[uuid.UUID] = mapped_column(server_default=text("app_empresa_id()"))
+
+
+class ProjetoParticipante(Base):
+    """Pessoa incluída no projeto: vê o projeto inteiro e só edita o que é dela."""
+
+    __tablename__ = "projeto_participante"
+
+    projeto_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projetos.id"), primary_key=True)
+    usuario_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("usuarios.id"), primary_key=True)
+    empresa_id: Mapped[uuid.UUID] = mapped_column(server_default=text("app_empresa_id()"))
+    incluido_em: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+class TransferenciaDono(Base):
+    """Registro de troca de dono (gravado pelo gatilho do banco; leitura só por administradores)."""
+
+    __tablename__ = "transferencia_dono"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    empresa_id: Mapped[uuid.UUID] = mapped_column(server_default=text("app_empresa_id()"))
+    entidade: Mapped[str]
+    registro_id: Mapped[uuid.UUID]
+    de: Mapped[uuid.UUID | None]
+    para: Mapped[uuid.UUID | None]
+    por: Mapped[uuid.UUID | None]
+    em: Mapped[datetime] = mapped_column(server_default=func.now())

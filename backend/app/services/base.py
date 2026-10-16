@@ -4,10 +4,12 @@ from collections.abc import Mapping
 from typing import Any, TypeVar
 from uuid import UUID
 
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.exc import StaleDataError
 
 from app.errors import Conflito, NaoEncontrado
+from app.services.escopo import traduzir_erro_de_escopo
 
 T = TypeVar("T")
 
@@ -43,3 +45,9 @@ async def confirmar(sessao: AsyncSession) -> None:
     except StaleDataError as e:
         await sessao.rollback()
         raise Conflito(MENSAGEM_CONFLITO) from e
+    except DBAPIError as e:  # recusa de escopo pelo banco (RLS/gatilho): vira 404/403 com mensagem clara
+        traduzido = traduzir_erro_de_escopo(e)
+        if traduzido is None:
+            raise
+        await sessao.rollback()
+        raise traduzido from e
