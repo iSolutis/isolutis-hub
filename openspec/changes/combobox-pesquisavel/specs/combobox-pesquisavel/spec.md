@@ -30,6 +30,10 @@ O sistema SHALL gravar apenas o identificador de uma opção existente; texto li
 - **WHEN** o usuário seleciona uma opção
 - **THEN** o campo exibe o rótulo e o formulário passa a carregar o identificador da opção
 
+#### Scenario: Limpar o campo
+- **WHEN** o usuário apaga todo o texto e sai do campo
+- **THEN** a escolha é removida e o campo fica vazio
+
 #### Scenario: Sair do campo sem escolher
 - **WHEN** o usuário sai do campo com texto que não foi escolhido
 - **THEN** o campo restaura o rótulo da opção selecionada ou fica vazio, e a validação de obrigatório se aplica

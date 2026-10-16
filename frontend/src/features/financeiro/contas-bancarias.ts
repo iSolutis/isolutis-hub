@@ -4,7 +4,8 @@ import { html, type Safe } from "@/core/html";
 import { numero, paraCampo } from "@/core/numero";
 import { registrarVista } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
-import { campo, fv, inp, sel } from "@/ui/campos";
+import { campo, fv, inp } from "@/ui/campos";
+import { combobox } from "@/ui/combobox";
 import { tentar } from "@/ui/erros";
 import { abrirGaveta } from "@/ui/gaveta";
 import { espaco } from "@/ui/formularios";
@@ -40,7 +41,7 @@ async function formConta(c?: ContaBancaria): Promise<void> {
   abrirGaveta({
     titulo: c ? c.nome : "Nova conta bancária",
     corpo: html`<div class="fields">
-      ${campo("Instituição financeira", sel("instituicao_financeira_id", [["", "Selecione…"], ...instituicoes.map((i) => [i.id, `${i.codigo} · ${i.nome}`] as const)], c?.instituicao_financeira_id ?? ""), true)}
+      ${campo("Instituição financeira", combobox({ nome: "instituicao_financeira_id", rotulo: "Instituição financeira", opcoes: instituicoes.map((i) => ({ id: i.id, codigo: i.codigo, rotulo: i.nome })), valor: c?.instituicao_financeira_id, vazio: "Digite o nome ou o código…" }), true)}
       ${campo("Nome da conta", inp("nome", c?.nome, 'maxlength="150" placeholder="Ex.: Conta corrente principal"'), true)}
       ${campo("Saldo inicial (R$)", inp("saldo_inicial", paraCampo(c?.saldo_inicial), 'inputmode="decimal" placeholder="0,00"'))}
     </div>`,

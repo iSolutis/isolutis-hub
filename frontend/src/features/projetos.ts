@@ -8,6 +8,7 @@ import { dados, nomeCliente, nomeMembro, podeEscrever, ui } from "@/state/estado
 import { registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { combobox, comboboxDe } from "@/ui/combobox";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura } from "@/ui/eventos";
@@ -191,7 +192,7 @@ export function formProjeto(p?: Projeto, inicial: Partial<ProjetoEntrada> = {}):
     autoria: linhaAutoria(p),
     corpo: html`<div class="fields">
       ${campo("Nome do projeto", inp("titulo", v("titulo"), 'placeholder="Ex.: Portal do cliente"'), true)}
-      ${seletorCliente(v("cliente_id"))}<div class="field"><label for="f-negocio_id">Negócio vendido</label>${sel("negocio_id", [["", "Sem vínculo"], ...ganhos.map((n) => [n.id, `${n.titulo} · ${nomeCliente(n.cliente_id)}`] as const)], v("negocio_id"))}</div>
+      ${seletorCliente(v("cliente_id"))}<div class="field"><label for="f-negocio_id">Negócio vendido</label>${combobox({ nome: "negocio_id", rotulo: "Negócio vendido", opcoes: ganhos.map((n) => ({ id: n.id, rotulo: n.titulo, grupo: nomeCliente(n.cliente_id) })), valor: v("negocio_id"), vazio: "Sem vínculo" })}</div>
       ${campo("Situação", sel("status", Object.entries(PROJ_STATUS).map(([k, x]) => [k, x[0]] as const), v("status") ?? "planejamento"))}${seletorDono("Responsável técnico", v("responsavel_id"), !p)}
       ${campo("Início", inp("inicio", v("inicio") ?? hoje(), 'type="date"'))}${campo("Entrega prevista", inp("entrega", v("entrega"), 'type="date"'))}
       ${campo("Objetivo do projeto", area("objetivo", v("objetivo"), "O problema que o sistema resolve para o cliente, em uma ou duas frases."), true)}
@@ -270,12 +271,12 @@ export function formProjeto(p?: Projeto, inicial: Partial<ProjetoEntrada> = {}):
         toast("Etapas padrão adicionadas. Ajuste nomes e datas ao projeto.");
       });
       desenhar();
-      (f.elements.namedItem("negocio_id") as HTMLSelectElement).addEventListener("change", () => {
+      (f.elements.namedItem("negocio_id") as HTMLInputElement).addEventListener("change", () => {
         const n = dados.negocios.find((x) => x.id === fv(f, "negocio_id"));
         if (!n) return;
         const titulo = f.elements.namedItem("titulo") as HTMLInputElement;
         if (!titulo.value) titulo.value = n.titulo;
-        (f.elements.namedItem("cliente_id") as HTMLSelectElement).value = n.cliente_id;
+        comboboxDe(f, "cliente_id")?.definirValor(n.cliente_id);
       });
 
       const coletar = async (): Promise<ProjetoEntrada | null> => {

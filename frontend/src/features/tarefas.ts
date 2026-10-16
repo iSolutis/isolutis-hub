@@ -8,12 +8,13 @@ import { dados, eu, nomeCliente, nomeMembro, podeEscrever, tituloProjeto, ui } f
 import { recarregar, registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { combobox, comboboxDe } from "@/ui/combobox";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura, registrarSoltar } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, opcoesClientes, opcoesEquipe, soLeitura } from "@/ui/formularios";
+import { avisoSoLeitura, botaoExcluir, botaoSalvar, comboboxClientes, espaco, opcoesEquipe, soLeitura } from "@/ui/formularios";
 import { excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
@@ -111,8 +112,8 @@ export function formTarefa(t?: Tarefa, colunaInicial = "a_fazer"): void {
       ${campo("Responsável", sel("responsavel_id", opcoesEquipe("Sem responsável", true), t ? (t.responsavel_id ?? "") : eu.id))}
       ${campo("Prazo", inp("prazo", t?.prazo, 'type="date"'))}
       ${campo("Prioridade", sel("prioridade", Object.entries(PRIORIDADES).map(([k, v]) => [k, v[0]] as const), t?.prioridade ?? "media"))}
-      ${campo("Cliente", sel("cliente_id", opcoesClientes("Nenhum"), t?.cliente_id))}
-      ${campo("Projeto", sel("projeto_id", [["", "Nenhum"], ...projs], t?.projeto_id))}
+      ${campo("Cliente", comboboxClientes(t?.cliente_id, "Nenhum"))}
+      ${campo("Projeto", combobox({ nome: "projeto_id", rotulo: "Projeto", opcoes: projs.map(([id, rotulo]) => ({ id, rotulo })), valor: t?.projeto_id, vazio: "Nenhum" }))}
       ${campo("Detalhes", area("descricao", t?.descricao, "Contexto, links, o que é preciso para considerar pronta…"), true)}
     </div>
     <div><h2 style="margin-bottom:6px">Checklist</h2><div id="ckBox" class="ck"></div>
@@ -159,10 +160,9 @@ export function formTarefa(t?: Tarefa, colunaInicial = "a_fazer"): void {
         }
       });
       desenhar();
-      (f.elements.namedItem("projeto_id") as HTMLSelectElement).addEventListener("change", () => {
+      (f.elements.namedItem("projeto_id") as HTMLInputElement).addEventListener("change", () => {
         const p = dados.projetos.find((x) => x.id === fv(f, "projeto_id"));
-        const cli = f.elements.namedItem("cliente_id") as HTMLSelectElement;
-        if (p && !cli.value) cli.value = p.cliente_id;
+        if (p && !fv(f, "cliente_id")) comboboxDe(f, "cliente_id")?.definirValor(p.cliente_id, { silencioso: true });
       });
       const coletar = (colunaForcada?: string): TarefaEntrada | null => {
         const titulo = fv(f, "titulo");

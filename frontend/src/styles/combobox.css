@@ -1,0 +1,41 @@
+/* Combobox pesquisável (ui/combobox.ts): campo + lista suspensa (telas largas) + folha de seleção (telas estreitas). */
+.cbx{position:relative;display:block;min-width:0}
+.cbx-in{padding-right:32px !important;text-overflow:ellipsis;cursor:pointer}
+.cbx-in:focus{cursor:text}
+.cbx-seta{position:absolute;right:12px;top:50%;width:7px;height:7px;margin-top:-6px;border:solid var(--muted);border-width:0 2px 2px 0;transform:rotate(45deg);cursor:pointer}
+.cbx-seta::after{content:"";position:absolute;inset:-14px -12px}
+
+.cbx-lista{position:fixed;z-index:var(--z-selecao);display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r-md);box-shadow:var(--shadow-lg);overflow:hidden}
+.cbx-itens{overflow-y:auto;overscroll-behavior:contain;flex:1;min-height:0;padding:4px}
+.cbx-op{display:flex;gap:10px;align-items:baseline;padding:8px 10px;border-radius:var(--r-sm);cursor:pointer;line-height:1.3}
+.cbx-op[data-ativo="true"]{background:var(--sunk);outline:1px solid var(--line-strong)}
+.cbx-op[aria-selected="true"]{font-weight:600;color:var(--accent)}
+.cbx-cod{font-family:var(--f-mono, monospace);font-size:var(--text-xs);color:var(--muted);flex:none}
+.cbx-tx{display:flex;flex-direction:column;min-width:0;overflow-wrap:anywhere}
+.cbx-gr{color:var(--muted);font-size:var(--text-xs);font-weight:400}
+.cbx-acao{border-top:1px solid var(--line);border-radius:0;margin-top:4px;padding-top:12px;font-weight:600;color:var(--accent);position:sticky;bottom:-4px;background:var(--surface)}
+.cbx-vazio{padding:12px 10px;color:var(--muted)}
+.cbx-mais{padding:6px 14px;font-size:var(--text-xs);color:var(--muted);border-top:1px solid var(--line)}
+.cbx-mais:empty{display:none}
+
+/* Folha de seleção: tela cheia; altura/posição reais vêm do visualViewport (JS), 100dvh é a reserva. */
+.cbx-folha{position:fixed;left:0;right:0;top:0;height:100dvh;z-index:var(--z-selecao);display:flex;flex-direction:column;background:var(--bg);color:var(--ink)}
+.cbx-folha header{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 4px;border-bottom:1px solid var(--line);flex:none}
+.cbx-folha h2{font:600 16px var(--f-display);margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cbx-voltar{width:44px;height:44px;border:0;background:none;font-size:30px;line-height:1;cursor:pointer;border-radius:var(--r-md)}
+.cbx-busca{padding:10px 12px;flex:none}
+.cbx-busca-in{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--line-strong);border-radius:var(--r-md);background:var(--surface);font-size:16px /* evita o zoom do iOS */}
+.cbx-folha .cbx-itens{padding:0 4px}
+.cbx-folha .cbx-op{min-height:44px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);border-radius:0}
+.cbx-folha .cbx-op[data-ativo="true"]{outline:0}
+.cbx-folha .cbx-acao{bottom:0}
+.cbx-travado,.cbx-travado body{overflow:hidden}
+
+@media (max-width:860px){
+  /* 16px nos campos que abrem a folha: evita o zoom automático ao focar no iOS */
+  .cbx-in{font-size:16px;min-height:44px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .cbx-folha{animation:cbx-entra .16s ease-out}
+  @keyframes cbx-entra{from{transform:translateY(8%);opacity:0}to{transform:none;opacity:1}}
+}

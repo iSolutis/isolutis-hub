@@ -5,6 +5,7 @@
  */
 import { caminhoDaTela, resolverCaminho, type RotaResolvida } from "./caminhos";
 import { abaSalva, atualizarUrl, caminhoAtual, ir, podeSair, vistasVisiveis } from "./nucleo";
+import { voltarEhDeCamada } from "./voltar";
 
 export interface RotaDeRegistro {
   /** Abre o formulário de um novo registro. */
@@ -54,6 +55,8 @@ export function aplicarRegistroDaRota(rota: RotaResolvida | null): void {
 }
 
 async function aoVoltarOuAvancar(): Promise<void> {
+  // Voltar do aparelho com uma camada aberta (folha de seleção): fecha só a camada, sem navegar.
+  if (voltarEhDeCamada()) return;
   const rota = resolverCaminho(location.pathname, telasVisiveis());
   if (rota.tipo === "reservada") return;
   // Alterações pendentes: se o usuário optar por ficar, devolve o endereço de antes.

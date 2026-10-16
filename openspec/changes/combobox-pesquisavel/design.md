@@ -52,3 +52,9 @@ Fatos do código que moldam o desenho:
 ## Migration Plan
 
 Adoção em ordem crescente de risco, cada passo com teste: instituição (conta bancária), conta do plano no título, parceiro e conta bancária no título, município, cliente (negócio, orçamento, projeto, tarefa), negócio e projeto, conta pai. Sem mudança de API ou banco; reverter é trocar o campo de volta para `sel(...)`.
+
+## Integração escolhida (investigação 1.1)
+
+- **`Esc`**: a gaveta ouve `keydown` no `document` em fase de bolha. O combobox registra, só enquanto a lista ou a folha estão abertas, um ouvinte no `document` em **fase de captura** que chama `preventDefault()` e `stopImmediatePropagation()`; o evento nunca chega à gaveta. Sem alteração em `gaveta.ts`.
+- **Voltar**: novo módulo `state/voltar.ts` com uma pilha de "camadas". `abrirCamada(aoVoltar)` cria a entrada de histórico (mesmo endereço) e devolve `fechar()`, que desfaz a entrada com `history.back()` marcando um `popstate` a ignorar. O roteador chama `voltarEhDeCamada()` na primeira linha de `aoVoltarOuAvancar`: se o `popstate` pertence a uma camada (Voltar do aparelho ou entrada desfeita pela própria folha), retorna sem consultar a guarda de saída nem recarregar a tela. Única alteração em `state/roteador.ts`.
+- **Limitação conhecida**: depois de fechar a folha pelo Voltar, a entrada "à frente" do histórico continua existindo; acionar "Avançar" a partir dela recarrega a tela atual pelo caminho normal do roteador. Aceito, por ser raro no celular.

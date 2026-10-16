@@ -5,6 +5,7 @@ import { dados, defineDono, eu, nomeMembro, podeEscrever, temPermissao } from "@
 import { campo, fv, sel, type Opcao } from "./campos";
 import { toast } from "./toast";
 import { tentar } from "./erros";
+import { combobox } from "./combobox";
 
 export const botaoSalvar = (rotulo = "Salvar"): Safe => (podeEscrever() ? html`<button class="btn primary" data-salvar>${rotulo}</button>` : html``);
 
@@ -49,15 +50,20 @@ export const opcoesClientes = (vazio = "Selecione…"): Opcao[] => [
   ...[...dados.referenciasClientes].sort((a, b) => compararTexto(a.nome, b.nome)).map((c) => [c.id, c.nome] as const),
 ];
 
+/** Combobox de clientes (lista pesquisável); `acaoFinal` acrescenta "+ Novo cliente…" quando permitido. */
+export function comboboxClientes(valor?: string | null, vazio = "Selecione…", novo = false): Safe {
+  const opcoes = [...dados.referenciasClientes].sort((a, b) => compararTexto(a.nome, b.nome)).map((c) => ({ id: c.id, rotulo: c.nome }));
+  return combobox({ nome: "cliente_id", rotulo: "Cliente", opcoes, valor, vazio, acaoFinal: novo ? { valor: "__novo", rotulo: "+ Novo cliente…" } : undefined });
+}
+
 /** Campo "Cliente" com a opção "+ Novo cliente…" (cria o cliente junto com o registro). */
 export function seletorCliente(valor?: string | null): Safe {
-  const ops: Opcao[] = [...opcoesClientes()];
-  if (podeEscrever() && temPermissao("comercial")) ops.push(["__novo", "+ Novo cliente…"]); // criar cliente é do comercial
-  return campo("Cliente", html`${sel("cliente_id", ops, valor)}<input name="novo_cliente" id="f-novo_cliente" placeholder="Nome da empresa" hidden>`);
+  const novo = podeEscrever() && temPermissao("comercial"); // criar cliente é do comercial
+  return campo("Cliente", html`${comboboxClientes(valor, "Selecione…", novo)}<input name="novo_cliente" id="f-novo_cliente" placeholder="Nome da empresa" hidden>`);
 }
 
 export function ligarNovoCliente(form: HTMLFormElement): void {
-  const s = form.elements.namedItem("cliente_id") as HTMLSelectElement | null;
+  const s = form.elements.namedItem("cliente_id") as HTMLInputElement | null;
   const i = form.elements.namedItem("novo_cliente") as HTMLInputElement | null;
   if (!s || !i) return;
   s.addEventListener("change", () => {

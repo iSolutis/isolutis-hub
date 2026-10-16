@@ -11,6 +11,7 @@ import { dados, podeEscrever, ui } from "@/state/estado";
 import { recarregar, registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { combobox, comboboxDe, type OpcaoCombobox } from "@/ui/combobox";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura } from "@/ui/eventos";
@@ -22,6 +23,10 @@ import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
 import { botaoNovo } from "./comum";
 import { abrirFormulario, registrarFormulario } from "./ponte";
+
+/** Negócios do cliente escolhido, como opções do combobox. */
+const negociosDoCliente = (clienteId: string | null | undefined): OpcaoCombobox[] =>
+  dados.negocios.filter((n) => n.cliente_id === clienteId).map((n) => ({ id: n.id, rotulo: `${n.titulo} (${etapaNome(n.etapa)})` }));
 
 registrarConsulta("orcamentos", (id) => dados.orcamentos.find((o) => o.id === id));
 
@@ -68,7 +73,7 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
     autoria: linhaAutoria(o),
     corpo: html`<div class="fields">
       ${campo("Número", raw(`<input value="${esc(o?.numero ?? "Gerado ao salvar")}" readonly aria-readonly="true">`))}${campo("Status", sel("status", Object.entries(ORC_STATUS).filter(([k]) => k !== "vencido").map(([k, v]) => [k, v[0]] as const), status))}
-      ${seletorCliente(clienteInicial)}<div class="field"><label for="f-negocio_id">Negócio</label><select name="negocio_id" id="f-negocio_id"></select></div>
+      ${seletorCliente(clienteInicial)}<div class="field"><label for="f-negocio_id">Negócio</label>${combobox({ nome: "negocio_id", rotulo: "Negócio", opcoes: negociosDoCliente(clienteInicial), valor: negocioInicial, vazio: "Sem negócio vinculado" })}</div>
       ${campo("Data", inp("data", o?.data ?? inicial.data ?? hoje(), 'type="date"'))}${campo("Validade (dias)", inp("validade_dias", o?.validade_dias ?? inicial.validade_dias ?? 15, 'type="number" min="1"'))}
     </div>
     <div><h2 style="margin-bottom:6px">Itens</h2>${!prods.length ? html`<p class="sub" style="margin:0 0 6px">Cadastre produtos para preencher os itens com um clique. Você também pode digitar a descrição livremente.</p>` : ""}
@@ -80,14 +85,9 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
     montar: (f, fechar, L) => {
       melhorarFormulario(f);
       ligarNovoCliente(f);
-      const clienteSel = f.elements.namedItem("cliente_id") as HTMLSelectElement;
-      const negSel = f.elements.namedItem("negocio_id") as HTMLSelectElement;
-      const popularNegocios = (): void => {
-        const ns = dados.negocios.filter((n) => n.cliente_id === clienteSel.value);
-        negSel.innerHTML = String(html`<option value="">Sem negócio vinculado</option>${ns.map((n) => html`<option value="${n.id}"${raw(n.id === negocioInicial ? " selected" : "")}>${n.titulo} (${etapaNome(n.etapa)})</option>`)}`);
-      };
-      popularNegocios();
-      clienteSel.addEventListener("change", popularNegocios);
+      const clienteSel = f.elements.namedItem("cliente_id") as HTMLInputElement;
+      const negociosCbx = comboboxDe(f, "negocio_id")!;
+      clienteSel.addEventListener("change", () => negociosCbx.definirOpcoes(negociosDoCliente(clienteSel.value), { valor: negocioInicial }));
 
       const tb = $("#itens", L) as HTMLElement;
       const desconto = () => numero(fv(f, "desconto"));
@@ -192,7 +192,7 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
           id: i.id ?? null, produto_id: i.produto_id || null, descricao: i.descricao || "Item", qtd: numero(i.qtd) || 1, preco_unitario: numero(i.preco_unitario), mensal: !!i.mensal,
         }));
         return {
-          cliente_id: clienteId, negocio_id: negSel.value || null, data: fv(f, "data") || hoje(), validade_dias: numero(fv(f, "validade_dias")) || 15,
+          cliente_id: clienteId, negocio_id: fv(f, "negocio_id") || null, data: fv(f, "data") || hoje(), validade_dias: numero(fv(f, "validade_dias")) || 15,
           status: fv(f, "status") as OrcamentoEntrada["status"], desconto: desconto(), obs: fv(f, "obs") || null, itens: lista,
         };
       };

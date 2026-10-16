@@ -4,6 +4,7 @@ import { registrarVista, render } from "@/state/nucleo";
 import { ui } from "@/state/estado";
 import { registrarAcao } from "@/ui/acoes";
 import { campo, fv, inp, sel } from "@/ui/campos";
+import { combobox } from "@/ui/combobox";
 import { tentar } from "@/ui/erros";
 import { abrirGaveta } from "@/ui/gaveta";
 import { espaco } from "@/ui/formularios";
@@ -94,7 +95,7 @@ function formConta(modo: "nova" | "editar", base?: PlanoConta, paiInicial?: Plan
   abrirGaveta({
     titulo: editando ? `Conta ${base.codigo}` : paiInicial ? `Nova conta em ${paiInicial.codigo}` : "Nova conta",
     corpo: html`<div class="fields">
-      ${campo("Conta pai", sel("plano_pai_id", [["", "— (primeiro nível)"], ...possiveisPais.map((c) => [c.id, `${c.codigo} ${c.nome}`] as const)], paiAtual ?? ""), true)}
+      ${campo("Conta pai", combobox({ nome: "plano_pai_id", rotulo: "Conta pai", opcoes: possiveisPais.map((c) => ({ id: c.id, codigo: c.codigo, rotulo: c.nome })), valor: paiAtual, vazio: "— (primeiro nível)" }), true)}
       <div class="field"><label for="f-codigo">Código</label><div style="display:flex;gap:6px">${inp("codigo", base?.codigo, `placeholder="Ex.: 1.01.001"${temFilhas ? " readonly" : ""}`)}${editando ? "" : html`<button class="btn" type="button" id="sugerir" title="Sugere o próximo código livre">Sugerir</button>`}</div></div>
       ${campo("Nome", inp("nome", base?.nome, 'maxlength="150"'))}
       ${campo("Tipo", sel("tipo_conta", [["A", "Analítica (recebe lançamentos)"], ["S", "Sintética (agrupa contas)"]], base?.tipo_conta ?? "A"))}
@@ -103,7 +104,7 @@ function formConta(modo: "nova" | "editar", base?: PlanoConta, paiInicial?: Plan
     <p class="sub" id="dicaConta" style="margin:0"></p>`,
     rodape: html`<button class="btn primary" data-salvar>Salvar</button>${espaco}`,
     montar: (f, fechar, L) => {
-      const pai = f.elements.namedItem("plano_pai_id") as HTMLSelectElement;
+      const pai = f.elements.namedItem("plano_pai_id") as HTMLInputElement;
       const codigo = f.elements.namedItem("codigo") as HTMLInputElement;
       const tipo = f.elements.namedItem("tipo_conta") as HTMLSelectElement;
       const nat = f.elements.namedItem("natureza") as HTMLSelectElement;

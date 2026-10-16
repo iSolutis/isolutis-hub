@@ -7,6 +7,7 @@ const fixtures = JSON.parse(readFileSync(new URL("../visual/fixtures.json", impo
 export const ID_CLIENTE = (fixtures["/clientes"] as Array<{ id: string }>)[0]!.id;
 export const USUARIO = { id: "00000000-0000-0000-0000-0000000000a1", nome: "Ana Souza", email: "ana@isolutis.example", admin: true, ativo: true, totp_ativo: false, versao: 1, senha_definida: true };
 const EMPRESA = { id: "e1", nome: "iSolutis Tecnologia", papel: "admin", onboarding_concluido: true };
+const PERMISSOES = { admin: ["base", "comercial", "financeiro", "administracao"], membro: ["base"] } as const;
 
 const json = (corpo: unknown, status = 200) => ({ status, contentType: "application/json", body: JSON.stringify(corpo) });
 
@@ -28,7 +29,7 @@ export async function simularApi(page: Page, o: OpcoesApi = {}): Promise<void> {
       return rota.fulfill(json(o.com2fa ? { requer_2fa: true, token_temporario: "tmp.jwt.parcial" } : { access_token: "acesso", token_type: "bearer", usuario: USUARIO }));
     }
     if (caminho === "/auth/2fa/verificar") return rota.fulfill(json({ access_token: "acesso", token_type: "bearer", usuario: USUARIO }));
-    if (caminho === "/empresas") return rota.fulfill(json([{ ...EMPRESA, papel: o.papel ?? "admin" }]));
+    if (caminho === "/empresas") return rota.fulfill(json([{ ...EMPRESA, papel: o.papel ?? "admin", permissoes: PERMISSOES[o.papel ?? "admin"] }]));
     if (/^\/clientes\/[^/]+\/relacionados$/.test(caminho)) return rota.fulfill(json({ lancamentos: 4, recebido: 48200 }));
     if (req.method() !== "GET") {
       o.gravados?.push(`${req.method()} ${caminho}`);

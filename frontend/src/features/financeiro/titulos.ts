@@ -1,11 +1,12 @@
 import { $, $$ } from "@/core/dom";
 import { brl, dataBR, hoje } from "@/core/formato";
-import { html, raw, type Safe } from "@/core/html";
+import { html, type Safe } from "@/core/html";
 import { numero, paraCampo } from "@/core/numero";
 import { ui } from "@/state/estado";
 import { registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { combobox, comboboxDe, type OpcaoCombobox } from "@/ui/combobox";
 import { tentar } from "@/ui/erros";
 import { abrirGaveta } from "@/ui/gaveta";
 import { espaco } from "@/ui/formularios";
@@ -61,17 +62,20 @@ async function formTitulo(t?: Titulo): Promise<void> {
   const tipoInicial = t?.tipo_conta ?? "R";
   /** RN04: contas a pagar mostram só despesas; a receber, só receitas. */
   const contasDoTipo = (tipo: string): PlanoConta[] => contasDoPlanoParaTitulo(plano, tipo);
-  const opcoesPlano = (tipo: string, atual?: string): Safe =>
-    html`<option value="">${contasDoTipo(tipo).length ? "Selecione…" : "Nenhuma conta disponível"}</option>${contasDoTipo(tipo).map((c) => html`<option value="${c.id}"${raw(c.id === atual ? " selected" : "")}>${c.codigo} ${c.nome}</option>`)}`;
+  const nomeDoPlano = new Map(plano.map((c) => [c.id, `${c.codigo} ${c.nome}`]));
+  const opcoesPlano = (tipo: string): OpcaoCombobox[] =>
+    contasDoTipo(tipo).map((c) => ({ id: c.id, codigo: c.codigo, rotulo: c.nome, grupo: c.plano_pai_id ? nomeDoPlano.get(c.plano_pai_id) : undefined }));
+  const campoPlano = (tipo: string, atual?: string | null): Safe =>
+    combobox({ nome: "plano_conta_id", rotulo: "Conta do plano de contas", opcoes: opcoesPlano(tipo), valor: atual, vazio: contasDoTipo(tipo).length ? "Digite para buscar…" : "Nenhuma conta disponível" });
 
   abrirGaveta({
     titulo: t ? `Título · ${t.parceiro_nome}` : "Novo título financeiro",
     corpo: html`<div class="fields">
       ${campo("Tipo", sel("tipo_conta", [["R", "A receber (receita)"], ["P", "A pagar (despesa)"]], tipoInicial))}
       ${campo("Situação", sel("status", [["A", "Aberto"], ["Q", "Quitado"], ["C", "Cancelado"]], t?.status ?? "A"))}
-      <div class="field full"><label for="f-plano_conta_id">Conta do plano de contas</label><select name="plano_conta_id" id="f-plano_conta_id">${opcoesPlano(tipoInicial, t?.plano_conta_id)}</select><span class="sub" id="dicaPlano"></span></div>
-      ${campo("Conta bancária", sel("conta_bancaria_id", [["", "Selecione…"], ...contas.map((c) => [c.id, `${c.nome} (${c.instituicao_codigo})`] as const)], t?.conta_bancaria_id ?? ""))}
-      ${campo("Parceiro de negócio", sel("parceiro_id", [["", "Selecione…"], ...parceiros.map((p) => [p.id, `${p.nome} · ${formatarDocumento(p.cpf_cnpj)}`] as const)], t?.parceiro_id ?? ""))}
+      <div class="field full"><label for="f-plano_conta_id">Conta do plano de contas</label>${campoPlano(tipoInicial, t?.plano_conta_id)}<span class="sub" id="dicaPlano"></span></div>
+      ${campo("Conta bancária", combobox({ nome: "conta_bancaria_id", rotulo: "Conta bancária", opcoes: contas.map((c) => ({ id: c.id, rotulo: `${c.nome} (${c.instituicao_codigo})` })), valor: t?.conta_bancaria_id }))}
+      ${campo("Parceiro de negócio", combobox({ nome: "parceiro_id", rotulo: "Parceiro de negócio", opcoes: parceiros.map((p) => ({ id: p.id, rotulo: `${p.nome} · ${formatarDocumento(p.cpf_cnpj)}` })), valor: t?.parceiro_id }))}
       ${campo("Data de emissão", inp("data_emissao", t?.data_emissao, 'type="date"'))}${campo("Data de vencimento", inp("data_vencimento", t?.data_vencimento ?? hoje(), 'type="date"'))}
       ${campo("Valor do título (R$)", inp("valor_titulo", paraCampo(t?.valor_titulo), 'inputmode="decimal" placeholder="0,00"'))}${campo("Desconto (R$)", inp("valor_desconto", paraCampo(t?.valor_desconto), 'inputmode="decimal" placeholder="0,00"'))}
       ${campo("Multa (R$)", inp("valor_multa", paraCampo(t?.valor_multa), 'inputmode="decimal" placeholder="0,00"'))}${campo("Juros (R$)", inp("valor_juros", paraCampo(t?.valor_juros), 'inputmode="decimal" placeholder="0,00"'))}
@@ -83,14 +87,13 @@ async function formTitulo(t?: Titulo): Promise<void> {
     rodape: html`<button class="btn primary" data-salvar>Salvar</button>${espaco}`,
     montar: (f, fechar, L) => {
       const tipo = f.elements.namedItem("tipo_conta") as HTMLSelectElement;
-      const planoSel = f.elements.namedItem("plano_conta_id") as HTMLSelectElement;
       const status = f.elements.namedItem("status") as HTMLSelectElement;
       const dica = $("#dicaPlano", L)!;
       const mostrarDica = (): void => {
         dica.textContent = contasDoTipo(tipo.value).length ? `Somente contas analíticas de ${tipo.value === "P" ? "despesa" : "receita"}.` : `Não há conta analítica de ${tipo.value === "P" ? "despesa" : "receita"} no plano de contas. Cadastre uma antes.`;
       };
       tipo.addEventListener("change", () => {
-        planoSel.innerHTML = String(opcoesPlano(tipo.value));
+        comboboxDe(f, "plano_conta_id")?.definirOpcoes(opcoesPlano(tipo.value), { valor: fv(f, "plano_conta_id") });
         mostrarDica();
       });
       mostrarDica();

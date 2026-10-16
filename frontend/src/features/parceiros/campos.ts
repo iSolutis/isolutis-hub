@@ -8,6 +8,7 @@ import { ORIGENS } from "@/domain/constantes";
 import { apiFinanceiro } from "@/features/financeiro/api";
 import { formatarCep, formatarDocumento } from "@/features/financeiro/comum";
 import { campo, fv, inp, sel, area } from "@/ui/campos";
+import { combobox, comboboxDe } from "@/ui/combobox";
 import { seletorDono } from "@/ui/formularios";
 import type { SecaoFormulario } from "@/ui/formulario-pagina";
 import { tentar } from "@/ui/erros";
@@ -76,7 +77,7 @@ function camposSoltos(v: ValoresParceiro) {
     endereco: campo("Endereço", inp("endereco", v.endereco, 'maxlength="150" placeholder="Rua, número, bairro"'), true),
     cep: campo("CEP", inp("cep", formatarCep(v.cep), 'inputmode="numeric" maxlength="9" placeholder="00000-000"')),
     uf: html`<div class="field"><label for="f-uf">UF</label><select name="uf" id="f-uf"><option value="">UF</option>${UFS.map((u) => html`<option value="${u}"${raw(u === v.uf ? " selected" : "")}>${u}</option>`)}</select></div>`,
-    municipio: campo("Município", html`<select name="municipio_id" id="f-municipio_id"><option value="">Escolha a UF primeiro</option></select>`, true),
+    municipio: campo("Município", combobox({ nome: "municipio_id", rotulo: "Município", opcoes: [], valor: null, vazio: "Escolha a UF primeiro" }), true),
     obs: campo("Observações", area("obs", v.obs), true),
   };
 }
@@ -119,13 +120,13 @@ export function secoesDoParceiro(v: ValoresParceiro = {}): SecaoFormulario[] {
 /** Liga o carregamento de municípios por UF e, se o parceiro já tem município, o pré-seleciona. */
 export function ligarCamposDoParceiro(form: HTMLFormElement, v: ValoresParceiro = {}): void {
   const uf = form.elements.namedItem("uf") as HTMLSelectElement;
-  const municipio = form.elements.namedItem("municipio_id") as HTMLSelectElement;
+  const municipio = comboboxDe(form, "municipio_id")!;
+  const visivel = form.querySelector<HTMLInputElement>("#f-municipio_id")!;
   const carregar = async (selecionado?: string | null): Promise<void> => {
-    municipio.innerHTML = '<option value="">Carregando…</option>';
+    visivel.placeholder = "Carregando…";
     const lista = uf.value ? await tentar(() => apiFinanceiro.municipios(uf.value)) : [];
-    municipio.innerHTML = String(
-      html`<option value="">${uf.value ? "Sem município" : "Escolha a UF primeiro"}</option>${(lista ?? []).map((m) => html`<option value="${m.id}"${raw(m.id === selecionado ? " selected" : "")}>${m.nome}</option>`)}`,
-    );
+    municipio.definirOpcoes((lista ?? []).map((m) => ({ id: m.id, rotulo: m.nome })), { valor: selecionado ?? null, silencioso: true });
+    visivel.placeholder = uf.value ? "Digite para buscar…" : "Escolha a UF primeiro";
   };
   uf.addEventListener("change", () => void carregar());
   if (v.municipio_id && v.uf) void carregar(v.municipio_id);
