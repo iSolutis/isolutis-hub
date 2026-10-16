@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Plano de entrega · {{ p.titulo }} · iSolutis</title>
+<title>Plano de entrega · {{ p.titulo }} · {{ e.nome }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 {{ css | safe }}
@@ -11,7 +11,7 @@
 </head>
 <body>
 <div class="capa"><div class="in">
-  <img src="{{ logo }}" alt="iSolutis">
+  <img src="{{ logo }}" alt="{{ e.nome }}"{% if logo_propria %} class="logo-propria"{% endif %}>
   <div class="eyebrow">Plano de entrega do projeto</div>
   <h1>{{ p.titulo }}</h1>
   <div class="cli">{{ p.cliente_nome }}{% if contato %} · A/C {{ contato }}{% endif %}</div>
@@ -53,7 +53,7 @@
 </ol></section>
 {% endif %}
 {% if p.pos_entrega %}<section class="pos"><h2>Depois da entrega</h2><p style="margin:0">{{ p.pos_entrega }}</p></section>{% endif %}
-<footer><span><b><span>i</span>Solutis</b> · Soluções e Inovações Tecnológicas · +55 71 99239-0992</span><span>Documento emitido em {{ emitido_em | data_br }}</span></footer>
+<footer><span>{{ e.rodape }}</span><span>Documento emitido em {{ emitido_em | data_br }}</span></footer>
 </div>
 </body>
 </html>

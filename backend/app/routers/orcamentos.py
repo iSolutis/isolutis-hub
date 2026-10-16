@@ -3,10 +3,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Query, Response
 
-from app.deps import Sessao
+from app.deps import EmpresaAtual, Sessao
 from app.documents.render import orcamento_pdf, slug
 from app.errors import ErroApp
 from app.schemas.orcamento import AprovacaoSaida, OrcamentoAtualizar, OrcamentoEntrada, OrcamentoLeitura, StatusExibido
+from app.services import empresa as svc_empresa
 from app.services import orcamentos as svc
 from app.services.parceiros import exigir_cliente
 
@@ -41,11 +42,12 @@ async def excluir(id_: UUID, sessao: Sessao) -> Response:
 
 
 @router.get("/{id_}/documento", response_class=Response)
-async def documento(id_: UUID, sessao: Sessao) -> Response:
+async def documento(id_: UUID, sessao: Sessao, empresa: EmpresaAtual) -> Response:
     orc = await svc.obter_completo(sessao, id_)
     cliente = await exigir_cliente(sessao, orc.cliente_id)
+    emissor = await svc_empresa.identidade(sessao, empresa)
     try:
-        pdf_bytes = orcamento_pdf(orc, cliente)
+        pdf_bytes = orcamento_pdf(orc, cliente, emissor)
     except Exception as exc:
         raise ErroApp(
             "Não foi possível gerar o PDF. Tente novamente.",

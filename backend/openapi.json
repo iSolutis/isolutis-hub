@@ -803,6 +803,352 @@
             }
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Obter",
+        "operationId": "obter_api_v1_empresas_ativa_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpresaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Atualizar",
+        "operationId": "atualizar_api_v1_empresas_ativa_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmpresaDados"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpresaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/empresas/ativa/logo": {
+      "put": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Definir Logo",
+        "operationId": "definir_logo_api_v1_empresas_ativa_logo_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpresaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Remover Logo",
+        "operationId": "remover_logo_api_v1_empresas_ativa_logo_delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/empresas/ativa/paleta": {
+      "put": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Definir Paleta",
+        "operationId": "definir_paleta_api_v1_empresas_ativa_paleta_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Paleta"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpresaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Restaurar Paleta",
+        "description": "Volta à paleta padrão do Hub.",
+        "operationId": "restaurar_paleta_api_v1_empresas_ativa_paleta_delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpresaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/projetos": {
@@ -8495,6 +8841,564 @@
         ],
         "title": "EmpresaAtualizar"
       },
+      "EmpresaDados": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Nome",
+            "description": "Nome de exibição no Hub"
+          },
+          "tipo_inscricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "CNPJ",
+                  "CPF"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo Inscricao"
+          },
+          "inscricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 18
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao"
+          },
+          "razao_social": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Razao Social"
+          },
+          "nome_fantasia": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nome Fantasia"
+          },
+          "inscricao_estadual": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao Estadual"
+          },
+          "inscricao_municipal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao Municipal"
+          },
+          "cnae_codigo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cnae Codigo"
+          },
+          "cnae_descricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cnae Descricao"
+          },
+          "regime_tributario": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "mei",
+                  "simples_nacional",
+                  "lucro_presumido",
+                  "lucro_real"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regime Tributario"
+          },
+          "data_abertura": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Abertura"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150,
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "telefone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefone"
+          },
+          "site": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site"
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 9
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cep"
+          },
+          "logradouro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logradouro"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "complemento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Complemento"
+          },
+          "bairro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bairro"
+          },
+          "municipio_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipio Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nome"
+        ],
+        "title": "EmpresaDados",
+        "description": "Campos editáveis do cadastro (o que a tela \"Dados da empresa\" envia)."
+      },
+      "EmpresaLeitura": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Nome",
+            "description": "Nome de exibição no Hub"
+          },
+          "tipo_inscricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "CNPJ",
+                  "CPF"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo Inscricao"
+          },
+          "inscricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 18
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao"
+          },
+          "razao_social": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Razao Social"
+          },
+          "nome_fantasia": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nome Fantasia"
+          },
+          "inscricao_estadual": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao Estadual"
+          },
+          "inscricao_municipal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao Municipal"
+          },
+          "cnae_codigo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cnae Codigo"
+          },
+          "cnae_descricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cnae Descricao"
+          },
+          "regime_tributario": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "mei",
+                  "simples_nacional",
+                  "lucro_presumido",
+                  "lucro_real"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regime Tributario"
+          },
+          "data_abertura": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Abertura"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150,
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "telefone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefone"
+          },
+          "site": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site"
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 9
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cep"
+          },
+          "logradouro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logradouro"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "complemento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Complemento"
+          },
+          "bairro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bairro"
+          },
+          "municipio_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipio Id"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "segmento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segmento"
+          },
+          "uf": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uf",
+            "description": "UF do município do endereço"
+          },
+          "logo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo",
+            "description": "Logomarca como data URL (data:image/...;base64,...)"
+          },
+          "paleta": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Paleta"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "nome",
+          "id"
+        ],
+        "title": "EmpresaLeitura"
+      },
       "EmpresaOnboardingEntrada": {
         "properties": {
           "nome": {
@@ -9717,6 +10621,20 @@
           "senha"
         ],
         "title": "LoginEntrada"
+      },
+      "LogoEntrada": {
+        "properties": {
+          "imagem": {
+            "type": "string",
+            "title": "Imagem",
+            "description": "Imagem PNG, JPEG ou WebP como data URL ou base64 puro (até 512 KB)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "imagem"
+        ],
+        "title": "LogoEntrada"
       },
       "MembroEquipe": {
         "properties": {
@@ -11113,6 +12031,27 @@
         ],
         "title": "Painel",
         "description": "Campos de `financeiro` e `comercial` só vêm quando o papel tem a permissão; o front omite o que não vier."
+      },
+      "Paleta": {
+        "properties": {
+          "primaria": {
+            "type": "string",
+            "title": "Primaria",
+            "description": "Cor principal (barra lateral, botões), #rrggbb"
+          },
+          "destaque": {
+            "type": "string",
+            "title": "Destaque",
+            "description": "Cor de destaque (seleção, links, gráficos), #rrggbb"
+          }
+        },
+        "type": "object",
+        "required": [
+          "primaria",
+          "destaque"
+        ],
+        "title": "Paleta",
+        "description": "Duas cores escolhidas; a interface deriva os demais tons (claro e escuro) a partir delas."
       },
       "PapelLeitura": {
         "properties": {

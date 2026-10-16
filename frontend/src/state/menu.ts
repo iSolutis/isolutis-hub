@@ -32,7 +32,7 @@ export const ESTRUTURA_MENU: SecaoMenu[] = [
       { id: "relatorios" },
     ],
   },
-  { rotulo: "Administração", itens: [{ id: "equipe" }, { id: "empresa" }] },
+  { rotulo: "Administração", itens: [{ id: "equipe" }, { id: "empresa" }, { id: "aparencia" }] },
 ];
 
 export const ICONES_DAS_TELAS: Record<string, string> = {
@@ -53,6 +53,7 @@ export const ICONES_DAS_TELAS: Record<string, string> = {
   relatorios: "relatorios",
   equipe: "equipe",
   empresa: "empresa",
+  aparencia: "paleta",
   conta: "conta",
 };
 

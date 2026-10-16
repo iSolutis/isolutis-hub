@@ -229,14 +229,55 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
+        /** Obter */
+        get: operations["obter_api_v1_empresas_ativa_get"];
+        /** Atualizar */
+        put: operations["atualizar_api_v1_empresas_ativa_put"];
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         /** Atualizar Empresa Ativa */
         patch: operations["atualizar_empresa_ativa_api_v1_empresas_ativa_patch"];
+        trace?: never;
+    };
+    "/api/v1/empresas/ativa/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Definir Logo */
+        put: operations["definir_logo_api_v1_empresas_ativa_logo_put"];
+        post?: never;
+        /** Remover Logo */
+        delete: operations["remover_logo_api_v1_empresas_ativa_logo_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/empresas/ativa/paleta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Definir Paleta */
+        put: operations["definir_paleta_api_v1_empresas_ativa_paleta_put"];
+        post?: never;
+        /**
+         * Restaurar Paleta
+         * @description Volta à paleta padrão do Hub.
+         */
+        delete: operations["restaurar_paleta_api_v1_empresas_ativa_paleta_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/projetos": {
@@ -1917,6 +1958,119 @@ export interface components {
             /** Nome */
             nome: string;
         };
+        /**
+         * EmpresaDados
+         * @description Campos editáveis do cadastro (o que a tela "Dados da empresa" envia).
+         */
+        EmpresaDados: {
+            /**
+             * Nome
+             * @description Nome de exibição no Hub
+             */
+            nome: string;
+            /** Tipo Inscricao */
+            tipo_inscricao?: ("CNPJ" | "CPF") | null;
+            /** Inscricao */
+            inscricao?: string | null;
+            /** Razao Social */
+            razao_social?: string | null;
+            /** Nome Fantasia */
+            nome_fantasia?: string | null;
+            /** Inscricao Estadual */
+            inscricao_estadual?: string | null;
+            /** Inscricao Municipal */
+            inscricao_municipal?: string | null;
+            /** Cnae Codigo */
+            cnae_codigo?: string | null;
+            /** Cnae Descricao */
+            cnae_descricao?: string | null;
+            /** Regime Tributario */
+            regime_tributario?: ("mei" | "simples_nacional" | "lucro_presumido" | "lucro_real") | null;
+            /** Data Abertura */
+            data_abertura?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Telefone */
+            telefone?: string | null;
+            /** Site */
+            site?: string | null;
+            /** Cep */
+            cep?: string | null;
+            /** Logradouro */
+            logradouro?: string | null;
+            /** Numero */
+            numero?: string | null;
+            /** Complemento */
+            complemento?: string | null;
+            /** Bairro */
+            bairro?: string | null;
+            /** Municipio Id */
+            municipio_id?: string | null;
+        };
+        /** EmpresaLeitura */
+        EmpresaLeitura: {
+            /**
+             * Nome
+             * @description Nome de exibição no Hub
+             */
+            nome: string;
+            /** Tipo Inscricao */
+            tipo_inscricao?: ("CNPJ" | "CPF") | null;
+            /** Inscricao */
+            inscricao?: string | null;
+            /** Razao Social */
+            razao_social?: string | null;
+            /** Nome Fantasia */
+            nome_fantasia?: string | null;
+            /** Inscricao Estadual */
+            inscricao_estadual?: string | null;
+            /** Inscricao Municipal */
+            inscricao_municipal?: string | null;
+            /** Cnae Codigo */
+            cnae_codigo?: string | null;
+            /** Cnae Descricao */
+            cnae_descricao?: string | null;
+            /** Regime Tributario */
+            regime_tributario?: ("mei" | "simples_nacional" | "lucro_presumido" | "lucro_real") | null;
+            /** Data Abertura */
+            data_abertura?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Telefone */
+            telefone?: string | null;
+            /** Site */
+            site?: string | null;
+            /** Cep */
+            cep?: string | null;
+            /** Logradouro */
+            logradouro?: string | null;
+            /** Numero */
+            numero?: string | null;
+            /** Complemento */
+            complemento?: string | null;
+            /** Bairro */
+            bairro?: string | null;
+            /** Municipio Id */
+            municipio_id?: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Segmento */
+            segmento?: string | null;
+            /**
+             * Uf
+             * @description UF do município do endereço
+             */
+            uf?: string | null;
+            /**
+             * Logo
+             * @description Logomarca como data URL (data:image/...;base64,...)
+             */
+            logo?: string | null;
+            paleta?: components["schemas"]["Paleta"] | null;
+        };
         /** EmpresaOnboardingEntrada */
         EmpresaOnboardingEntrada: {
             /** Nome */
@@ -2344,6 +2498,14 @@ export interface components {
             email: string;
             /** Senha */
             senha: string;
+        };
+        /** LogoEntrada */
+        LogoEntrada: {
+            /**
+             * Imagem
+             * @description Imagem PNG, JPEG ou WebP como data URL ou base64 puro (até 512 KB)
+             */
+            imagem: string;
         };
         /**
          * MembroEquipe
@@ -2815,6 +2977,22 @@ export interface components {
             proximos_fechamentos?: components["schemas"]["ProximoFechamento"][] | null;
             /** Orcamentos Aguardando */
             orcamentos_aguardando?: components["schemas"]["OrcamentoAguardando"][] | null;
+        };
+        /**
+         * Paleta
+         * @description Duas cores escolhidas; a interface deriva os demais tons (claro e escuro) a partir delas.
+         */
+        Paleta: {
+            /**
+             * Primaria
+             * @description Cor principal (barra lateral, botões), #rrggbb
+             */
+            primaria: string;
+            /**
+             * Destaque
+             * @description Cor de destaque (seleção, links, gráficos), #rrggbb
+             */
+            destaque: string;
         };
         /** PapelLeitura */
         PapelLeitura: {
@@ -4201,6 +4379,72 @@ export interface operations {
             };
         };
     };
+    obter_api_v1_empresas_ativa_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmpresaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_api_v1_empresas_ativa_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmpresaDados"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmpresaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     atualizar_empresa_ativa_api_v1_empresas_ativa_patch: {
         parameters: {
             query?: never;
@@ -4222,6 +4466,136 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    definir_logo_api_v1_empresas_ativa_logo_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogoEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmpresaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remover_logo_api_v1_empresas_ativa_logo_delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    definir_paleta_api_v1_empresas_ativa_paleta_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Paleta"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmpresaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restaurar_paleta_api_v1_empresas_ativa_paleta_delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmpresaLeitura"];
+                };
             };
             /** @description Validation Error */
             422: {
