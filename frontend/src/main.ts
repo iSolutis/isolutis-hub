@@ -8,7 +8,7 @@ import type { EmpresaAcesso } from "@/api/tipos";
 import { decidirEmpresa } from "@/state/empresa-ativa";
 import { escolherEmpresa, telaSemAcesso } from "@/ui/escolha-empresa";
 import { acesso, conexao, eu, ui } from "@/state/estado";
-import { abaSalva, atualizarUrl, carregarTudo, definirAtual, observarNavegacao, recarregar, render } from "@/state/nucleo";
+import { abaSalva, aoRecarregar, atualizarUrl, carregarTudo, definirAtual, observarNavegacao, recarregar, render, vistaAtual } from "@/state/nucleo";
 import { aplicarRegistroDaRota, iniciarRoteador, resolverRotaInicial } from "@/state/roteador";
 import { tempoReal } from "@/state/realtime";
 import { desenharOnline, indicarSincronizacao, iniciarBarraLateral } from "@/ui/casca";
@@ -17,6 +17,7 @@ import { iniciarAvisoDeConflito } from "@/ui/conflito";
 import { detectarRotaConvite, iniciarTelaConvite } from "@/ui/convite";
 import { concluirConvitePendente, convitePendente } from "@/ui/convite-pendente";
 import { iniciarEventos } from "@/ui/eventos";
+import { aplicarIdentidade, aplicarLogo, esquecerIdentidades, identidadeLembrada, lembrarIdentidade } from "@/ui/identidade";
 import { abrirPaleta, ligarAtalhoDaPaleta } from "@/ui/paleta";
 import { montarSprite } from "@/ui/icones";
 import { observarGaveta } from "@/ui/gaveta";
@@ -38,6 +39,7 @@ import "@/features/faturamento";
 import "@/features/relatorios";
 import "@/features/equipe";
 import "@/features/empresa";
+import "@/features/aparencia";
 import "@/features/conta";
 import "@/features/periodo";
 
@@ -98,9 +100,29 @@ async function iniciarApp(usuario: Usuario): Promise<void> {
       }, 120);
     },
   });
+  // Outro administrador mudou o cadastro, a logomarca ou a paleta: reaplica a identidade nesta aba.
+  aoRecarregar((recurso) => {
+    if (recurso === "empresa" && acesso.empresaId) void sincronizarIdentidade(acesso.empresaId);
+  });
   observarNavegacao((id) => tempoReal.presenca({ area: id }));
   observarGaveta((titulo, editando) => tempoReal.presenca({ editando: editando ? titulo : null }));
   tempoReal.presenca({ area: abaSalva(), editando: null });
+}
+
+/**
+ * Logomarca e paleta da empresa ativa: aplica na hora a última conhecida (sem piscar a identidade padrão) e
+ * confirma com o servidor. Na tela Aparência a paleta em pré-visualização não é sobrescrita.
+ */
+async function sincronizarIdentidade(empresaId: string): Promise<void> {
+  try {
+    const empresa = await api.empresas.ativa();
+    const identidade = { logo: empresa.logo ?? null, paleta: empresa.paleta ?? null };
+    lembrarIdentidade(empresaId, identidade);
+    if (vistaAtual() === "aparencia") aplicarLogo(identidade.logo, empresa.nome);
+    else aplicarIdentidade(identidade, empresa.nome);
+  } catch (e) {
+    console.error(e); // sem a identidade da empresa, o Hub segue com a padrão
+  }
 }
 
 /** Sai da sessão: nada da escolha de empresa pode sobrar para a próxima pessoa no mesmo navegador. */
@@ -108,6 +130,7 @@ function sair(): void {
   tempoReal.parar();
   sessaoToken.definir(null);
   sessaoToken.limparEmpresas();
+  esquecerIdentidades();
   convitePendente.limpar();
   location.replace(location.pathname);
 }
@@ -137,6 +160,9 @@ async function selecionarEmpresa(): Promise<EmpresaAcesso> {
   acesso.empresaNome = ativa.nome;
   acesso.papel = ativa.papel;
   acesso.permissoes = ativa.permissoes;
+  const lembrada = identidadeLembrada(ativa.id);
+  if (lembrada) aplicarIdentidade(lembrada, ativa.nome);
+  void sincronizarIdentidade(ativa.id);
   return ativa;
 }
 

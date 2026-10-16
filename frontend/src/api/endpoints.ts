@@ -9,6 +9,13 @@ export const api = {
   empresas: {
     listar: () => http.get<T.EmpresaAcesso[]>("/empresas"),
     atualizar: (nome: string) => http.patch<void>("/empresas/ativa", { nome }),
+    /** Cadastro completo, logomarca e paleta da empresa ativa (qualquer papel lê; só administradores alteram). */
+    ativa: () => http.get<S["EmpresaLeitura"]>("/empresas/ativa"),
+    salvar: (d: S["EmpresaDados"]) => http.put<S["EmpresaLeitura"]>("/empresas/ativa", d),
+    enviarLogo: (imagem: string) => http.put<S["EmpresaLeitura"]>("/empresas/ativa/logo", { imagem }),
+    removerLogo: () => http.delete("/empresas/ativa/logo"),
+    salvarPaleta: (p: S["Paleta"]) => http.put<S["EmpresaLeitura"]>("/empresas/ativa/paleta", p),
+    restaurarPaleta: () => http.delete("/empresas/ativa/paleta"),
   },
   auth: {
     login: (email: string, senha: string) => http.post<T.LoginResposta>("/auth/login", { email, senha }),

@@ -11,6 +11,7 @@
 <body>
 <div class="page">
   <header>
+    {% if logo %}<img class="logo" src="{{ logo }}" alt="{{ empresa_nome }}">{% endif %}
     <div>
       <div class="empresa">{{ empresa_nome }}</div>
       <h1>{{ titulo }}</h1>
@@ -84,7 +85,7 @@
   </table>
   {% endif %}
 
-  <footer>iSolutis · Soluções e Inovações Tecnológicas · +55 71 99239-0992</footer>
+  <footer>{{ rodape }}</footer>
 </div>
 </body>
 </html>

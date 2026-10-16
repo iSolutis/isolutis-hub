@@ -5,11 +5,12 @@ from uuid import UUID
 from fastapi import APIRouter, Query, Response
 from sqlalchemy import select
 
-from app.deps import Sessao
+from app.deps import EmpresaAtual, Sessao
 from app.documents.render import projeto_html, slug
 from app.models import Usuario
 from app.schemas.projeto import EtapaSugerida, ModeloProjeto, ProjetoAtualizar, ProjetoEntrada, ProjetoLeitura
 from app.schemas.usuario import MembroEquipe
+from app.services import empresa as svc_empresa
 from app.services import projetos as svc
 from app.services.parceiros import exigir_cliente
 
@@ -48,11 +49,12 @@ async def excluir(id_: UUID, sessao: Sessao) -> Response:
 
 
 @router.get("/{id_}/relatorio", response_class=Response)
-async def relatorio(id_: UUID, sessao: Sessao) -> Response:
+async def relatorio(id_: UUID, sessao: Sessao, empresa: EmpresaAtual) -> Response:
     projeto = await svc.obter_completo(sessao, id_)
     cliente = await exigir_cliente(sessao, projeto.cliente_id)
     equipe = {u.id: MembroEquipe.model_validate(u) for u in (await sessao.scalars(select(Usuario))).all()}
-    html = projeto_html(projeto, cliente, equipe.get(projeto.responsavel_id), equipe)
+    emissor = await svc_empresa.identidade(sessao, empresa)
+    html = projeto_html(projeto, cliente, equipe.get(projeto.responsavel_id), equipe, emissor)
     nome = f"Plano-de-entrega-{slug(projeto.titulo)}-{slug(cliente.nome)}.html"
     return Response(
         html,

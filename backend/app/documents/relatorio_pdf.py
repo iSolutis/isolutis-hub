@@ -28,7 +28,9 @@ def _css(nome: str) -> str:
     return (PASTA / "templates" / nome).read_text(encoding="utf-8")
 
 
-def relatorio_pdf(dados: list[dict], tipo: str, empresa_nome: str, ano: int) -> bytes:
+def relatorio_pdf(
+    dados: list[dict], tipo: str, empresa_nome: str, ano: int, logo: str | None = None, rodape: str | None = None
+) -> bytes:
     """Gera PDF do relatório financeiro.
 
     Args:
@@ -36,6 +38,8 @@ def relatorio_pdf(dados: list[dict], tipo: str, empresa_nome: str, ano: int) -> 
         tipo: ``'dre'`` ou ``'fluxo_caixa'``.
         empresa_nome: Nome da empresa para o cabeçalho.
         ano: Ano de referência do relatório.
+        logo: Logomarca da empresa como data URL (opcional), exibida no cabeçalho.
+        rodape: Linha do rodapé (dados de contato da empresa); sem ela, só o nome da empresa.
 
     Returns:
         Conteúdo do PDF como bytes.
@@ -52,6 +56,8 @@ def relatorio_pdf(dados: list[dict], tipo: str, empresa_nome: str, ano: int) -> 
             empresa_nome=empresa_nome,
             titulo=titulo,
             ano=ano,
+            logo=logo,
+            rodape=rodape or empresa_nome,
             css=_css("_relatorio_financeiro.css"),
         )
     )

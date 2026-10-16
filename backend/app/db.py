@@ -33,6 +33,7 @@ RECURSO_DA_TABELA = {
     "tarefas": "tarefas",
     "tarefa_checklist": "tarefas",
     "usuarios": "equipe",
+    "empresa": "empresa",  # cadastro, logomarca e paleta: as outras abas reaplicam a identidade visual
     # módulo financeiro (tudo o que ele grava avisa a tela "financeiro")
     "plano_contas": "financeiro",
     "conta_bancaria": "financeiro",
