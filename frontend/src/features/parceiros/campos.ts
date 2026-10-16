@@ -4,6 +4,7 @@
  * sua própria API; aqui ficam só o HTML dos campos, a leitura do formulário e o carregamento de municípios.
  */
 import { html, raw, type Safe } from "@/core/html";
+import { numero, paraCampo } from "@/core/numero";
 import { ORIGENS } from "@/domain/constantes";
 import { apiFinanceiro } from "@/features/financeiro/api";
 import { formatarCep, formatarDocumento } from "@/features/financeiro/comum";
@@ -12,6 +13,8 @@ import { seletorDono } from "@/ui/formularios";
 import type { SecaoFormulario } from "@/ui/formulario-pagina";
 import { tentar } from "@/ui/erros";
 import { avisar } from "@/ui/toast";
+
+export const PAPEL_SOCIO = "socio";
 
 export const UFS = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"] as const;
 
@@ -35,6 +38,8 @@ export interface ValoresParceiro {
   municipio_id?: string | null;
   uf?: string | null;
   papeis?: string[];
+  /** Participação do sócio na empresa, em %. */
+  participacao_percentual?: number | null;
 }
 
 export interface PapelDisponivel {
@@ -57,6 +62,7 @@ export interface CamposLidos {
   cep: string | null;
   municipio_id: string | null;
   papeis: string[];
+  participacao_percentual: number | null;
   /** Só presente quando o formulário tem o campo "Dono"; ausente, o servidor mantém (ou define quem cria). */
   responsavel_id?: string | null;
 }
@@ -81,6 +87,12 @@ function camposSoltos(v: ValoresParceiro) {
   };
 }
 
+/** Participação do sócio: só aparece com o papel Sócio marcado (ver `ligarCamposDoParceiro`). */
+function campoParticipacao(v: ValoresParceiro): Safe {
+  const visivel = (v.papeis ?? []).includes(PAPEL_SOCIO);
+  return html`<div class="field full" id="campoParticipacao"${raw(visivel ? "" : " hidden")}><label for="f-participacao_percentual">Participação na empresa (%)</label>${inp("participacao_percentual", paraCampo(v.participacao_percentual), 'inputmode="decimal" placeholder="Ex.: 40"')}<span class="sub">A soma das participações dos sócios não pode passar de 100%.</span></div>`;
+}
+
 /** HTML dos campos. Com `papeis` (lista de papéis disponíveis) mostra as caixas de escolha de papel; sem, o papel é fixo. */
 export function camposDoParceiro(v: ValoresParceiro = {}, papeis?: readonly PapelDisponivel[]): Safe {
   const marcados = new Set(v.papeis ?? []);
@@ -91,6 +103,7 @@ export function camposDoParceiro(v: ValoresParceiro = {}, papeis?: readonly Pape
         ? html`<div class="field full"><label>Papéis</label><div class="papeis" style="display:flex;gap:16px;flex-wrap:wrap">${papeis.map((p) => html`<label class="check"><input type="checkbox" name="papel" value="${p.codigo}"${raw(marcados.has(p.codigo) ? " checked" : "")}> ${p.nome}</label>`)}</div></div>`
         : ""
     }
+    ${papeis ? campoParticipacao(v) : ""}
     ${c.nome}
     ${c.tipo}
     ${c.doc}
@@ -129,6 +142,12 @@ export function ligarCamposDoParceiro(form: HTMLFormElement, v: ValoresParceiro 
   };
   uf.addEventListener("change", () => void carregar());
   if (v.municipio_id && v.uf) void carregar(v.municipio_id);
+  // A participação só faz sentido para sócios: mostra o campo ao marcar o papel e esconde ao desmarcar.
+  const caixaSocio = form.querySelector<HTMLInputElement>(`input[name="papel"][value="${PAPEL_SOCIO}"]`);
+  const campoParticipacao = form.querySelector<HTMLElement>("#campoParticipacao");
+  caixaSocio?.addEventListener("change", () => {
+    if (campoParticipacao) campoParticipacao.hidden = !caixaSocio.checked;
+  });
 }
 
 /** Lê e valida o formulário; devolve null (já avisando) se faltar algo. `papelFixo` evita exigir a escolha de papéis. */
@@ -138,12 +157,18 @@ export function lerCamposDoParceiro(form: HTMLFormElement, papelFixo?: string): 
   const papeis = papelFixo ? [papelFixo] : [...form.querySelectorAll<HTMLInputElement>('input[name="papel"]:checked')].map((i) => i.value);
   if (!papeis.length) return avisar("Escolha pelo menos um papel (cliente, fornecedor, funcionário…).");
   const municipio = fv(form, "municipio_id");
+  let participacao: number | null = null;
+  if (papeis.includes(PAPEL_SOCIO)) {
+    participacao = numero(fv(form, "participacao_percentual"));
+    if (!(participacao > 0 && participacao <= 100)) return avisar("Informe a participação do sócio, maior que 0% e até 100%.");
+  }
   return {
     tipo_pessoa: fv(form, "tipo_pessoa") as "PJ" | "PF", cpf_cnpj: fv(form, "cpf_cnpj") || null, nome,
     segmento: fv(form, "segmento") || null, contato: fv(form, "contato") || null, cargo: fv(form, "cargo") || null,
     telefone: fv(form, "telefone") || null, email: fv(form, "email") || null,
     origem: (fv(form, "origem") || null) as CamposLidos["origem"], obs: fv(form, "obs") || null,
     endereco: fv(form, "endereco") || null, cep: fv(form, "cep") || null, municipio_id: municipio || null, papeis,
+    participacao_percentual: participacao,
     ...(form.elements.namedItem("responsavel_id") ? { responsavel_id: fv(form, "responsavel_id") || null } : {}),
   };
 }

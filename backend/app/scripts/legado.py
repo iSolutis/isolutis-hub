@@ -19,13 +19,12 @@ from app.financeiro.regras import documento_valido
 
 COLECOES = (
     "hub_membros", "hub_clientes", "hub_produtos", "hub_negocios", "hub_orcamentos",
-    "hub_faturamento", "hub_despesas", "hub_projetos", "hub_tarefas",
+    "hub_faturamento", "hub_projetos", "hub_tarefas",
 )  # fmt: skip
 
 ORIGENS = {"Site", "Indicação", "LinkedIn", "Instagram", "WhatsApp", "Evento", "Prospecção ativa", "Outro"}
 MOTIVOS = {"Preço", "Prazo", "Escolheu concorrente", "Adiou o projeto", "Sem resposta", "Fora do perfil"}
 TIPOS_RECEITA = {"projeto", "mensal", "consultoria", "outro"}
-FORMAS = {"Dinheiro (aporte)", "Equipamento", "Pagamento de despesa da empresa", "Outro"}
 
 
 @dataclass
@@ -244,26 +243,6 @@ def limpar_lancamento(d: dict[str, Any]) -> dict[str, Any]:
         "descricao": texto(d.get("descricao")) or "(sem descrição)", "valor": max(dinheiro(d.get("valor")), Decimal(0)),
         "vencimento": vencimento, "status": status, "nf": texto(d.get("nf")),
         "recebido_em": (data(d.get("recebidoEm")) or vencimento) if status == "recebido" else None,
-    }  # fmt: skip
-
-
-def limpar_despesa(d: dict[str, Any]) -> dict[str, Any]:
-    dia = data(d.get("data")) or date.today()
-    status = "a_pagar" if d.get("status") == "a_pagar" else "pago"
-    return {
-        "data": dia, "descricao": texto(d.get("descricao")) or texto(d.get("categoria")) or "Despesa",
-        "valor": max(dinheiro(d.get("valor")), Decimal(0)), "obs": texto(d.get("obs")), "status": status,
-        "pago_em": (data(d.get("pagoEm")) or dia) if status == "pago" else None, "fornecedor": texto(d.get("fornecedor")),
-        "categoria": texto(d.get("categoria")),
-    }  # fmt: skip
-
-
-def limpar_investimento(d: dict[str, Any]) -> dict[str, Any]:
-    forma = d.get("forma") if d.get("forma") in FORMAS else "Outro"
-    return {
-        "data": data(d.get("data")) or date.today(), "descricao": texto(d.get("descricao")) or "Investimento",
-        "valor": max(dinheiro(d.get("valor")), Decimal(0)), "forma": forma, "obs": texto(d.get("obs")),
-        "investidor": texto(d.get("investidor")) or "Não informado",
     }  # fmt: skip
 
 

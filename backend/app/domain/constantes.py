@@ -67,13 +67,3 @@ class Prioridade(StrEnum):
     ALTA = "alta"
     MEDIA = "media"
     BAIXA = "baixa"
-
-
-class StatusDespesa(StrEnum):
-    PAGO = "pago"
-    A_PAGAR = "a_pagar"
-
-
-class TipoDespesa(StrEnum):
-    DESPESA = "despesa"
-    INVESTIMENTO = "investimento"

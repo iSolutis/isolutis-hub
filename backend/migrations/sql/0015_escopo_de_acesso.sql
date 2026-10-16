@@ -1,4 +1,4 @@
--- 0013 · Escopo de acesso dentro da empresa: equipes, dono do cliente, participantes de projeto e RLS por escopo.
+-- 0015 · Escopo de acesso dentro da empresa: equipes, dono do cliente, participantes de projeto e RLS por escopo.
 --
 -- Visão geral (ver openspec/changes/escopo-de-acesso/design.md):
 --   * app_definir_escopo() calcula UMA vez por transação o conjunto V = {eu} ∪ liderados (árvore de equipes)

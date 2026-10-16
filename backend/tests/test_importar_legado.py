@@ -2,7 +2,7 @@ from pathlib import Path
 
 from sqlalchemy import func, select, text
 
-from app.models import Despesa, Investimento, LancamentoReceita, Negocio, Orcamento, Parceiro, Projeto, Tarefa, Usuario
+from app.models import LancamentoReceita, Negocio, Orcamento, Parceiro, Projeto, Tarefa, Usuario
 from app.scripts import legado as lg
 from app.scripts.importar_legado import Importador
 
@@ -47,9 +47,6 @@ async def test_importacao_completa_com_limpeza(sessao):
     assert float(avulso.valor) == 1500.5
     assert avulso.recebido_em is not None  # recebido sem data -> usa o vencimento
 
-    assert await sessao.scalar(select(func.count()).select_from(Despesa)) == 2
-    invs = (await sessao.scalars(select(Investimento))).all()
-    assert len(invs) == 2
     projetos = (await sessao.scalars(select(Projeto))).all()
     por_titulo = {p.titulo: p for p in projetos}
     assert por_titulo["Portal"].entrega is None  # entrega < início descartada

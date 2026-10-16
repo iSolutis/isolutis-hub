@@ -18,9 +18,9 @@ from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import criar_engine
+from app.financeiro.models import TituloFinanceiro
 from app.models import (
     Empresa,
-    Despesa,
     LancamentoReceita,
     Negocio,
     Orcamento,
@@ -138,7 +138,7 @@ async def medir_receita_periodo(sessao: AsyncSession, empresa_id: UUID, medidor:
 
 
 async def medir_despesa_periodo(sessao: AsyncSession, empresa_id: UUID, medidor: MedidorPerformance, n_iteracoes: int = 10):
-    """Medir latência de listagem de despesas por período."""
+    """Medir latência de listagem de despesas (títulos a pagar) por período."""
     hoje = date.today()
     for mes in range(1, n_iteracoes + 1):
         inicio_mes = date(hoje.year, mes if mes <= 12 else mes % 12, 1)
@@ -146,13 +146,14 @@ async def medir_despesa_periodo(sessao: AsyncSession, empresa_id: UUID, medidor:
 
         inicio = time.perf_counter()
         await sessao.execute(
-            select(Despesa)
+            select(TituloFinanceiro)
             .where(
-                Despesa.empresa_id == empresa_id,
-                Despesa.data >= inicio_mes,
-                Despesa.data < fim_mes,
+                TituloFinanceiro.empresa_id == empresa_id,
+                TituloFinanceiro.tipo_conta == "P",
+                TituloFinanceiro.data_vencimento >= inicio_mes,
+                TituloFinanceiro.data_vencimento < fim_mes,
             )
-            .order_by(Despesa.data, Despesa.id)
+            .order_by(TituloFinanceiro.data_vencimento, TituloFinanceiro.id)
             .limit(100)
         )
         duracao = (time.perf_counter() - inicio) * 1000
@@ -190,7 +191,7 @@ async def relatorio_tamanho_indices(sessao: AsyncSession):
             pg_size_pretty(pg_relation_size(indexrelid)) as tamanho
         FROM pg_indexes
         WHERE schemaname = 'public'
-            AND tablename IN ('parceiro', 'negocio', 'orcamento', 'lancamento_receita', 'despesa', 'projeto', 'tarefa')
+            AND tablename IN ('parceiro', 'negocio', 'orcamento', 'lancamento_receita', 'titulo_financeiro', 'projeto', 'tarefa')
         ORDER BY pg_relation_size(indexrelid) DESC;
         """)
     )
@@ -214,7 +215,7 @@ async def relatorio_tamanho_tabelas(sessao: AsyncSession):
             pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as tamanho
         FROM pg_stat_user_tables
         WHERE schemaname = 'public'
-            AND tablename IN ('parceiro', 'negocio', 'orcamento', 'lancamento_receita', 'despesa', 'projeto', 'tarefa')
+            AND tablename IN ('parceiro', 'negocio', 'orcamento', 'lancamento_receita', 'titulo_financeiro', 'projeto', 'tarefa')
         ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
         """)
     )

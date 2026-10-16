@@ -5,7 +5,8 @@ from decimal import Decimal
 from sqlalchemy import extract, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.financeiro import Despesa, LancamentoReceita
+from app.financeiro.models import PlanoConta, TituloFinanceiro
+from app.models.financeiro import LancamentoReceita
 
 MESES = [
     "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -13,6 +14,23 @@ MESES = [
 ]
 
 ZERO = Decimal("0")
+
+# Raízes do plano padrão que não são resultado operacional: 7 (entradas) e 8 (saídas: dívidas, retiradas de sócios...).
+RAIZES_NAO_OPERACIONAIS = ("7", "8")
+
+
+def _pagos_por_mes(ano: int, *, so_operacionais: bool):  # noqa: ANN202
+    """Títulos a pagar quitados no ano, somados por mês de pagamento (valor efetivamente pago)."""
+    t = TituloFinanceiro
+    mes = extract("month", t.data_pagamento)
+    consulta = select(mes.label("mes"), func.coalesce(func.sum(t.valor_quitacao), ZERO).label("total")).where(
+        t.tipo_conta == "P", t.status == "Q", extract("year", t.data_pagamento) == ano
+    )
+    if so_operacionais:
+        raiz = func.split_part(PlanoConta.codigo, ".", 1)
+        consulta = consulta.join(PlanoConta, PlanoConta.id == t.plano_conta_id)
+        consulta = consulta.where(raiz.notin_(RAIZES_NAO_OPERACIONAIS))
+    return consulta.group_by(mes)
 
 
 async def calcular_dre(
@@ -42,18 +60,8 @@ async def calcular_dre(
         int(mes): total for mes, total in linhas_receitas.all()
     }
 
-    # Custos pagos no ano (Despesa.data é a data de referência da despesa)
-    linhas_despesas = await db.execute(
-        select(
-            extract("month", Despesa.data).label("mes"),
-            func.coalesce(func.sum(Despesa.valor), ZERO).label("total"),
-        )
-        .where(
-            Despesa.status == "pago",
-            extract("year", Despesa.data) == ano,
-        )
-        .group_by(extract("month", Despesa.data))
-    )
+    # Custos pagos no ano: títulos a pagar quitados, fora as saídas não operacionais
+    linhas_despesas = await db.execute(_pagos_por_mes(ano, so_operacionais=True))
     custos_por_mes: dict[int, Decimal] = {
         int(mes): total for mes, total in linhas_despesas.all()
     }
@@ -101,17 +109,7 @@ async def calcular_fluxo_caixa(
         int(mes): total for mes, total in linhas_entradas.all()
     }
 
-    linhas_saidas = await db.execute(
-        select(
-            extract("month", Despesa.data).label("mes"),
-            func.coalesce(func.sum(Despesa.valor), ZERO).label("total"),
-        )
-        .where(
-            Despesa.status == "pago",
-            extract("year", Despesa.data) == ano,
-        )
-        .group_by(extract("month", Despesa.data))
-    )
+    linhas_saidas = await db.execute(_pagos_por_mes(ano, so_operacionais=False))
     saidas_por_mes: dict[int, Decimal] = {
         int(mes): total for mes, total in linhas_saidas.all()
     }

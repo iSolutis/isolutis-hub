@@ -20,7 +20,7 @@ mkdirSync(saida, { recursive: true });
 
 const USUARIO = { id: "00000000-0000-0000-0000-0000000000a1", nome: "Ana Souza", email: "ana@isolutis.example", admin: true, ativo: true, totp_ativo: false, versao: 1, senha_definida: true };
 const EMPRESA = { id: "e1", nome: "iSolutis Tecnologia", papel: "admin", permissoes: ["base", "comercial", "financeiro", "administracao"], onboarding_concluido: true };
-const TELAS = ["painel", "clientes", "negocios", "orcamentos", "projetos", "tarefas", "produtos", "fin-plano", "fin-contas", "fin-parceiros", "fin-titulos", "fin-fluxo", "faturamento", "relatorios", "equipe", "despesas", "empresa", "conta"];
+const TELAS = ["painel", "clientes", "negocios", "orcamentos", "projetos", "tarefas", "produtos", "fin-plano", "fin-contas", "fornecedores", "funcionarios", "socios", "fin-titulos", "fin-recorrencias", "fin-fluxo", "faturamento", "relatorios", "equipe", "empresa", "conta"];
 const MODOS = [
   { id: "claro", w: 1366, h: 860, tema: "light" },
   { id: "escuro", w: 1366, h: 860, tema: "dark" },

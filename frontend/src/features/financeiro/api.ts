@@ -15,6 +15,9 @@ export type TituloEntrada = S["TituloEntrada"];
 export type Municipio = S["MunicipioLeitura"];
 export type Instituicao = S["InstituicaoLeitura"];
 export type FluxoDeCaixa = S["FluxoDeCaixa"];
+export type Recorrencia = S["RecorrenciaLeitura"];
+export type RecorrenciaEntrada = S["RecorrenciaEntrada"];
+export type RecorrenciaAtualizar = S["RecorrenciaAtualizar"];
 
 const B = "/financeiro";
 
@@ -46,6 +49,14 @@ export const apiFinanceiro = {
     criar: (d: TituloEntrada) => http.post<Titulo>(`${B}/titulos`, d),
     atualizar: (id: string, d: TituloEntrada) => http.put<Titulo>(`${B}/titulos/${id}`, d),
     excluir: (id: string) => http.delete(`${B}/titulos/${id}`),
+  },
+  recorrencias: {
+    listar: () => http.get<Recorrencia[]>(`${B}/recorrencias`),
+    criar: (d: RecorrenciaEntrada) => http.post<Recorrencia>(`${B}/recorrencias`, d),
+    atualizar: (id: string, d: RecorrenciaAtualizar) => http.put<Recorrencia>(`${B}/recorrencias/${id}`, d),
+    pausar: (id: string) => http.post<Recorrencia>(`${B}/recorrencias/${id}/pausar`),
+    retomar: (id: string) => http.post<Recorrencia>(`${B}/recorrencias/${id}/retomar`),
+    encerrar: (id: string) => http.post<Recorrencia>(`${B}/recorrencias/${id}/encerrar`),
   },
   fluxoDeCaixa: (ano: number) => http.get<FluxoDeCaixa>(`${B}/fluxo-de-caixa`, { ano }),
 };

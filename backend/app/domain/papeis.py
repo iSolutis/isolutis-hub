@@ -26,3 +26,20 @@ def permissoes_do_papel(papel: str | None) -> frozenset[str]:
 def ordenadas(permissoes: frozenset[str]) -> list[str]:
     """Lista estável (ordem da matriz) para devolver à API."""
     return [p for p in PERMISSOES if p in permissoes]
+
+
+# Papéis de parceiro (cliente, fornecedor, funcionário, sócio…) que cada papel de usuário enxerga e edita.
+# `None` = todos, inclusive papéis criados depois; funcionários e sócios (dados sensíveis) são só do admin.
+PAPEIS_DE_PARCEIRO_POR_PAPEL: Final[dict[str, frozenset[str] | None]] = {
+    "admin": None,
+    "financeiro": frozenset({"cliente", "fornecedor"}),
+    "comercial": frozenset({"cliente"}),
+    "membro": frozenset(),
+}
+
+
+def papeis_de_parceiro_visiveis(papel: str | None) -> frozenset[str] | None:
+    """Papéis de parceiro que o papel de usuário pode ver/editar (`None` = todos). Papel desconhecido não vê nenhum."""
+    if papel in PAPEIS_DE_PARCEIRO_POR_PAPEL:
+        return PAPEIS_DE_PARCEIRO_POR_PAPEL[papel]
+    return frozenset()

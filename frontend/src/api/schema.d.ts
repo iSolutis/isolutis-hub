@@ -961,129 +961,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/despesas": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar */
-        get: operations["listar_api_v1_despesas_get"];
-        put?: never;
-        /** Criar */
-        post: operations["criar_api_v1_despesas_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/despesas/opcoes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Opcoes */
-        get: operations["opcoes_api_v1_despesas_opcoes_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/despesas/resumo": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Resumo */
-        get: operations["resumo_api_v1_despesas_resumo_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/despesas/{id_}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Atualizar */
-        put: operations["atualizar_api_v1_despesas__id___put"];
-        post?: never;
-        /** Excluir */
-        delete: operations["excluir_api_v1_despesas__id___delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/despesas/{id_}/pagar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Pagar */
-        post: operations["pagar_api_v1_despesas__id___pagar_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/investimentos": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar Investimentos */
-        get: operations["listar_investimentos_api_v1_investimentos_get"];
-        put?: never;
-        /** Criar Investimento */
-        post: operations["criar_investimento_api_v1_investimentos_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/investimentos/{id_}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Atualizar Investimento */
-        put: operations["atualizar_investimento_api_v1_investimentos__id___put"];
-        post?: never;
-        /** Excluir Investimento */
-        delete: operations["excluir_investimento_api_v1_investimentos__id___delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/financeiro/plano-contas": {
         parameters: {
             query?: never;
@@ -1226,6 +1103,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/financeiro/recorrencias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Recorrencias */
+        get: operations["listar_recorrencias_api_v1_financeiro_recorrencias_get"];
+        put?: never;
+        /** Criar Recorrencia */
+        post: operations["criar_recorrencia_api_v1_financeiro_recorrencias_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/recorrencias/{id_}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Atualizar Recorrencia */
+        put: operations["atualizar_recorrencia_api_v1_financeiro_recorrencias__id___put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/recorrencias/{id_}/pausar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pausar Recorrencia */
+        post: operations["pausar_recorrencia_api_v1_financeiro_recorrencias__id___pausar_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/recorrencias/{id_}/retomar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Retomar Recorrencia */
+        post: operations["retomar_recorrencia_api_v1_financeiro_recorrencias__id___retomar_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/financeiro/recorrencias/{id_}/encerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Encerrar Recorrencia */
+        post: operations["encerrar_recorrencia_api_v1_financeiro_recorrencias__id___encerrar_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/financeiro/municipios": {
         parameters: {
             query?: never;
@@ -1358,7 +1321,7 @@ export interface paths {
         };
         /**
          * Papeis
-         * @description Papéis que um parceiro pode assumir (qualquer pessoa logada pode consultar).
+         * @description Papéis que o usuário pode atribuir a um parceiro (qualquer pessoa logada pode consultar).
          */
         get: operations["papeis_api_v1_parceiros_papeis_get"];
         put?: never;
@@ -1492,93 +1455,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/2fa/setup": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Setup 2Fa
-         * @description Inicia o setup do 2FA: gera segredo, QR code e backup codes provisórios.
-         *
-         *     O 2FA só fica ativo após confirmar um código em /auth/2fa/confirmar.
-         */
-        post: operations["setup_2fa_api_v1_auth_2fa_setup_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/2fa/confirmar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Confirmar 2Fa
-         * @description Confirma o primeiro código TOTP e ativa 2FA.
-         *
-         *     Invalida todas as sessões existentes (incrementa versao_sessao) e emite
-         *     um novo JWT completo para a sessão atual continuar sem re-login.
-         */
-        post: operations["confirmar_2fa_api_v1_auth_2fa_confirmar_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/2fa/verificar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Verificar 2Fa
-         * @description Endpoint público: valida código TOTP ou backup code após login parcial e emite JWT completo.
-         *
-         *     O token parcial é de uso único e é invalidado após 5 códigos incorretos.
-         */
-        post: operations["verificar_2fa_api_v1_auth_2fa_verificar_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/2fa": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Desativar 2Fa
-         * @description Desativa 2FA após confirmar o código TOTP atual.
-         */
-        delete: operations["desativar_2fa_api_v1_auth_2fa_delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/saude": {
         parameters: {
             query?: never;
@@ -1645,16 +1521,6 @@ export interface components {
             orcamento: components["schemas"]["OrcamentoLeitura"];
             /** Negocio Id */
             negocio_id: string | null;
-        };
-        /** CategoriaLeitura */
-        CategoriaLeitura: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Nome */
-            nome: string;
         };
         /** ChecklistEntrada */
         ChecklistEntrada: {
@@ -1807,6 +1673,8 @@ export interface components {
             uf: string | null;
             /** Papeis */
             papeis: string[];
+            /** Participacao Percentual */
+            participacao_percentual?: number | null;
         };
         /**
          * ClienteReferencia
@@ -1897,6 +1765,8 @@ export interface components {
             uf: string | null;
             /** Papeis */
             papeis: string[];
+            /** Participacao Percentual */
+            participacao_percentual?: number | null;
             /** Negocios Abertos */
             negocios_abertos: number;
             /** Faturado */
@@ -1909,13 +1779,6 @@ export interface components {
              * @default []
              */
             produtos: components["schemas"]["ProdutoInicial"][];
-        };
-        /** ConfirmarTotpEntrada */
-        ConfirmarTotpEntrada: {
-            /** Codigo */
-            codigo: string;
-            /** Backup Codes */
-            backup_codes: string[];
         };
         /** ContaBancariaEntrada */
         ContaBancariaEntrada: {
@@ -2009,125 +1872,6 @@ export interface components {
             expira_em: string;
             /** Usado Em */
             usado_em?: string | null;
-        };
-        /** DespesaAtualizar */
-        DespesaAtualizar: {
-            /**
-             * Data
-             * Format: date
-             */
-            data: string;
-            /** Descricao */
-            descricao: string;
-            /** Valor */
-            valor: number | string;
-            /**
-             * Categoria Id
-             * Format: uuid
-             */
-            categoria_id: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "pago" | "a_pagar";
-            /** Fornecedor */
-            fornecedor?: string | null;
-            /** Obs */
-            obs?: string | null;
-            /** Versao */
-            versao: number;
-        };
-        /** DespesaEntrada */
-        DespesaEntrada: {
-            /**
-             * Data
-             * Format: date
-             */
-            data: string;
-            /** Descricao */
-            descricao: string;
-            /** Valor */
-            valor: number | string;
-            /**
-             * Categoria Id
-             * Format: uuid
-             */
-            categoria_id: string;
-            /**
-             * Status
-             * @default pago
-             * @enum {string}
-             */
-            status: "pago" | "a_pagar";
-            /** Fornecedor */
-            fornecedor?: string | null;
-            /** Obs */
-            obs?: string | null;
-            /**
-             * Repetir
-             * @default 1
-             */
-            repetir: number;
-        };
-        /** DespesaLeitura */
-        DespesaLeitura: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Empresa Id
-             * Format: uuid
-             */
-            empresa_id: string;
-            /**
-             * Criado Em
-             * Format: date-time
-             */
-            criado_em: string;
-            /**
-             * Atualizado Em
-             * Format: date-time
-             */
-            atualizado_em: string;
-            /** Criado Por */
-            criado_por: string | null;
-            /** Atualizado Por */
-            atualizado_por: string | null;
-            /** Versao */
-            versao: number;
-            /**
-             * Data
-             * Format: date
-             */
-            data: string;
-            /** Descricao */
-            descricao: string;
-            /** Valor */
-            valor: number;
-            /**
-             * Categoria Id
-             * Format: uuid
-             */
-            categoria_id: string;
-            /** Categoria Nome */
-            categoria_nome: string;
-            /** Status */
-            status: string;
-            /** Pago Em */
-            pago_em: string | null;
-            /** Fornecedor */
-            fornecedor: string | null;
-            /** Obs */
-            obs: string | null;
-            /** Grupo Id */
-            grupo_id: string | null;
-            /** Parcela */
-            parcela: number | null;
-            /** Total Parcelas */
-            total_parcelas: number | null;
         };
         /** EmpresaAtualizar */
         EmpresaAtualizar: {
@@ -2415,6 +2159,11 @@ export interface components {
             meses: components["schemas"]["MesFluxo"][];
             /** Total Entradas */
             total_entradas: number;
+            /**
+             * Total Aportes
+             * @default 0
+             */
+            total_aportes: number;
             /** Total Saidas */
             total_saidas: number;
         };
@@ -2434,112 +2183,6 @@ export interface components {
             codigo: string;
             /** Nome */
             nome: string;
-        };
-        /** InvestidorResumo */
-        InvestidorResumo: {
-            /** Nome */
-            nome: string;
-            /** No Ano */
-            no_ano: number;
-            /** Total */
-            total: number;
-            /** Percentual */
-            percentual: number;
-        };
-        /** InvestimentoAtualizar */
-        InvestimentoAtualizar: {
-            /**
-             * Data
-             * Format: date
-             */
-            data: string;
-            /** Descricao */
-            descricao: string;
-            /** Valor */
-            valor: number | string;
-            /** Investidor */
-            investidor: string;
-            /**
-             * Forma
-             * @default Dinheiro (aporte)
-             * @enum {string}
-             */
-            forma: "Dinheiro (aporte)" | "Equipamento" | "Pagamento de despesa da empresa" | "Outro";
-            /** Obs */
-            obs?: string | null;
-            /** Versao */
-            versao: number;
-        };
-        /** InvestimentoEntrada */
-        InvestimentoEntrada: {
-            /**
-             * Data
-             * Format: date
-             */
-            data: string;
-            /** Descricao */
-            descricao: string;
-            /** Valor */
-            valor: number | string;
-            /** Investidor */
-            investidor: string;
-            /**
-             * Forma
-             * @default Dinheiro (aporte)
-             * @enum {string}
-             */
-            forma: "Dinheiro (aporte)" | "Equipamento" | "Pagamento de despesa da empresa" | "Outro";
-            /** Obs */
-            obs?: string | null;
-        };
-        /** InvestimentoLeitura */
-        InvestimentoLeitura: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Empresa Id
-             * Format: uuid
-             */
-            empresa_id: string;
-            /**
-             * Criado Em
-             * Format: date-time
-             */
-            criado_em: string;
-            /**
-             * Atualizado Em
-             * Format: date-time
-             */
-            atualizado_em: string;
-            /** Criado Por */
-            criado_por: string | null;
-            /** Atualizado Por */
-            atualizado_por: string | null;
-            /** Versao */
-            versao: number;
-            /**
-             * Data
-             * Format: date
-             */
-            data: string;
-            /** Descricao */
-            descricao: string;
-            /** Valor */
-            valor: number;
-            /**
-             * Investidor Id
-             * Format: uuid
-             */
-            investidor_id: string;
-            /** Investidor Nome */
-            investidor_nome: string;
-            /** Forma */
-            forma: string;
-            /** Obs */
-            obs: string | null;
         };
         /** ItemEntrada */
         ItemEntrada: {
@@ -2774,6 +2417,16 @@ export interface components {
             entradas_realizadas: number;
             /** Entradas Previstas */
             entradas_previstas: number;
+            /**
+             * Aportes Realizados
+             * @default 0
+             */
+            aportes_realizados: number;
+            /**
+             * Aportes Previstos
+             * @default 0
+             */
+            aportes_previstos: number;
             /** Saidas Realizadas */
             saidas_realizadas: number;
             /** Saidas Previstas */
@@ -2782,19 +2435,6 @@ export interface components {
             saldo_do_mes: number;
             /** Saldo Acumulado */
             saldo_acumulado: number;
-        };
-        /** MesResultado */
-        MesResultado: {
-            /** Mes */
-            mes: number;
-            /** Recebido */
-            recebido: number;
-            /** Despesas */
-            despesas: number;
-            /** Resultado */
-            resultado: number;
-            /** Investimentos */
-            investimentos: number;
         };
         /**
          * ModeloProjeto
@@ -2998,15 +2638,6 @@ export interface components {
             fechado_em: string | null;
             /** Faturado */
             faturado: boolean;
-        };
-        /** OpcoesDespesa */
-        OpcoesDespesa: {
-            /** Categorias */
-            categorias: components["schemas"]["CategoriaLeitura"][];
-            /** Investidores */
-            investidores: string[];
-            /** Fornecedores */
-            fornecedores: string[];
         };
         /** OrcamentoAguardando */
         OrcamentoAguardando: {
@@ -3278,6 +2909,8 @@ export interface components {
             tipo_pessoa: "PJ" | "PF";
             /** Papeis */
             papeis: string[];
+            /** Participacao Percentual */
+            participacao_percentual?: number | string | null;
             /** Versao */
             versao: number;
         };
@@ -3317,6 +2950,8 @@ export interface components {
             tipo_pessoa: "PJ" | "PF";
             /** Papeis */
             papeis: string[];
+            /** Participacao Percentual */
+            participacao_percentual?: number | string | null;
         };
         /** ParceiroLeitura */
         ParceiroLeitura: {
@@ -3380,6 +3015,8 @@ export interface components {
             uf: string | null;
             /** Papeis */
             papeis: string[];
+            /** Participacao Percentual */
+            participacao_percentual?: number | null;
         };
         /** ParticipanteEntrada */
         ParticipanteEntrada: {
@@ -3414,6 +3051,11 @@ export interface components {
             tipo_conta: "A" | "S";
             /** Natureza */
             natureza?: ("R" | "D") | null;
+            /**
+             * Aporte Socio
+             * @default false
+             */
+            aporte_socio: boolean;
         };
         /** PlanoContaLeitura */
         PlanoContaLeitura: {
@@ -3434,6 +3076,11 @@ export interface components {
             natureza: string;
             /** Nivel */
             nivel: number;
+            /**
+             * Aporte Socio
+             * @default false
+             */
+            aporte_socio: boolean;
             /**
              * Possui Filhas
              * @default false
@@ -3784,6 +3431,146 @@ export interface components {
              */
             previsao: string;
         };
+        /**
+         * RecorrenciaAtualizar
+         * @description O que se pode mudar numa recorrência; frequência e início são fixos (encerre e crie outra para mudá-los).
+         */
+        RecorrenciaAtualizar: {
+            /**
+             * Termino
+             * @enum {string}
+             */
+            termino: "data" | "quantidade" | "sem_fim";
+            /** Data Fim */
+            data_fim?: string | null;
+            /** Quantidade */
+            quantidade?: number | null;
+            /**
+             * Conta Bancaria Id
+             * Format: uuid
+             */
+            conta_bancaria_id: string;
+            /**
+             * Plano Conta Id
+             * Format: uuid
+             */
+            plano_conta_id: string;
+            /**
+             * Parceiro Id
+             * Format: uuid
+             */
+            parceiro_id: string;
+            /** Valor Titulo */
+            valor_titulo: number | string;
+            /** Anotacao */
+            anotacao?: string | null;
+        };
+        /** RecorrenciaEntrada */
+        RecorrenciaEntrada: {
+            /**
+             * Termino
+             * @enum {string}
+             */
+            termino: "data" | "quantidade" | "sem_fim";
+            /** Data Fim */
+            data_fim?: string | null;
+            /** Quantidade */
+            quantidade?: number | null;
+            /**
+             * Conta Bancaria Id
+             * Format: uuid
+             */
+            conta_bancaria_id: string;
+            /**
+             * Plano Conta Id
+             * Format: uuid
+             */
+            plano_conta_id: string;
+            /**
+             * Parceiro Id
+             * Format: uuid
+             */
+            parceiro_id: string;
+            /** Valor Titulo */
+            valor_titulo: number | string;
+            /** Anotacao */
+            anotacao?: string | null;
+            /**
+             * Tipo Conta
+             * @enum {string}
+             */
+            tipo_conta: "P" | "R";
+            /**
+             * Frequencia
+             * @enum {string}
+             */
+            frequencia: "semanal" | "quinzenal" | "mensal" | "bimestral" | "trimestral" | "semestral" | "anual";
+            /**
+             * Data Inicio
+             * Format: date
+             */
+            data_inicio: string;
+        };
+        /** RecorrenciaLeitura */
+        RecorrenciaLeitura: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Tipo Conta */
+            tipo_conta: string;
+            /**
+             * Conta Bancaria Id
+             * Format: uuid
+             */
+            conta_bancaria_id: string;
+            /** Conta Bancaria Nome */
+            conta_bancaria_nome: string;
+            /**
+             * Plano Conta Id
+             * Format: uuid
+             */
+            plano_conta_id: string;
+            /** Plano Conta Codigo */
+            plano_conta_codigo: string;
+            /** Plano Conta Nome */
+            plano_conta_nome: string;
+            /**
+             * Parceiro Id
+             * Format: uuid
+             */
+            parceiro_id: string;
+            /** Parceiro Nome */
+            parceiro_nome: string;
+            /** Valor Titulo */
+            valor_titulo: number;
+            /** Anotacao */
+            anotacao: string | null;
+            /** Frequencia */
+            frequencia: string;
+            /**
+             * Data Inicio
+             * Format: date
+             */
+            data_inicio: string;
+            /** Termino */
+            termino: string;
+            /** Data Fim */
+            data_fim: string | null;
+            /** Quantidade */
+            quantidade: number | null;
+            /** Ativa */
+            ativa: boolean;
+            /** Encerrada Em */
+            encerrada_em: string | null;
+            /** Titulos Gerados */
+            titulos_gerados: number;
+            /** Titulos Abertos */
+            titulos_abertos: number;
+            /** Proximo Vencimento */
+            proximo_vencimento: string | null;
+        };
         /** RelNegocio */
         RelNegocio: {
             /**
@@ -3814,29 +3601,6 @@ export interface components {
             /** Total Projeto */
             total_projeto: number;
         };
-        /** ResumoDespesas */
-        ResumoDespesas: {
-            /** Ano */
-            ano: number;
-            /** Anos Disponiveis */
-            anos_disponiveis: number[];
-            /** Recebido No Ano */
-            recebido_no_ano: number;
-            /** Despesas Pagas */
-            despesas_pagas: number;
-            /** Despesas A Pagar */
-            despesas_a_pagar: number;
-            /** Resultado */
-            resultado: number;
-            /** Investido No Ano */
-            investido_no_ano: number;
-            /** Investido Total */
-            investido_total: number;
-            /** Meses */
-            meses: components["schemas"]["MesResultado"][];
-            /** Investidores */
-            investidores: components["schemas"]["InvestidorResumo"][];
-        };
         /** ResumoFaturamento */
         ResumoFaturamento: {
             /** Ano */
@@ -3851,15 +3615,6 @@ export interface components {
             total_previsto: number;
             /** Total Recorrente */
             total_recorrente: number;
-        };
-        /** SetupTotpSaida */
-        SetupTotpSaida: {
-            /** Qr Code */
-            qr_code: string;
-            /** Provisioning Uri */
-            provisioning_uri: string;
-            /** Backup Codes */
-            backup_codes: string[];
         };
         /** TagEntrada */
         TagEntrada: {
@@ -4120,6 +3875,8 @@ export interface components {
             valor_quitacao: number;
             /** Anotacao */
             anotacao: string | null;
+            /** Recorrencia Id */
+            recorrencia_id?: string | null;
         };
         /** TokenSaida */
         TokenSaida: {
@@ -4233,13 +3990,6 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
-        };
-        /** VerificarTotpEntrada */
-        VerificarTotpEntrada: {
-            /** Token Temporario */
-            token_temporario: string;
-            /** Codigo */
-            codigo: string;
         };
     };
     responses: never;
@@ -6756,376 +6506,6 @@ export interface operations {
             };
         };
     };
-    listar_api_v1_despesas_get: {
-        parameters: {
-            query?: {
-                ano?: number | null;
-                mes?: number | null;
-            };
-            header?: {
-                "X-Empresa-ID"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DespesaLeitura"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    criar_api_v1_despesas_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Empresa-ID"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DespesaEntrada"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DespesaLeitura"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    opcoes_api_v1_despesas_opcoes_get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Empresa-ID"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OpcoesDespesa"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    resumo_api_v1_despesas_resumo_get: {
-        parameters: {
-            query: {
-                ano: number;
-            };
-            header?: {
-                "X-Empresa-ID"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResumoDespesas"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    atualizar_api_v1_despesas__id___put: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Empresa-ID"?: string | null;
-            };
-            path: {
-                id_: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DespesaAtualizar"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DespesaLeitura"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    excluir_api_v1_despesas__id___delete: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Empresa-ID"?: string | null;
-            };
-            path: {
-                id_: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    pagar_api_v1_despesas__id___pagar_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Empresa-ID"?: string | null;
-            };
-            path: {
-                id_: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DespesaLeitura"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    listar_investimentos_api_v1_investimentos_get: {
-        parameters: {
-            query?: {
-                ano?: number | null;
-            };
-            header?: {
-                "X-Empresa-ID"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvestimentoLeitura"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    criar_investimento_api_v1_investimentos_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Empresa-ID"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InvestimentoEntrada"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvestimentoLeitura"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    atualizar_investimento_api_v1_investimentos__id___put: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Empresa-ID"?: string | null;
-            };
-            path: {
-                id_: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InvestimentoAtualizar"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvestimentoLeitura"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    excluir_investimento_api_v1_investimentos__id___delete: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Empresa-ID"?: string | null;
-            };
-            path: {
-                id_: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     listar_plano_api_v1_financeiro_plano_contas_get: {
         parameters: {
             query?: never;
@@ -7587,6 +6967,208 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FluxoDeCaixa"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listar_recorrencias_api_v1_financeiro_recorrencias_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecorrenciaLeitura"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    criar_recorrencia_api_v1_financeiro_recorrencias_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecorrenciaEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecorrenciaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_recorrencia_api_v1_financeiro_recorrencias__id___put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecorrenciaAtualizar"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecorrenciaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pausar_recorrencia_api_v1_financeiro_recorrencias__id___pausar_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecorrenciaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retomar_recorrencia_api_v1_financeiro_recorrencias__id___retomar_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecorrenciaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    encerrar_recorrencia_api_v1_financeiro_recorrencias__id___encerrar_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecorrenciaLeitura"];
                 };
             };
             /** @description Validation Error */
@@ -8200,121 +7782,6 @@ export interface operations {
                 content: {
                     "application/json": unknown;
                 };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    setup_2fa_api_v1_auth_2fa_setup_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SetupTotpSaida"];
-                };
-            };
-        };
-    };
-    confirmar_2fa_api_v1_auth_2fa_confirmar_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConfirmarTotpEntrada"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TokenSaida"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    verificar_2fa_api_v1_auth_2fa_verificar_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["VerificarTotpEntrada"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TokenSaida"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    desativar_2fa_api_v1_auth_2fa_delete: {
-        parameters: {
-            query: {
-                codigo: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Validation Error */
             422: {

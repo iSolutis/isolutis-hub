@@ -31,8 +31,11 @@ export function resolverRotaInicial(caminho: string = location.pathname): RotaIn
   const telas = telasVisiveis();
   const rota = resolverCaminho(caminho, telas);
   switch (rota.tipo) {
-    case "tela":
-      return { vista: rota.vista, corrigir: null, registro: null };
+    case "tela": {
+      // Endereço antigo de uma tela que mudou de lugar: abre a nova e corrige a barra de endereços.
+      const certo = caminhoDaTela(rota.vista);
+      return { vista: rota.vista, corrigir: caminho.replace(/\/+$/, "").split(/[?#]/)[0] === certo ? null : certo, registro: null };
+    }
     case "novo":
     case "registro":
       return { vista: rota.vista, corrigir: null, registro: rota };
@@ -65,7 +68,9 @@ async function aoVoltarOuAvancar(): Promise<void> {
     await ir(rota.tipo === "raiz" ? abaSalva() : "painel", { historico: "replace", semGuarda: true });
     return;
   }
-  await ir(rota.vista, { historico: "nenhum", semGuarda: true });
+  // tela com endereço antigo (ex.: /despesas): a URL é trocada pela nova em vez de empilhar entrada no histórico
+  const antigo = rota.tipo === "tela" && location.pathname !== caminhoDaTela(rota.vista);
+  await ir(rota.vista, { historico: antigo ? "replace" : "nenhum", semGuarda: true });
   aplicarRegistroDaRota(rota);
 }
 

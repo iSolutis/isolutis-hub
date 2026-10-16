@@ -115,6 +115,6 @@ registrarVista({
   id: "painel",
   nome: "Painel",
   carregar,
-  depende: ["clientes", "negocios", "orcamentos", "faturamento", "despesas", "projetos"],
+  depende: ["clientes", "negocios", "orcamentos", "faturamento", "financeiro", "projetos"],
   desenhar: vista,
 });

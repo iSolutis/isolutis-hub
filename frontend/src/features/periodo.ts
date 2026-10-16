@@ -1,4 +1,4 @@
-/** Seleção de ano e mês compartilhada por Faturamento e Despesas. */
+/** Seleção de ano e mês compartilhada pelas telas que filtram por ano e mês. */
 import { ui } from "@/state/estado";
 import { recarregarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";

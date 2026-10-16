@@ -7,7 +7,14 @@ import pytest
 from fastapi.routing import APIRoute
 from pydantic import ValidationError
 
-from app.domain.papeis import PAPEIS, PERMISSOES, PERMISSOES_POR_PAPEL, ordenadas, permissoes_do_papel
+from app.domain.papeis import (
+    PAPEIS,
+    PERMISSOES,
+    PERMISSOES_POR_PAPEL,
+    ordenadas,
+    papeis_de_parceiro_visiveis,
+    permissoes_do_papel,
+)
 from app.main import criar_app
 from app.schemas.convite import ConviteEntrada
 from app.schemas.usuario import UsuarioAtualizar, UsuarioCriar
@@ -85,7 +92,7 @@ def test_lista_de_excecoes_so_tem_rotas_que_existem():
         ("GET", "/orcamentos", "comercial"),
         ("GET", "/produtos", "comercial"),
         ("GET", "/faturamento", "financeiro"),
-        ("GET", "/despesas", "financeiro"),
+        ("GET", "/financeiro/recorrencias", "financeiro"),
         ("GET", "/relatorios/dre", "financeiro"),
         ("GET", "/financeiro/titulos", "financeiro"),
         ("GET", "/financeiro/instituicoes", "base"),
@@ -152,3 +159,30 @@ def test_papel_invalido_e_recusado(papel: str):
 
 def test_usuario_novo_nasce_com_acesso_basico():
     assert UsuarioCriar(nome="Bia", email="bia@exemplo.com", senha="senha-longa-1").papel == "membro"
+
+
+# ----------------------------------------------------------------------------- papéis de parceiro por papel de usuário
+def test_admin_ve_todos_os_papeis_de_parceiro():
+    assert papeis_de_parceiro_visiveis("admin") is None
+
+
+def test_funcionarios_e_socios_so_para_o_admin():
+    for papel in ("financeiro", "comercial", "membro"):
+        visiveis = papeis_de_parceiro_visiveis(papel)
+        assert visiveis is not None and not visiveis & {"funcionario", "socio"}
+
+
+def test_financeiro_ve_clientes_e_fornecedores_e_comercial_so_clientes():
+    assert papeis_de_parceiro_visiveis("financeiro") == {"cliente", "fornecedor"}
+    assert papeis_de_parceiro_visiveis("comercial") == {"cliente"}
+    assert papeis_de_parceiro_visiveis("membro") == frozenset()
+
+
+@pytest.mark.parametrize("papel", [None, "", "superusuario"])
+def test_papel_desconhecido_nao_ve_nenhum_papel_de_parceiro(papel: str | None):
+    assert papeis_de_parceiro_visiveis(papel) == frozenset()
+
+
+def test_modulo_despesas_foi_removido():
+    caminhos = {r.path for r in criar_app().routes if isinstance(r, APIRoute)}
+    assert not {c for c in caminhos if "/despesas" in c or "/investimentos" in c}

@@ -24,6 +24,6 @@ Cada empresa do Hub usa a logo e as cores da iSolutis: a interface, os orçament
 
 ## Impact
 
-- Banco: migração `0012` aditiva na tabela `empresa` (colunas anuláveis, checks, índice único parcial da inscrição, `logo bytea`, `paleta jsonb`).
+- Banco: migração `0014` aditiva na tabela `empresa` (colunas anuláveis, checks, índice único parcial da inscrição, `logo bytea`, `paleta jsonb`).
 - Backend: `models/parceiro.py`, `schemas/empresa.py`, `services/empresa.py`, `routers/empresa.py`, `documents/*`, `routers/{orcamentos,projetos,relatorios}.py`, `db.py` (tempo real).
 - Frontend: `features/empresa.ts`, `features/aparencia.ts`, `ui/identidade.ts`, `styles/identidade.css`, `main.ts`, menu e ícone.

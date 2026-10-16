@@ -1,15 +1,16 @@
 """Cadastro único de parceiros (hub de papéis): regras compartilhadas por clientes e pelo módulo financeiro."""
 
 from collections.abc import Iterable
+from decimal import Decimal
 from types import SimpleNamespace
 from uuid import UUID
 
-from sqlalchemy import exists, func, select
+from sqlalchemy import exists, func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
-from app.errors import NaoEncontrado, RegraDeNegocio
+from app.errors import NaoEncontrado, RegraDeNegocio, SemPermissao
 from app.financeiro import regras
 from app.models import (
     Empresa,
@@ -20,6 +21,7 @@ from app.models import (
     PapelParceiro,
     Parceiro,
     ParceiroPapel,
+    ParceiroSocio,
     ParceiroTag,
     Projeto,
     Tarefa,
@@ -28,6 +30,11 @@ from app.services import escopo
 from app.services.base import conferir_versao, confirmar
 
 PAPEL_CLIENTE = "cliente"
+PAPEL_SOCIO = "socio"
+PAPEL_FORNECEDOR = "fornecedor"
+
+# Papéis de parceiro que o usuário enxerga/edita; `None` = todos (chamadas internas, sem requisição).
+Visiveis = frozenset[str] | None
 
 
 async def empresa_atual(sessao: AsyncSession) -> Empresa:
@@ -40,14 +47,31 @@ async def empresa_atual(sessao: AsyncSession) -> Empresa:
 
 
 def consulta() -> object:
-    return select(Parceiro).options(selectinload(Parceiro.papeis), joinedload(Parceiro.municipio))
+    return select(Parceiro).options(selectinload(Parceiro.papeis), selectinload(Parceiro.socio), joinedload(Parceiro.municipio))
+
+
+def exigir_papel_visivel(papel: str | None, visiveis: Visiveis) -> None:
+    if papel and visiveis is not None and papel not in visiveis:
+        raise SemPermissao("Seu papel nesta empresa não permite acessar este tipo de cadastro.")
+
+
+def _restringir(q: object, empresa: Empresa, visiveis: Visiveis) -> object:
+    """Só parceiros com ao menos um papel visível: os demais não existem para quem consulta."""
+    if visiveis is None:
+        return q
+    return q.where(exists().where(  # type: ignore[attr-defined]
+        ParceiroPapel.empresa_id == empresa.id,
+        ParceiroPapel.parceiro_id == Parceiro.id,
+        ParceiroPapel.papel.in_(visiveis),
+    ))
 
 
 async def listar(
     sessao: AsyncSession, empresa: Empresa, papel: str | None = None, busca: str | None = None,
-    tag_ids: Iterable[UUID] | None = None,
+    tag_ids: Iterable[UUID] | None = None, visiveis: Visiveis = None,
 ) -> list[Parceiro]:
-    q = consulta().where(Parceiro.empresa_id == empresa.id).order_by(Parceiro.nome)  # type: ignore[attr-defined]
+    exigir_papel_visivel(papel, visiveis)
+    q = _restringir(consulta().where(Parceiro.empresa_id == empresa.id), empresa, visiveis).order_by(Parceiro.nome)  # type: ignore[attr-defined]
     if papel:
         q = q.where(exists().where(
             ParceiroPapel.empresa_id == empresa.id,
@@ -70,8 +94,10 @@ async def listar(
     return list((await sessao.scalars(q)).unique().all())
 
 
-async def obter_completo(sessao: AsyncSession, empresa: Empresa, id_: UUID, papel: str | None = None) -> Parceiro:
-    q = consulta().where(Parceiro.id == id_, Parceiro.empresa_id == empresa.id)  # type: ignore[attr-defined]
+async def obter_completo(
+    sessao: AsyncSession, empresa: Empresa, id_: UUID, papel: str | None = None, visiveis: Visiveis = None
+) -> Parceiro:
+    q = _restringir(consulta().where(Parceiro.id == id_, Parceiro.empresa_id == empresa.id), empresa, visiveis)  # type: ignore[attr-defined]
     if papel:
         q = q.where(exists().where(
             ParceiroPapel.empresa_id == empresa.id,
@@ -97,10 +123,11 @@ async def cliente_para_documento(sessao: AsyncSession, id_: UUID, nome: str) -> 
         return SimpleNamespace(nome=nome, contato=None, cargo=None, cpf_cnpj=None, tipo_pessoa="PJ")
 
 
-async def listar_papeis(sessao: AsyncSession) -> list[PapelParceiro]:
-    return list(
-        (await sessao.scalars(select(PapelParceiro).where(PapelParceiro.ativo).order_by(PapelParceiro.nome))).all()
-    )
+async def listar_papeis(sessao: AsyncSession, visiveis: Visiveis = None) -> list[PapelParceiro]:
+    q = select(PapelParceiro).where(PapelParceiro.ativo).order_by(PapelParceiro.nome)
+    if visiveis is not None:
+        q = q.where(PapelParceiro.codigo.in_(visiveis))
+    return list((await sessao.scalars(q)).all())
 
 
 async def _validar(sessao: AsyncSession, campos: dict) -> None:
@@ -133,42 +160,105 @@ async def _vinculos_como_cliente(sessao: AsyncSession, id_: UUID) -> int:
     return total
 
 
-async def criar(sessao: AsyncSession, empresa: Empresa, campos: dict, papeis: Iterable[str]) -> Parceiro:
+async def _aportes_do_socio(sessao: AsyncSession, id_: UUID) -> int:
+    from app.financeiro.models import (  # evita ciclo: o módulo financeiro importa este serviço
+        PlanoConta,
+        TituloFinanceiro,
+    )
+
+    return (
+        await sessao.scalar(
+            select(func.count())
+            .select_from(TituloFinanceiro)
+            .join(PlanoConta, PlanoConta.id == TituloFinanceiro.plano_conta_id)
+            .where(TituloFinanceiro.parceiro_id == id_, PlanoConta.aporte_socio)
+        )
+        or 0
+    )
+
+
+async def _participacao(
+    sessao: AsyncSession, empresa: Empresa, parceiro: Parceiro, papeis: set[str], pedida: Decimal | None
+) -> ParceiroSocio | None:
+    """Mantém `parceiro_socio` coerente com o papel `socio`: exige o percentual, limita a soma a 100 e o apaga ao sair do papel."""
+    if PAPEL_SOCIO not in papeis:
+        return None
+    existente = parceiro.socio if parceiro.id is not None else None
+    valor = pedida if pedida is not None else (existente.participacao_percentual if existente else None)
+    if valor is None:
+        raise RegraDeNegocio("Informe a participação do sócio na empresa (maior que 0% e até 100%).")
+    # Dois sócios gravados ao mesmo tempo não podem estourar os 100%: serializa por empresa até o fim da transação.
+    await sessao.execute(text("select pg_advisory_xact_lock(hashtextextended(:k, 0))"), {"k": f"socios:{empresa.id}"})
+    outros = await sessao.scalar(
+        select(func.coalesce(func.sum(ParceiroSocio.participacao_percentual), 0)).where(
+            ParceiroSocio.empresa_id == empresa.id, ParceiroSocio.parceiro_id != parceiro.id
+        )
+    ) or Decimal(0)
+    if outros + valor > 100:
+        raise RegraDeNegocio(
+            f"A soma das participações passaria de 100%: os outros sócios já têm {outros}%. Informe até {100 - outros}%."
+        )
+    if existente:
+        existente.participacao_percentual = valor
+        return existente
+    return ParceiroSocio(empresa_id=empresa.id, participacao_percentual=valor)
+
+
+async def criar(
+    sessao: AsyncSession, empresa: Empresa, campos: dict, papeis: Iterable[str],
+    participacao: Decimal | None = None, visiveis: Visiveis = None,
+) -> Parceiro:
     await _validar(sessao, campos)
     campos["responsavel_id"] = await escopo.dono_padrao(sessao, "responsavel_id" in campos, campos.get("responsavel_id"))
     codigos = await _papeis_validos(sessao, papeis)
+    if visiveis is not None and codigos - visiveis:
+        raise SemPermissao("Seu papel nesta empresa não permite cadastrar parceiros com este papel.")
     parceiro = Parceiro(empresa_id=empresa.id, **campos, papeis=[ParceiroPapel(papel=c) for c in sorted(codigos)])
+    parceiro.socio = await _participacao(sessao, empresa, parceiro, codigos, participacao)
     sessao.add(parceiro)
     await _confirmar(sessao)
     return await obter_completo(sessao, empresa, parceiro.id)
 
 
 async def atualizar(
-    sessao: AsyncSession, empresa: Empresa, id_: UUID, campos: dict, versao: int, papeis: Iterable[str] | None = None
+    sessao: AsyncSession, empresa: Empresa, id_: UUID, campos: dict, versao: int,
+    papeis: Iterable[str] | None = None, participacao: Decimal | None = None, visiveis: Visiveis = None,
 ) -> Parceiro:
-    parceiro = await obter_completo(sessao, empresa, id_)
+    parceiro = await obter_completo(sessao, empresa, id_, visiveis=visiveis)
     await escopo.exigir_edicao(sessao, "cliente", id_)
     conferir_versao(parceiro, versao)
     await _validar(sessao, campos)
     for nome, valor in campos.items():
         setattr(parceiro, nome, valor)
     if papeis is not None:
-        novos = await _papeis_validos(sessao, papeis)
+        pedidos = await _papeis_validos(sessao, papeis)
         atuais = set(parceiro.codigos_de_papel)
+        if visiveis is not None:
+            if pedidos - visiveis:
+                raise SemPermissao("Seu papel nesta empresa não permite atribuir este papel de parceiro.")
+            pedidos |= atuais - visiveis  # papéis que o usuário nem enxerga permanecem como estão
+        novos = pedidos
         if PAPEL_CLIENTE in atuais - novos and await _vinculos_como_cliente(sessao, id_):
             raise RegraDeNegocio(
                 "Este parceiro tem negócios, orçamentos, projetos, tarefas ou lançamentos como cliente e não pode deixar de ser cliente."
             )
+        if PAPEL_SOCIO in atuais - novos and await _aportes_do_socio(sessao, id_):
+            raise RegraDeNegocio("Este sócio tem aportes lançados e não pode deixar de ser sócio.")
         parceiro.papeis[:] = [p for p in parceiro.papeis if p.papel in novos] + [
             ParceiroPapel(papel=c) for c in sorted(novos - atuais)
         ]
+        parceiro.socio = await _participacao(sessao, empresa, parceiro, novos, participacao)
     await _confirmar(sessao)
     return await obter_completo(sessao, empresa, id_)
 
 
-async def excluir(sessao: AsyncSession, empresa: Empresa, id_: UUID, papel: str | None = None) -> None:
+async def excluir(
+    sessao: AsyncSession, empresa: Empresa, id_: UUID, papel: str | None = None, visiveis: Visiveis = None
+) -> None:
     """Exclui o parceiro. Com `papel` (fachada de clientes): se ele tem outros papéis, só retira esse papel."""
-    parceiro = await obter_completo(sessao, empresa, id_, papel)
+    parceiro = await obter_completo(sessao, empresa, id_, papel, visiveis)
+    if visiveis is not None and set(parceiro.codigos_de_papel) - visiveis:
+        raise SemPermissao("Este parceiro também tem papéis que o seu acesso não gerencia; peça a um administrador.")
     if papel == PAPEL_CLIENTE and await _vinculos_como_cliente(sessao, id_):
         raise RegraDeNegocio(
             "Este cliente tem negócios, orçamentos, projetos, tarefas ou faturamento. Exclua esses registros antes."

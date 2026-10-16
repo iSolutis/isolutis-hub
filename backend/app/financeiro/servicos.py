@@ -24,7 +24,7 @@ from app.financeiro.schemas import (
     PlanoContaEntrada,
     TituloEntrada,
 )
-from app.models import Empresa, Municipio, Parceiro
+from app.models import Empresa, Municipio, Parceiro, ParceiroPapel
 from app.services.base import confirmar
 from app.services.parceiros import empresa_atual  # noqa: F401  (reexportado para as rotas)
 
@@ -63,7 +63,8 @@ async def listar_plano(sessao: AsyncSession, empresa: Empresa) -> list[dict]:
     return [
         {
             "id": c.id, "plano_pai_id": c.plano_pai_id, "codigo": c.codigo, "nome": c.nome, "tipo_conta": c.tipo_conta,
-            "natureza": c.natureza, "nivel": c.nivel, "possui_filhas": c.id in com_filhas, "possui_titulos": c.id in com_titulos,
+            "natureza": c.natureza, "nivel": c.nivel, "aporte_socio": c.aporte_socio,
+            "possui_filhas": c.id in com_filhas, "possui_titulos": c.id in com_titulos,
         }
         for c in contas
     ]  # fmt: skip
@@ -104,11 +105,17 @@ async def _validar_conta(sessao: AsyncSession, empresa: Empresa, d: PlanoContaEn
     return nivel, pai.natureza
 
 
+def _exigir_aporte_valido(d: PlanoContaEntrada, natureza: str) -> None:
+    if d.aporte_socio and (d.tipo_conta != "A" or natureza != "R"):
+        raise RegraDeNegocio("Só uma conta analítica de receita pode ser marcada como aporte de sócio.")
+
+
 async def criar_conta(sessao: AsyncSession, empresa: Empresa, d: PlanoContaEntrada) -> PlanoConta:
     nivel, natureza = await _validar_conta(sessao, empresa, d)
+    _exigir_aporte_valido(d, natureza)
     conta = PlanoConta(
         empresa_id=empresa.id, plano_pai_id=d.plano_pai_id, codigo=d.codigo.strip(), nome=d.nome.strip(),
-        tipo_conta=d.tipo_conta, natureza=natureza, nivel=nivel,
+        tipo_conta=d.tipo_conta, natureza=natureza, nivel=nivel, aporte_socio=d.aporte_socio,
     )  # fmt: skip
     sessao.add(conta)
     await _confirmar_plano(sessao)
@@ -124,6 +131,9 @@ async def atualizar_conta(sessao: AsyncSession, empresa: Empresa, id_: UUID, d: 
     if d.plano_pai_id == id_:
         raise RegraDeNegocio("Uma conta não pode ser pai dela mesma.")
     nivel, natureza = await _validar_conta(sessao, empresa, d)
+    _exigir_aporte_valido(d, natureza)
+    if conta.aporte_socio and not d.aporte_socio and titulos:
+        raise RegraDeNegocio("Há aportes lançados nesta conta: ela precisa continuar marcada como aporte de sócio.")
     if filhas and (
         d.codigo.strip() != conta.codigo or d.plano_pai_id != conta.plano_pai_id or natureza != conta.natureza
     ):
@@ -133,7 +143,7 @@ async def atualizar_conta(sessao: AsyncSession, empresa: Empresa, id_: UUID, d: 
     if titulos and (d.tipo_conta == "S" or natureza != conta.natureza):
         raise RegraDeNegocio("Há títulos lançados nesta conta: ela precisa continuar analítica e com a mesma natureza.")
     conta.plano_pai_id, conta.codigo, conta.nome = d.plano_pai_id, d.codigo.strip(), d.nome.strip()
-    conta.tipo_conta, conta.natureza, conta.nivel = d.tipo_conta, natureza, nivel
+    conta.tipo_conta, conta.natureza, conta.nivel, conta.aporte_socio = d.tipo_conta, natureza, nivel, d.aporte_socio
     await _confirmar_plano(sessao)
     return conta
 
@@ -239,6 +249,7 @@ def _linha_titulo(t: TituloFinanceiro) -> dict:
         "valor_multa": t.valor_multa, "valor_juros": t.valor_juros,
         "valor_devido": regras.valor_devido(t.valor_titulo, t.valor_desconto, t.valor_multa, t.valor_juros),
         "status": t.status, "data_pagamento": t.data_pagamento, "valor_quitacao": t.valor_quitacao, "anotacao": t.anotacao,
+        "recorrencia_id": t.recorrencia_id,
     }  # fmt: skip
 
 
@@ -285,6 +296,11 @@ async def _campos_validados(sessao: AsyncSession, empresa: Empresa, d: TituloEnt
     await _obter(sessao, ContaBancaria, d.conta_bancaria_id, empresa, "Conta bancária")
     await _obter(sessao, Parceiro, d.parceiro_id, empresa, "Parceiro")
     conta = await _obter(sessao, PlanoConta, d.plano_conta_id, empresa, "Conta do plano de contas")
+    papeis = set((await sessao.scalars(select(ParceiroPapel.papel).where(ParceiroPapel.parceiro_id == d.parceiro_id))).all())
+    if d.tipo_conta == "P" and not regras.parceiro_pode_receber_pagamento(papeis):
+        raise RegraDeNegocio("Conta a pagar exige um parceiro fornecedor, funcionário ou sócio. Ajuste os papéis do parceiro.")
+    if conta.aporte_socio and not regras.parceiro_pode_aportar(papeis):
+        raise RegraDeNegocio("Aporte de sócio exige um parceiro com o papel de sócio.")
     if conta.tipo_conta != "A":
         raise RegraDeNegocio(
             "Títulos só podem ser lançados em conta analítica do plano de contas, nunca em conta sintética."
@@ -339,20 +355,24 @@ async def fluxo_de_caixa(sessao: AsyncSession, empresa: Empresa, ano: int) -> di
     t = TituloFinanceiro
     devido = t.valor_titulo - t.valor_desconto + t.valor_multa + t.valor_juros
 
-    async def somar(coluna_data, valor, tipo: str, status: str) -> dict[int, Decimal]:  # noqa: ANN001
+    async def somar(coluna_data, valor, tipo: str, status: str, aporte: bool = False) -> dict[int, Decimal]:  # noqa: ANN001
         mes = extract("month", coluna_data)
         inicio, fim = date(ano, 1, 1), date(ano + 1, 1, 1)
         linhas = await sessao.execute(
             select(mes, func.coalesce(func.sum(valor), 0))
-            .where(t.empresa_id == empresa.id, t.tipo_conta == tipo, t.status == status, coluna_data >= inicio, coluna_data < fim)
+            .join(PlanoConta, PlanoConta.id == t.plano_conta_id)
+            .where(t.empresa_id == empresa.id, t.tipo_conta == tipo, t.status == status, coluna_data >= inicio, coluna_data < fim, PlanoConta.aporte_socio == aporte)
             .group_by(mes)
         )  # fmt: skip
         return {int(m): v for m, v in linhas.all()}
 
+    # Aportes de sócio entram no caixa (e no saldo), mas ficam fora das entradas operacionais.
     ent_real = await somar(t.data_pagamento, t.valor_quitacao, "R", "Q")
     sai_real = await somar(t.data_pagamento, t.valor_quitacao, "P", "Q")
     ent_prev = await somar(t.data_vencimento, devido, "R", "A")
     sai_prev = await somar(t.data_vencimento, devido, "P", "A")
+    apo_real = await somar(t.data_pagamento, t.valor_quitacao, "R", "Q", aporte=True)
+    apo_prev = await somar(t.data_vencimento, devido, "R", "A", aporte=True)
 
     base = await sessao.scalar(
         select(func.coalesce(func.sum(ContaBancaria.saldo_inicial), 0)).where(ContaBancaria.empresa_id == empresa.id)
@@ -368,9 +388,10 @@ async def fluxo_de_caixa(sessao: AsyncSession, empresa: Empresa, ano: int) -> di
     meses, acumulado = [], saldo_inicial
     for m in range(1, 13):
         er, ep, sr, sp = ent_real.get(m, ZERO), ent_prev.get(m, ZERO), sai_real.get(m, ZERO), sai_prev.get(m, ZERO)
-        saldo = er + ep - sr - sp
+        ar, ap = apo_real.get(m, ZERO), apo_prev.get(m, ZERO)
+        saldo = er + ep + ar + ap - sr - sp
         acumulado += saldo
-        meses.append({"mes": m, "entradas_realizadas": er, "entradas_previstas": ep, "saidas_realizadas": sr, "saidas_previstas": sp, "saldo_do_mes": saldo, "saldo_acumulado": acumulado})  # fmt: skip
+        meses.append({"mes": m, "entradas_realizadas": er, "entradas_previstas": ep, "aportes_realizados": ar, "aportes_previstos": ap, "saidas_realizadas": sr, "saidas_previstas": sp, "saldo_do_mes": saldo, "saldo_acumulado": acumulado})  # fmt: skip
 
     anos = {
         int(a)
@@ -384,5 +405,6 @@ async def fluxo_de_caixa(sessao: AsyncSession, empresa: Empresa, ano: int) -> di
     return {
         "ano": ano, "anos_disponiveis": sorted(anos | {hoje().year}), "saldo_inicial": saldo_inicial, "meses": meses,
         "total_entradas": sum((m["entradas_realizadas"] + m["entradas_previstas"] for m in meses), ZERO),
+        "total_aportes": sum((m["aportes_realizados"] + m["aportes_previstos"] for m in meses), ZERO),
         "total_saidas": sum((m["saidas_realizadas"] + m["saidas_previstas"] for m in meses), ZERO),
     }  # fmt: skip

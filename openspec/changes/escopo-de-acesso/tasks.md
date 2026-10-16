@@ -2,7 +2,7 @@
 
 ## 1. Estrutura no banco (equipes, donos, participantes)
 
-- [x] 1.1 Migração `0013` (parte estrutural) + down: tabelas `equipe`, `equipe_membro`, `equipe_lider`, `projeto_participante`, `transferencia_dono` com `empresa_id` e RLS de tenant; coluna `parceiro_negocio.responsavel_id`; índices do design. Verificar com `alembic upgrade head` e `alembic downgrade 0012` em base de teste sem erro
+- [x] 1.1 Migração `0015` (parte estrutural) + down: tabelas `equipe`, `equipe_membro`, `equipe_lider`, `projeto_participante`, `transferencia_dono` com `empresa_id` e RLS de tenant; coluna `parceiro_negocio.responsavel_id`; índices do design. Verificar com `alembic upgrade head` e `alembic downgrade 0014` em base de teste sem erro
 - [x] 1.2 Models SQLAlchemy das novas tabelas e da coluna; verificar import do app e `pytest tests/test_permissoes_rotas.py`
 - [x] 1.3 Carga do dono dos clientes (responsável do negócio mais recente) na migração; verificar com teste SQL que cliente com dois negócios fica com o responsável do mais recente e cliente sem negócio fica sem dono
 

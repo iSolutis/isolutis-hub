@@ -43,8 +43,6 @@ export const ETAPA_STATUS: Record<string, readonly [string, string]> = {
   concluida: ["Concluída", "ok"],
 };
 
-export const FORMAS_INVEST = ["Dinheiro (aporte)", "Equipamento", "Pagamento de despesa da empresa", "Outro"] as const;
-
 export const COLUNAS_TAREFA = [
   { id: "a_fazer", nome: "A fazer" },
   { id: "fazendo", nome: "Fazendo" },
@@ -60,5 +58,5 @@ export const OPCOES_REPETICAO = [1, 2, 3, 6, 12, 18, 24, 36] as const;
 
 export const AREA_NOME: Record<string, string> = {
   painel: "Painel", clientes: "Clientes", negocios: "Negócios", orcamentos: "Orçamentos", faturamento: "Faturamento",
-  despesas: "Despesas", produtos: "Produtos", projetos: "Projetos", tarefas: "Tarefas", equipe: "Equipe",
+  produtos: "Produtos", projetos: "Projetos", tarefas: "Tarefas", equipe: "Equipe",
 };
