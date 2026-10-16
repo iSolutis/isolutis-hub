@@ -16,7 +16,7 @@ import { registrarAbertura, registrarSoltar } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
 import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, resolverCliente, seletorCliente, seletorDono, soLeitura } from "@/ui/formularios";
-import { excluir, gravar } from "@/ui/gravacao";
+import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { melhorarFormulario } from "@/ui/acessibilidade";
 import { toast } from "@/ui/toast";
 import { botaoNovo } from "./comum";
@@ -112,20 +112,9 @@ export function formNegocio(n: Inicial = { etapa: "lead" }, existente?: Negocio)
           return;
         }
 
-        // Loading visual
-        botao.disabled = true;
-        botao.classList.add("loading");
-        const textoOriginal = botao.textContent;
-        botao.innerHTML = '<span class="spinner"></span> Salvando…';
-
-        try {
+        await comTrava(botao, async () => {
           const clienteId = await resolverCliente(f);
-          if (!clienteId) {
-            botao.disabled = false;
-            botao.classList.remove("loading");
-            botao.innerHTML = textoOriginal || "Salvar";
-            return;
-          }
+          if (!clienteId) return null;
 
           const corpo: NegocioEntrada = {
             titulo,
@@ -154,11 +143,7 @@ export function formNegocio(n: Inicial = { etapa: "lead" }, existente?: Negocio)
           if (salvo && salvo.etapa === "ganho" && reg?.etapa !== "ganho" && !salvo.faturado) {
             oferecerFaturamento(salvo);
           }
-        } catch {
-          botao.disabled = false;
-          botao.classList.remove("loading");
-          botao.innerHTML = textoOriginal || "Salvar";
-        }
+        });
       });
 
       $("[data-orc]", L)?.addEventListener("click", () => reg && abrirFormulario("orcamento", { cliente_id: reg.cliente_id, negocio_id: reg.id }));

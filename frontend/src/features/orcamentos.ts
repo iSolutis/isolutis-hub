@@ -18,7 +18,7 @@ import { registrarAbertura } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
 import { botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, resolverCliente, seletorCliente } from "@/ui/formularios";
-import { excluir, gravar } from "@/ui/gravacao";
+import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
 import { botaoNovo } from "./comum";
@@ -213,26 +213,12 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
 
       $("[data-salvar]", L)?.addEventListener("click", async (e) => {
         const botao = e.target as HTMLButtonElement;
-        const textoOriginal = botao.textContent;
 
-        // Loading visual
-        botao.disabled = true;
-        botao.classList.add("loading");
-        botao.innerHTML = '<span class="spinner"></span> Salvando…';
-
-        try {
+        await comTrava(botao, async () => {
           const corpo = await coletar();
-          if (corpo && (await persistir(corpo, `Orçamento salvo`))) fechar();
-          else {
-            botao.disabled = false;
-            botao.classList.remove("loading");
-            botao.innerHTML = textoOriginal || "Salvar";
-          }
-        } catch {
-          botao.disabled = false;
-          botao.classList.remove("loading");
-          botao.innerHTML = textoOriginal || "Salvar";
-        }
+          if (!corpo || !(await persistir(corpo, `Orçamento salvo`))) return null;
+          fechar();
+        });
       });
       $("[data-aprovar]", L)?.addEventListener("click", async (e) => {
         const botao = e.target as HTMLButtonElement;

@@ -15,7 +15,7 @@ import { registrarAbertura } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
 import { botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, resolverCliente, seletorCliente } from "@/ui/formularios";
-import { excluir, gravar } from "@/ui/gravacao";
+import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
 import { botaoNovo } from "./comum";
@@ -96,7 +96,6 @@ function formLanc(l?: Lancamento): void {
       ligarNovoCliente(f);
       $("[data-salvar]", L)?.addEventListener("click", async (e) => {
         const botao = e.target as HTMLButtonElement;
-        const textoOriginal = botao.textContent;
 
         // Validação
         if (!fv(f, "cliente_id")) {
@@ -108,19 +107,9 @@ function formLanc(l?: Lancamento): void {
           return;
         }
 
-        // Loading visual
-        botao.disabled = true;
-        botao.classList.add("loading");
-        botao.innerHTML = '<span class="spinner"></span> Salvando…';
-
-        try {
+        await comTrava(botao, async () => {
           const clienteId = await resolverCliente(f);
-          if (!clienteId) {
-            botao.disabled = false;
-            botao.classList.remove("loading");
-            botao.innerHTML = textoOriginal || "Salvar";
-            return;
-          }
+          if (!clienteId) return null;
           const base = {
             cliente_id: clienteId, tipo: fv(f, "tipo") as LancamentoEntrada["tipo"], descricao: fv(f, "descricao") || TIPOS[fv(f, "tipo")] || "Lançamento",
             valor: numero(fv(f, "valor")), vencimento: fv(f, "vencimento") || hoje(), status: fv(f, "status") as LancamentoEntrada["status"], nf: fv(f, "nf") || null,
@@ -131,11 +120,7 @@ function formLanc(l?: Lancamento): void {
             mensagem: l ? "Lançamento salvo" : repetir > 1 ? `${repetir} lançamentos criados` : "Lançamento criado",
             operacao: async () => (l ? await api.faturamento.atualizar(l.id, { ...base, versao: l.versao }) : await api.faturamento.criar({ ...base, repetir })),
           });
-        } catch {
-          botao.disabled = false;
-          botao.classList.remove("loading");
-          botao.innerHTML = textoOriginal || "Salvar";
-        }
+        });
       });
       $("[data-excluir]", L)?.addEventListener("click", () => {
         if (l) void excluir({ recarregar: ["faturamento", "clientes"], mensagem: "Lançamento excluído", fechar, operacao: () => api.faturamento.excluir(l.id) });

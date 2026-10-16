@@ -102,17 +102,41 @@ async function converterErro(resposta: Response): Promise<ErroApi> {
   return new ErroApi(resposta.status, codigo, mensagem, detalhes);
 }
 
+/** Hash curto (FNV-1a) do corpo: corpo editado entre duas tentativas vira outra chave. */
+function hashDoCorpo(texto: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < texto.length; i++) h = Math.imul(h ^ texto.charCodeAt(i), 0x01000193);
+  return (h >>> 0).toString(36);
+}
+
+/**
+ * Tentativa de gravação em curso (ver `comTrava` em ui/gravacao.ts). Cada `POST` feito durante ela leva
+ * `Idempotency-Key: <tentativa>:<ordem>:<hash do corpo>`; reenviar a mesma tentativa repete as mesmas chaves, e o
+ * servidor devolve o que já criou em vez de criar de novo.
+ */
+let tentativa: { base: string; ordem: number } | null = null;
+export const idempotencia = {
+  iniciar(base: string): void {
+    tentativa = { base, ordem: 0 };
+  },
+  encerrar(): void {
+    tentativa = null;
+  },
+};
+
 async function enviar(metodo: string, caminho: string, opcoes: { corpo?: unknown; consulta?: Consulta } = {}): Promise<Response> {
   const cabecalhos: Record<string, string> = { Accept: "application/json" };
   if (token) cabecalhos.Authorization = `Bearer ${token}`;
   if (empresa) cabecalhos["X-Empresa-ID"] = empresa;
   if (opcoes.corpo !== undefined) cabecalhos["Content-Type"] = "application/json";
+  const corpoTexto = opcoes.corpo === undefined ? undefined : JSON.stringify(opcoes.corpo);
+  if (metodo === "POST" && tentativa) cabecalhos["Idempotency-Key"] = `${tentativa.base}:${++tentativa.ordem}:${hashDoCorpo(corpoTexto ?? "")}`;
   let resposta: Response;
   try {
     resposta = await fetch(montarUrl(caminho, opcoes.consulta), {
       method: metodo,
       headers: cabecalhos,
-      body: opcoes.corpo === undefined ? undefined : JSON.stringify(opcoes.corpo),
+      body: corpoTexto,
     });
   } catch {
     throw new ErroApi(0, "rede", "Sem conexão com o servidor. Verifique a internet e tente de novo.");

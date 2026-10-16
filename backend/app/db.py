@@ -82,17 +82,26 @@ async def definir_escopo_da_transacao(sessao: AsyncSession) -> None:
     await sessao.execute(text("select app_definir_escopo()"))
 
 
+async def definir_empresa_e_escopo_da_transacao(sessao: AsyncSession, empresa_id: UUID) -> None:
+    """Empresa ativa e escopo de visibilidade da transação, numa só ida ao banco."""
+    sessao.info["empresa_id"] = empresa_id
+    sessao.info["escopo"] = True
+    await sessao.execute(
+        text("select app_iniciar_contexto(cast(:u as uuid), cast(:e as uuid), true)"),
+        {"u": str(sessao.info["usuario_id"]) if sessao.info.get("usuario_id") else None, "e": str(empresa_id)},
+    )
+
+
 @event.listens_for(Session, "after_begin")
 def _reaplicar_contexto(sessao: Session, _transacao: object, conexao: Connection) -> None:
     """As variáveis da requisição são locais à transação: cada nova transação da sessão (ex.: leitura depois de
     um commit) recebe de novo usuário, empresa e escopo; sem isso o RLS esconderia tudo."""
     usuario, empresa = sessao.info.get("usuario_id"), sessao.info.get("empresa_id")
-    if usuario:
-        conexao.execute(text("select set_config('app.usuario_id', :u, true)"), {"u": str(usuario)})
-    if empresa:
-        conexao.execute(text("select set_config('app.empresa_id', :e, true)"), {"e": str(empresa)})
-    if usuario and empresa and sessao.info.get("escopo"):
-        conexao.execute(text("select app_definir_escopo()"))
+    if usuario or empresa:  # uma só ida ao banco para usuário, empresa e escopo (migração 0014)
+        conexao.execute(
+            text("select app_iniciar_contexto(cast(:u as uuid), cast(:e as uuid), :s)"),
+            {"u": str(usuario) if usuario else None, "e": str(empresa) if empresa else None, "s": bool(sessao.info.get("escopo"))},
+        )
 
 
 # --- Tempo real: avisa os clientes conectados depois que a transação é confirmada --------------------

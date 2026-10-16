@@ -15,7 +15,7 @@ import { registrarAbertura, registrarSoltar } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
 import { avisoSoLeitura, botaoExcluir, botaoSalvar, comboboxClientes, espaco, opcoesEquipe, soLeitura } from "@/ui/formularios";
-import { excluir, gravar } from "@/ui/gravacao";
+import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
 import { botaoNovo } from "./comum";
@@ -173,34 +173,18 @@ export function formTarefa(t?: Tarefa, colunaInicial = "a_fazer"): void {
           descricao: fv(f, "descricao") || null, checklist,
         };
       };
-      const salvar = async (corpo: TarefaEntrada, mensagem: string): Promise<void> => {
-        await gravar({
+      const salvar = (corpo: TarefaEntrada, mensagem: string) =>
+        gravar({
           recarregar: ["tarefas"], mensagem, fechar,
           operacao: () => (t ? api.tarefas.atualizar(t.id, { ...corpo, versao: t.versao }) : api.tarefas.criar(corpo)),
         });
-      };
       $("[data-salvar]", L)?.addEventListener("click", async (e) => {
         const botao = e.target as HTMLButtonElement;
-        const textoOriginal = botao.textContent;
 
-        // Loading visual
-        botao.disabled = true;
-        botao.classList.add("loading");
-        botao.innerHTML = '<span class="spinner"></span> Salvando…';
-
-        try {
+        await comTrava(botao, async () => {
           const corpo = coletar();
-          if (corpo) await salvar(corpo, t ? "Tarefa salva" : "Tarefa criada");
-          else {
-            botao.disabled = false;
-            botao.classList.remove("loading");
-            botao.innerHTML = textoOriginal || "Salvar";
-          }
-        } catch {
-          botao.disabled = false;
-          botao.classList.remove("loading");
-          botao.innerHTML = textoOriginal || "Salvar";
-        }
+          return corpo ? salvar(corpo, t ? "Tarefa salva" : "Tarefa criada") : null;
+        });
       });
       $("[data-concluir]", L)?.addEventListener("click", async (e) => {
         const botao = e.target as HTMLButtonElement;

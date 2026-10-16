@@ -24,10 +24,13 @@
 - *Alternativa descartada:* desabilitar o botão em cada tela — é o que gerou o botão preso e a divergência entre telas.
 
 ### 2. Chave de idempotência gerada no front, honrada no servidor
-- Front: ao abrir o formulário gera `crypto.randomUUID()`; o `POST` envia `Idempotency-Key`. A chave só é renovada depois de sucesso (um erro mantém a chave, então reenviar após falha de rede não duplica se a primeira chegou a gravar). Fechar e reabrir o formulário gera chave nova.
-- Servidor: tabela `idempotencia(empresa_id, usuario_id, chave, rota, status, resposta jsonb, criada_em)` com chave única `(empresa_id, usuario_id, chave)` e RLS de tenant. Dentro da **mesma transação** do `POST`: `INSERT … ON CONFLICT DO NOTHING`. Se inseriu, segue o fluxo e grava a resposta antes do commit. Se já existia (a outra requisição concorrente espera o bloqueio do índice único até o commit dela), devolve a resposta guardada com o mesmo status. Assim a gravação do registro e a da chave são atômicas: não há janela em que o registro existe sem a chave.
-- Chave reutilizada em outra rota ou com outro corpo → 422. Limpeza de registros com mais de 24 h pelo agendador existente (`scheduler.py`).
-- Sem a chave o comportamento é o atual (retrocompatível).
+- Front: cada clique em Salvar abre uma *tentativa* (`comTrava`) com uma chave-base (`crypto.randomUUID()`) guardada no botão; cada `POST` feito dentro da tentativa envia `Idempotency-Key: <base>:<ordem>:<hash do corpo>`. A chave-base só é descartada depois de sucesso: reenviar após um erro repete as mesmas chaves (e, por isso, `resolverCliente` reaproveita o cliente já criado), e corpo editado entre as tentativas gera outra chave.
+- Servidor: tabela `idempotencia(empresa_id, usuario_id, chave, rota, corpo_hash, estado, codigo_http, resposta)` com chave primária `(empresa_id, usuario_id, chave)` e RLS. Dependência `idempotencia` nos routers de dados (depois da checagem de permissão): `INSERT … ON CONFLICT DO NOTHING` e **commit imediato** da reivindicação (estado `em_andamento`). Os serviços já fazem commit próprio, então não há como gravar a resposta na mesma transação do registro; o desenho é o de reivindicar antes, concluir depois.
+  - Chave já `concluida` → devolve a resposta guardada (cabeçalho `Idempotent-Replay: true`).
+  - Chave `em_andamento` → espera até 15 s; passado o prazo, 409 `gravacao_em_andamento`. Tentativa parada há mais de 60 s é considerada abandonada e pode ser assumida.
+  - Rota ou corpo diferentes com a mesma chave → 422 `chave_reutilizada`.
+  - Middleware ASGI `ProtegerPosts` (o mais interno, na tarefa da rota) guarda a resposta de sucesso antes do último trecho da resposta, ou apaga a reivindicação quando a requisição falha, para o reenvio gravar.
+- Sem a chave o comportamento é o atual. A limpeza (>24 h) é oportunista, no próprio caminho da reivindicação, porque não há processo fixo na Vercel.
 - *Alternativa descartada:* constraint de unicidade por dados (ex.: nome do cliente) — bloqueia cadastros legítimos iguais e não cobre todas as entidades.
 
 ### 3. Fechar antes de recarregar
@@ -35,7 +38,7 @@ Depois que o servidor confirma, `gravar()` atualiza o registro gravado no estado
 - *Risco:* lista exibida alguns instantes desatualizada → aceitável; a recarga termina em seguida e o tempo real também avisa.
 
 ### 4. Menos instruções por requisição
-Medir com a contagem de instruções (como a medição de latência feita na análise) e remover o que for redundante: leituras repetidas de papel/escopo na mesma transação, `SELECT` de retorno após `INSERT` quando `RETURNING` basta, `commit` intermediário que reaplica o contexto da sessão. Meta: `POST /negocios` com no máximo metade das instruções atuais, sem enfraquecer RLS (o contexto de segurança continua sendo definido em toda transação).
+Medir com a contagem de instruções (como a medição de latência feita na análise) e remover o que for redundante: leituras repetidas de papel/escopo na mesma transação, `SELECT` de retorno após `INSERT` quando `RETURNING` basta, `commit` intermediário que reaplica o contexto da sessão. Resultado: usuário, empresa e escopo passam a ser definidos numa só chamada (`app_iniciar_contexto`), na requisição e a cada nova transação: `POST /negocios` de 15 para 12 instruções, `POST /clientes` de 17 para 14. A meta inicial (metade) não foi atingida porque o restante (vínculo com o cliente, dono padrão, leitura do registro gravado) é o que sustenta o escopo de acesso; o contexto de segurança continua sendo definido em toda transação.
 
 ### 5. Cliente criado junto com outro registro
 `resolverCliente()` cria o cliente e depois o registro principal. Para não duplicar o cliente se a segunda etapa falhar, o id do cliente criado fica guardado no formulário e o reenvio reutiliza esse id em vez de criar outro. O `POST` do cliente também leva a chave.
