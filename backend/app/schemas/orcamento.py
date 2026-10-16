@@ -53,6 +53,7 @@ class ItemLeitura(Leitura):
 
 
 class OrcamentoLeitura(Auditoria):
+    pode_editar: bool = Field(True, description="A pessoa da requisição pode alterar este registro (escopo).")
     numero: str
     cliente_id: UUID
     cliente_nome: str

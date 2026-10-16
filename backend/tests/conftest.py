@@ -23,7 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession  # noqa: E402
 from app.config import get_settings  # noqa: E402
 from app.db import criar_engine, get_session  # noqa: E402
 from app.main import app  # noqa: E402
-from app.models import Usuario  # noqa: E402
+from app.models import Empresa, Usuario, UsuarioEmpresa  # noqa: E402
 from app.security import gerar_hash  # noqa: E402
 
 SENHA = "senha-de-teste-123"

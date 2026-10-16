@@ -6,11 +6,11 @@ Negócios, orçamentos, projetos, tarefas e lançamentos de receita apontam para
 """
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import FetchedValue, ForeignKey, String, func, text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import FetchedValue, ForeignKey, LargeBinary, String, func, text
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -27,6 +27,31 @@ class Empresa(Base):
     updated_at: Mapped[datetime | None]
     onboarding_concluido: Mapped[bool] = mapped_column(default=False, server_default="false")
     segmento: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    # Cadastro completo (todos opcionais; `nome` segue como nome de exibição no Hub)
+    tipo_inscricao: Mapped[str | None]
+    inscricao: Mapped[str | None]
+    razao_social: Mapped[str | None]
+    nome_fantasia: Mapped[str | None]
+    inscricao_estadual: Mapped[str | None]
+    inscricao_municipal: Mapped[str | None]
+    cnae_codigo: Mapped[str | None]
+    cnae_descricao: Mapped[str | None]
+    regime_tributario: Mapped[str | None]
+    data_abertura: Mapped[date | None]
+    email: Mapped[str | None]
+    telefone: Mapped[str | None]
+    site: Mapped[str | None]
+    cep: Mapped[str | None]
+    logradouro: Mapped[str | None]
+    numero: Mapped[str | None]
+    complemento: Mapped[str | None]
+    bairro: Mapped[str | None]
+    municipio_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("municipio.id"))
+    # Identidade visual: logomarca (bytes + tipo MIME) e paleta {"primaria": "#rrggbb", "destaque": "#rrggbb"}
+    logo: Mapped[bytes | None] = mapped_column(LargeBinary, deferred=True)
+    logo_tipo: Mapped[str | None]
+    logo_atualizada_em: Mapped[datetime | None]
+    paleta: Mapped[dict[str, str] | None] = mapped_column(JSONB(none_as_null=True))
 
 
 class Municipio(Base):
@@ -94,6 +119,8 @@ class Parceiro(Base):
     obs: Mapped[str | None]
     endereco: Mapped[str | None]
     cep: Mapped[str | None]
+    # Dono do cliente (carteira): define quem o enxerga e edita (RLS por escopo, migração 0013).
+    responsavel_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("usuarios.id"))
     municipio_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("municipio.id"))
     # Carimbos mantidos pelo trigger (mesmos nomes de atributo das demais entidades: criado_em/atualizado_em)
     criado_em: Mapped[datetime] = mapped_column("created_at", server_default=func.now(), server_onupdate=FetchedValue())

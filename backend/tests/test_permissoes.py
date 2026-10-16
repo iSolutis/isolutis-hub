@@ -100,9 +100,14 @@ async def test_membro_ve_nome_do_cliente_sem_dados_de_contato(http: AsyncClient,
         headers=por_papel["comercial"],
     )
     assert criado.status_code == 201, criado.text
+    # Escopo de acesso: o cliente nasce com o comercial como dono; o membro só recebe nomes de clientes
+    # ligados a algo que ele enxerga (aqui, nada) — e nunca contato ou documento.
     r = await http.get(f"{API}/clientes/referencias", headers=por_papel["membro"])
     assert r.status_code == 200
-    assert r.json() == [{"id": criado.json()["id"], "nome": "Distribuidora Alfa"}]
+    assert r.json() == []
+    assert (await http.get(f"{API}/clientes/referencias", headers=por_papel["comercial"])).json() == [
+        {"id": criado.json()["id"], "nome": "Distribuidora Alfa"}
+    ]
     assert (await http.get(f"{API}/clientes", headers=por_papel["membro"])).status_code == 403
 
 

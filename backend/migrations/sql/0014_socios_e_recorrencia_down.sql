@@ -1,4 +1,4 @@
--- Reverte a 0012. Os títulos gerados por recorrência continuam existindo, só perdem o vínculo.
+-- Reverte a 0014. Os títulos gerados por recorrência continuam existindo, só perdem o vínculo.
 DROP FUNCTION IF EXISTS recorrencias_para_renovar();
 DROP INDEX IF EXISTS uq_titulo_financeiro_recorrencia_vencimento;
 ALTER TABLE titulo_financeiro DROP CONSTRAINT IF EXISTS fk_titulo_financeiro_recorrencia;

@@ -229,14 +229,148 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
+        /** Obter */
+        get: operations["obter_api_v1_empresas_ativa_get"];
+        /** Atualizar */
+        put: operations["atualizar_api_v1_empresas_ativa_put"];
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         /** Atualizar Empresa Ativa */
         patch: operations["atualizar_empresa_ativa_api_v1_empresas_ativa_patch"];
+        trace?: never;
+    };
+    "/api/v1/empresas/ativa/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Definir Logo */
+        put: operations["definir_logo_api_v1_empresas_ativa_logo_put"];
+        post?: never;
+        /** Remover Logo */
+        delete: operations["remover_logo_api_v1_empresas_ativa_logo_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/empresas/ativa/paleta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Definir Paleta */
+        put: operations["definir_paleta_api_v1_empresas_ativa_paleta_put"];
+        post?: never;
+        /**
+         * Restaurar Paleta
+         * @description Volta à paleta padrão do Hub.
+         */
+        delete: operations["restaurar_paleta_api_v1_empresas_ativa_paleta_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/equipes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Equipes */
+        get: operations["listar_equipes_api_v1_equipes_get"];
+        put?: never;
+        /** Criar Equipe */
+        post: operations["criar_equipe_api_v1_equipes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/equipes/{id_}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Atualizar Equipe */
+        put: operations["atualizar_equipe_api_v1_equipes__id___put"];
+        post?: never;
+        /** Excluir Equipe */
+        delete: operations["excluir_equipe_api_v1_equipes__id___delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/escopo/pessoas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pessoas Atribuiveis
+         * @description Quem a pessoa pode pôr como dono: todos (admin), ela e os liderados (líder) ou só ela.
+         */
+        get: operations["pessoas_atribuiveis_api_v1_escopo_pessoas_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/escopo/eu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Meu Escopo
+         * @description Para a interface: se a pessoa é admin, se lidera alguém e quantas equipes a empresa tem.
+         */
+        get: operations["meu_escopo_api_v1_escopo_eu_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/escopo/transferir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transferir */
+        post: operations["transferir_api_v1_escopo_transferir_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/projetos": {
@@ -251,6 +385,26 @@ export interface paths {
         put?: never;
         /** Criar */
         post: operations["criar_api_v1_projetos_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projetos/referencias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Referencias
+         * @description Id e título dos projetos que a pessoa vê, ou das tarefas que executa (sem acesso ao projeto).
+         */
+        get: operations["referencias_api_v1_projetos_referencias_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -304,6 +458,61 @@ export interface paths {
         post?: never;
         /** Excluir */
         delete: operations["excluir_api_v1_projetos__id___delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projetos/{id_}/etapas/{etapa_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Atualizar Etapa
+         * @description O responsável da etapa atualiza só a sua etapa (o projeto inteiro exige permissão no projeto).
+         */
+        patch: operations["atualizar_etapa_api_v1_projetos__id___etapas__etapa_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/projetos/{id_}/participantes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Participantes */
+        get: operations["participantes_api_v1_projetos__id___participantes_get"];
+        put?: never;
+        /** Incluir Participante */
+        post: operations["incluir_participante_api_v1_projetos__id___participantes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projetos/{id_}/participantes/{usuario_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Retirar Participante */
+        delete: operations["retirar_participante_api_v1_projetos__id___participantes__usuario_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1246,93 +1455,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/2fa/setup": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Setup 2Fa
-         * @description Inicia o setup do 2FA: gera segredo, QR code e backup codes provisórios.
-         *
-         *     O 2FA só fica ativo após confirmar um código em /auth/2fa/confirmar.
-         */
-        post: operations["setup_2fa_api_v1_auth_2fa_setup_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/2fa/confirmar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Confirmar 2Fa
-         * @description Confirma o primeiro código TOTP e ativa 2FA.
-         *
-         *     Invalida todas as sessões existentes (incrementa versao_sessao) e emite
-         *     um novo JWT completo para a sessão atual continuar sem re-login.
-         */
-        post: operations["confirmar_2fa_api_v1_auth_2fa_confirmar_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/2fa/verificar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Verificar 2Fa
-         * @description Endpoint público: valida código TOTP ou backup code após login parcial e emite JWT completo.
-         *
-         *     O token parcial é de uso único e é invalidado após 5 códigos incorretos.
-         */
-        post: operations["verificar_2fa_api_v1_auth_2fa_verificar_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/2fa": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Desativar 2Fa
-         * @description Desativa 2FA após confirmar o código TOTP atual.
-         */
-        delete: operations["desativar_2fa_api_v1_auth_2fa_delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/saude": {
         parameters: {
             query?: never;
@@ -1452,6 +1574,8 @@ export interface components {
             cep?: string | null;
             /** Municipio Id */
             municipio_id?: string | null;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /** Versao */
             versao: number;
         };
@@ -1484,6 +1608,8 @@ export interface components {
             cep?: string | null;
             /** Municipio Id */
             municipio_id?: string | null;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
         };
         /** ClienteLeitura */
         ClienteLeitura: {
@@ -1513,6 +1639,8 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /** Tipo Pessoa */
             tipo_pessoa: string;
             /** Cpf Cnpj */
@@ -1603,6 +1731,8 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /** Tipo Pessoa */
             tipo_pessoa: string;
             /** Cpf Cnpj */
@@ -1649,13 +1779,6 @@ export interface components {
              * @default []
              */
             produtos: components["schemas"]["ProdutoInicial"][];
-        };
-        /** ConfirmarTotpEntrada */
-        ConfirmarTotpEntrada: {
-            /** Codigo */
-            codigo: string;
-            /** Backup Codes */
-            backup_codes: string[];
         };
         /** ContaBancariaEntrada */
         ContaBancariaEntrada: {
@@ -1755,12 +1878,172 @@ export interface components {
             /** Nome */
             nome: string;
         };
+        /**
+         * EmpresaDados
+         * @description Campos editáveis do cadastro (o que a tela "Dados da empresa" envia).
+         */
+        EmpresaDados: {
+            /**
+             * Nome
+             * @description Nome de exibição no Hub
+             */
+            nome: string;
+            /** Tipo Inscricao */
+            tipo_inscricao?: ("CNPJ" | "CPF") | null;
+            /** Inscricao */
+            inscricao?: string | null;
+            /** Razao Social */
+            razao_social?: string | null;
+            /** Nome Fantasia */
+            nome_fantasia?: string | null;
+            /** Inscricao Estadual */
+            inscricao_estadual?: string | null;
+            /** Inscricao Municipal */
+            inscricao_municipal?: string | null;
+            /** Cnae Codigo */
+            cnae_codigo?: string | null;
+            /** Cnae Descricao */
+            cnae_descricao?: string | null;
+            /** Regime Tributario */
+            regime_tributario?: ("mei" | "simples_nacional" | "lucro_presumido" | "lucro_real") | null;
+            /** Data Abertura */
+            data_abertura?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Telefone */
+            telefone?: string | null;
+            /** Site */
+            site?: string | null;
+            /** Cep */
+            cep?: string | null;
+            /** Logradouro */
+            logradouro?: string | null;
+            /** Numero */
+            numero?: string | null;
+            /** Complemento */
+            complemento?: string | null;
+            /** Bairro */
+            bairro?: string | null;
+            /** Municipio Id */
+            municipio_id?: string | null;
+        };
+        /** EmpresaLeitura */
+        EmpresaLeitura: {
+            /**
+             * Nome
+             * @description Nome de exibição no Hub
+             */
+            nome: string;
+            /** Tipo Inscricao */
+            tipo_inscricao?: ("CNPJ" | "CPF") | null;
+            /** Inscricao */
+            inscricao?: string | null;
+            /** Razao Social */
+            razao_social?: string | null;
+            /** Nome Fantasia */
+            nome_fantasia?: string | null;
+            /** Inscricao Estadual */
+            inscricao_estadual?: string | null;
+            /** Inscricao Municipal */
+            inscricao_municipal?: string | null;
+            /** Cnae Codigo */
+            cnae_codigo?: string | null;
+            /** Cnae Descricao */
+            cnae_descricao?: string | null;
+            /** Regime Tributario */
+            regime_tributario?: ("mei" | "simples_nacional" | "lucro_presumido" | "lucro_real") | null;
+            /** Data Abertura */
+            data_abertura?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Telefone */
+            telefone?: string | null;
+            /** Site */
+            site?: string | null;
+            /** Cep */
+            cep?: string | null;
+            /** Logradouro */
+            logradouro?: string | null;
+            /** Numero */
+            numero?: string | null;
+            /** Complemento */
+            complemento?: string | null;
+            /** Bairro */
+            bairro?: string | null;
+            /** Municipio Id */
+            municipio_id?: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Segmento */
+            segmento?: string | null;
+            /**
+             * Uf
+             * @description UF do município do endereço
+             */
+            uf?: string | null;
+            /**
+             * Logo
+             * @description Logomarca como data URL (data:image/...;base64,...)
+             */
+            logo?: string | null;
+            paleta?: components["schemas"]["Paleta"] | null;
+        };
         /** EmpresaOnboardingEntrada */
         EmpresaOnboardingEntrada: {
             /** Nome */
             nome: string;
             /** Segmento */
             segmento?: string | null;
+        };
+        /** EquipeEntrada */
+        EquipeEntrada: {
+            /** Nome */
+            nome: string;
+            /** Lideres */
+            lideres?: string[];
+            /** Membros */
+            membros?: string[];
+        };
+        /** EquipeLeitura */
+        EquipeLeitura: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Nome */
+            nome: string;
+            /** Lideres */
+            lideres: string[];
+            /** Membros */
+            membros: string[];
+        };
+        /**
+         * EtapaAtualizacao
+         * @description O que o responsável de uma etapa altera nela, sem precisar editar o projeto inteiro.
+         */
+        EtapaAtualizacao: {
+            /**
+             * Versao
+             * @description Versão lida; se informada, protege contra edição concorrente.
+             */
+            versao?: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "a_fazer" | "andamento" | "concluida";
+            /** Inicio */
+            inicio?: string | null;
+            /** Fim */
+            fim?: string | null;
+            /** Descricao */
+            descricao?: string | null;
+            /** Entregaveis */
+            entregaveis?: string | null;
         };
         /** EtapaEntrada */
         EtapaEntrada: {
@@ -1796,6 +2079,12 @@ export interface components {
         };
         /** EtapaLeitura */
         EtapaLeitura: {
+            /**
+             * Pode Editar
+             * @description A pessoa da requisição pode alterar este registro (escopo).
+             * @default true
+             */
+            pode_editar: boolean;
             /**
              * Id
              * Format: uuid
@@ -2082,6 +2371,14 @@ export interface components {
             /** Senha */
             senha: string;
         };
+        /** LogoEntrada */
+        LogoEntrada: {
+            /**
+             * Imagem
+             * @description Imagem PNG, JPEG ou WebP como data URL ou base64 puro (até 512 KB)
+             */
+            imagem: string;
+        };
         /**
          * MembroEquipe
          * @description Visão mínima da equipe, disponível a qualquer pessoa logada (responsáveis, autoria).
@@ -2306,6 +2603,12 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /**
+             * Pode Editar
+             * @description A pessoa da requisição pode alterar este registro (escopo).
+             * @default true
+             */
+            pode_editar: boolean;
             /** Titulo */
             titulo: string;
             /**
@@ -2455,6 +2758,12 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /**
+             * Pode Editar
+             * @description A pessoa da requisição pode alterar este registro (escopo).
+             * @default true
+             */
+            pode_editar: boolean;
             /** Numero */
             numero: string;
             /**
@@ -2541,6 +2850,22 @@ export interface components {
             /** Orcamentos Aguardando */
             orcamentos_aguardando?: components["schemas"]["OrcamentoAguardando"][] | null;
         };
+        /**
+         * Paleta
+         * @description Duas cores escolhidas; a interface deriva os demais tons (claro e escuro) a partir delas.
+         */
+        Paleta: {
+            /**
+             * Primaria
+             * @description Cor principal (barra lateral, botões), #rrggbb
+             */
+            primaria: string;
+            /**
+             * Destaque
+             * @description Cor de destaque (seleção, links, gráficos), #rrggbb
+             */
+            destaque: string;
+        };
         /** PapelLeitura */
         PapelLeitura: {
             /** Codigo */
@@ -2574,6 +2899,8 @@ export interface components {
             cep?: string | null;
             /** Municipio Id */
             municipio_id?: string | null;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /**
              * Tipo Pessoa
              * @default PJ
@@ -2613,6 +2940,8 @@ export interface components {
             cep?: string | null;
             /** Municipio Id */
             municipio_id?: string | null;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /**
              * Tipo Pessoa
              * @default PJ
@@ -2652,6 +2981,8 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /** Responsavel Id */
+            responsavel_id?: string | null;
             /** Tipo Pessoa */
             tipo_pessoa: string;
             /** Cpf Cnpj */
@@ -2686,6 +3017,24 @@ export interface components {
             papeis: string[];
             /** Participacao Percentual */
             participacao_percentual?: number | null;
+        };
+        /** ParticipanteEntrada */
+        ParticipanteEntrada: {
+            /**
+             * Usuario Id
+             * Format: uuid
+             */
+            usuario_id: string;
+        };
+        /** PessoaReferencia */
+        PessoaReferencia: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Nome */
+            nome: string;
         };
         /** PlanoContaEntrada */
         PlanoContaEntrada: {
@@ -3004,6 +3353,12 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /**
+             * Pode Editar
+             * @description A pessoa da requisição pode alterar este registro (escopo).
+             * @default true
+             */
+            pode_editar: boolean;
             /** Titulo */
             titulo: string;
             /**
@@ -3037,6 +3392,16 @@ export interface components {
             progresso: number;
             /** Etapas */
             etapas: components["schemas"]["EtapaLeitura"][];
+        };
+        /** ProjetoReferencia */
+        ProjetoReferencia: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Titulo */
+            titulo: string;
         };
         /** ProximoCodigo */
         ProximoCodigo: {
@@ -3251,15 +3616,6 @@ export interface components {
             /** Total Recorrente */
             total_recorrente: number;
         };
-        /** SetupTotpSaida */
-        SetupTotpSaida: {
-            /** Qr Code */
-            qr_code: string;
-            /** Provisioning Uri */
-            provisioning_uri: string;
-            /** Backup Codes */
-            backup_codes: string[];
-        };
         /** TagEntrada */
         TagEntrada: {
             /** Nome */
@@ -3376,6 +3732,12 @@ export interface components {
             atualizado_por: string | null;
             /** Versao */
             versao: number;
+            /**
+             * Pode Editar
+             * @description A pessoa da requisição pode alterar este registro (escopo).
+             * @default true
+             */
+            pode_editar: boolean;
             /** Titulo */
             titulo: string;
             /** Coluna */
@@ -3527,6 +3889,24 @@ export interface components {
             token_type: string;
             usuario: components["schemas"]["UsuarioLeitura"];
         };
+        /** TransferenciaEntrada */
+        TransferenciaEntrada: {
+            /**
+             * Entidade
+             * @enum {string}
+             */
+            entidade: "cliente" | "negocio" | "projeto" | "tarefa";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Para
+             * @description Novo dono; nulo deixa o registro sem dono (só líder/admin).
+             */
+            para: string | null;
+        };
         /** TrocarSenhaEntrada */
         TrocarSenhaEntrada: {
             /** Senha Atual */
@@ -3610,13 +3990,6 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
-        };
-        /** VerificarTotpEntrada */
-        VerificarTotpEntrada: {
-            /** Token Temporario */
-            token_temporario: string;
-            /** Codigo */
-            codigo: string;
         };
     };
     responses: never;
@@ -4061,6 +4434,72 @@ export interface operations {
             };
         };
     };
+    obter_api_v1_empresas_ativa_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmpresaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_api_v1_empresas_ativa_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmpresaDados"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmpresaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     atualizar_empresa_ativa_api_v1_empresas_ativa_patch: {
         parameters: {
             query?: never;
@@ -4073,6 +4512,367 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["EmpresaAtualizar"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    definir_logo_api_v1_empresas_ativa_logo_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogoEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmpresaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remover_logo_api_v1_empresas_ativa_logo_delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    definir_paleta_api_v1_empresas_ativa_paleta_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Paleta"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmpresaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restaurar_paleta_api_v1_empresas_ativa_paleta_delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmpresaLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listar_equipes_api_v1_equipes_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EquipeLeitura"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    criar_equipe_api_v1_equipes_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EquipeEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EquipeLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_equipe_api_v1_equipes__id___put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EquipeEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EquipeLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    excluir_equipe_api_v1_equipes__id___delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pessoas_atribuiveis_api_v1_escopo_pessoas_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PessoaReferencia"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    meu_escopo_api_v1_escopo_eu_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transferir_api_v1_escopo_transferir_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransferenciaEntrada"];
             };
         };
         responses: {
@@ -4147,6 +4947,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjetoLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    referencias_api_v1_projetos_referencias_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjetoReferencia"][];
                 };
             };
             /** @description Validation Error */
@@ -4283,6 +5114,148 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_etapa_api_v1_projetos__id___etapas__etapa_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+                etapa_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EtapaAtualizacao"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjetoLeitura"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    participantes_api_v1_projetos__id___participantes_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    incluir_participante_api_v1_projetos__id___participantes_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParticipanteEntrada"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retirar_participante_api_v1_projetos__id___participantes__usuario_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Empresa-ID"?: string | null;
+            };
+            path: {
+                id_: string;
+                usuario_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -6809,121 +7782,6 @@ export interface operations {
                 content: {
                     "application/json": unknown;
                 };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    setup_2fa_api_v1_auth_2fa_setup_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SetupTotpSaida"];
-                };
-            };
-        };
-    };
-    confirmar_2fa_api_v1_auth_2fa_confirmar_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConfirmarTotpEntrada"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TokenSaida"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    verificar_2fa_api_v1_auth_2fa_verificar_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["VerificarTotpEntrada"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TokenSaida"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    desativar_2fa_api_v1_auth_2fa_delete: {
-        parameters: {
-            query: {
-                codigo: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Validation Error */
             422: {

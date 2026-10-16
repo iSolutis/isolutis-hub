@@ -17,7 +17,9 @@ from app.financeiro import rotas as financeiro
 from app.routers import (
     auth,
     clientes,
+    empresa,
     equipe,
+    escopo as router_escopo,
     faturamento,
     negocios,
     onboarding as router_onboarding,
@@ -94,6 +96,10 @@ def criar_app() -> FastAPI:
     # Cada um cuida da própria autenticação e permissão: login, equipe (rota a rota) e WebSocket.
     for modulo in (auth, equipe, ws):
         api.include_router(modulo.router)
+    # Dados da empresa ativa: leitura `base`, alterações `administracao` (rota a rota).
+    api.include_router(empresa.router)
+    # Escopo de acesso: equipes (`administracao`), pessoas atribuíveis e transferência (`base`), rota a rota.
+    api.include_router(router_escopo.router)
     # Toda rota de dados declara a permissão exigida pelo papel na empresa ativa (ver app.domain.papeis);
     # tests/test_permissoes.py falha se uma rota nova ficar sem checagem. A dependência também alimenta a auditoria.
     for modulo in (projetos, tarefas, painel):  # `base`: qualquer papel

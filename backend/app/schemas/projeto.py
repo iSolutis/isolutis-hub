@@ -54,6 +54,7 @@ class ProjetoAtualizar(ProjetoEntrada):
 
 
 class EtapaLeitura(Leitura):
+    pode_editar: bool = Field(True, description="A pessoa da requisição pode alterar este registro (escopo).")
     id: UUID
     ordem: int
     titulo: str
@@ -66,6 +67,7 @@ class EtapaLeitura(Leitura):
 
 
 class ProjetoLeitura(Auditoria):
+    pode_editar: bool = Field(True, description="A pessoa da requisição pode alterar este registro (escopo).")
     titulo: str
     cliente_id: UUID
     cliente_nome: str

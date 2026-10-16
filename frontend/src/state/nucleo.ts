@@ -49,6 +49,13 @@ const carregadores: Record<string, { permissao: Permissao; carregar: () => Promi
   projetos: { permissao: "base", carregar: async () => void (dados.projetos = await api.projetos.listar()) },
   tarefas: { permissao: "base", carregar: async () => void (dados.tarefas = await api.tarefas.listar()) },
   equipe: { permissao: "base", carregar: async () => void (dados.equipe = await api.equipe.listar()) },
+  escopo: {
+    permissao: "base",
+    carregar: async () => {
+      [dados.escopo, dados.atribuiveis] = await Promise.all([api.escopo.eu(), api.escopo.pessoas()]);
+    },
+  },
+  referenciasProjetos: { permissao: "base", carregar: async () => void (dados.referenciasProjetos = await api.projetos.referencias()) },
 };
 export const RECURSOS_EM_MEMORIA = Object.keys(carregadores) as Recurso[];
 
@@ -56,6 +63,11 @@ export const RECURSOS_EM_MEMORIA = Object.keys(carregadores) as Recurso[];
 function recursosPermitidos(recursos: readonly string[]): string[] {
   const todos = new Set(recursos);
   if (todos.has("clientes")) todos.add("referenciasClientes");
+  // Escopo de acesso: o que cada um enxerga depende de vínculos (cliente de um negócio, tarefa de um projeto)…
+  if (["negocios", "orcamentos", "projetos", "tarefas"].some((r) => todos.has(r))) todos.add("referenciasClientes");
+  if (todos.has("projetos") || todos.has("tarefas")) todos.add("referenciasProjetos");
+  // …e das equipes: mudou a estrutura, tudo o que a pessoa vê pode ter mudado.
+  if (todos.has("escopo")) Object.keys(carregadores).forEach((r) => todos.add(r));
   return [...todos].filter((r) => {
     const c = carregadores[r];
     return c !== undefined && temPermissao(c.permissao);

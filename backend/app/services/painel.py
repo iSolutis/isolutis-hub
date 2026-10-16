@@ -89,8 +89,8 @@ async def _comercial(sessao: AsyncSession) -> dict:
     ]
 
     funil_abertos = sum(e["quantidade"] for e in por_etapa)
-    funil_valor = sum((e["soma_valor"] for e in funil_rows), ZERO)
-    funil_mensal = sum((e["soma_mensal"] for e in funil_rows), ZERO)
+    funil_valor = sum((e.soma_valor for e in funil_rows), ZERO)
+    funil_mensal = sum((e.soma_mensal for e in funil_rows), ZERO)
 
     # --- ganhos / perdidos / conversão ---
     resultado_fechados = (
@@ -186,7 +186,7 @@ async def _comercial(sessao: AsyncSession) -> dict:
             {
                 "id": n.id,
                 "titulo": n.titulo,
-                "cliente_nome": n.cliente.nome,
+                "cliente_nome": n.cliente_nome,
                 "etapa": n.etapa,
                 "valor": n.valor,
                 "mensal": n.mensal,

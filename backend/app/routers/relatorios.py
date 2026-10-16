@@ -10,6 +10,7 @@ from app.deps import EmpresaAtual, Sessao, UsuarioLogado, requer_financeiro
 from app.documents.relatorio_pdf import relatorio_pdf
 from app.documents.relatorio_xlsx import relatorio_xlsx
 from app.errors import ErroApp
+from app.services import empresa as svc_empresa
 from app.services.relatorios import calcular_dre, calcular_fluxo_caixa
 
 router = APIRouter(prefix="/relatorios", tags=["Relatórios"], dependencies=[Depends(requer_financeiro)])
@@ -29,8 +30,9 @@ async def dre(
     dados = await calcular_dre(sessao, empresa.id, ano)
 
     if formato == "pdf":
+        emissor = await svc_empresa.identidade(sessao, empresa)
         try:
-            pdf_bytes = relatorio_pdf(dados, "dre", empresa.nome, ano)
+            pdf_bytes = relatorio_pdf(dados, "dre", emissor.nome, ano, emissor.logo, emissor.rodape)
         except Exception as exc:
             raise ErroApp(
                 "Não foi possível gerar o PDF. Tente novamente.",
@@ -76,8 +78,9 @@ async def fluxo_caixa(
     dados = await calcular_fluxo_caixa(sessao, empresa.id, ano)
 
     if formato == "pdf":
+        emissor = await svc_empresa.identidade(sessao, empresa)
         try:
-            pdf_bytes = relatorio_pdf(dados, "fluxo_caixa", empresa.nome, ano)
+            pdf_bytes = relatorio_pdf(dados, "fluxo_caixa", emissor.nome, ano, emissor.logo, emissor.rodape)
         except Exception as exc:
             raise ErroApp(
                 "Não foi possível gerar o PDF. Tente novamente.",

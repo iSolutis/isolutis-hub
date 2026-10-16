@@ -7,7 +7,7 @@ from fastapi import Depends, Header
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import definir_empresa_da_transacao, definir_usuario_da_transacao, get_session
+from app.db import definir_empresa_da_transacao, definir_escopo_da_transacao, definir_usuario_da_transacao, get_session
 from app.domain.papeis import Permissao, permissoes_do_papel
 from app.errors import NaoAutenticado, SemPermissao
 from app.models import Empresa, Usuario, UsuarioEmpresa
@@ -65,7 +65,7 @@ async def empresa_atual(
         raise SemPermissao("Você não tem acesso ativo à empresa selecionada.", codigo=CODIGO_EMPRESA_INACESSIVEL)
     membership = memberships[0]
     await definir_empresa_da_transacao(sessao, membership.empresa_id)
-    sessao.info["empresa_id"] = membership.empresa_id
+    await definir_escopo_da_transacao(sessao)
     sessao.info["papel"] = membership.papel
     empresa = await sessao.get(Empresa, membership.empresa_id)
     if empresa is None:

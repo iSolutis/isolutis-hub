@@ -9,9 +9,9 @@ from app.domain.datas import hoje
 from app.errors import NaoEncontrado, RegraDeNegocio
 from app.models import Negocio, Orcamento, OrcamentoItem
 from app.schemas.orcamento import ItemEntrada, OrcamentoAtualizar, OrcamentoEntrada
+from app.services import escopo
 from app.services import negocios as svc_negocios
 from app.services.base import aplicar, conferir_versao, confirmar, obter
-from app.services.parceiros import exigir_cliente
 
 
 def consulta():
@@ -33,7 +33,7 @@ async def obter_completo(sessao: AsyncSession, id_: UUID) -> Orcamento:
 
 
 async def _validar_vinculos(sessao: AsyncSession, dados: OrcamentoEntrada) -> Negocio | None:
-    await exigir_cliente(sessao, dados.cliente_id)
+    await escopo.exigir_vinculo_cliente(sessao, dados.cliente_id, dados.negocio_id)
     if not dados.negocio_id:
         return None
     negocio = await obter(sessao, Negocio, dados.negocio_id, "Negócio")
@@ -85,6 +85,7 @@ async def criar(sessao: AsyncSession, dados: OrcamentoEntrada) -> Orcamento:
 
 async def atualizar(sessao: AsyncSession, id_: UUID, dados: OrcamentoAtualizar) -> Orcamento:
     orc = await obter_completo(sessao, id_)
+    await escopo.exigir_edicao(sessao, "orcamento", id_)
     conferir_versao(orc, dados.versao)
     negocio = await _validar_vinculos(sessao, dados)
     aplicar(orc, dados.model_dump(), ignorar=("versao", "itens", "status"))
@@ -98,6 +99,7 @@ async def atualizar(sessao: AsyncSession, id_: UUID, dados: OrcamentoAtualizar) 
 async def aprovar(sessao: AsyncSession, id_: UUID) -> Orcamento:
     """Cliente aprovou: orçamento aprovado e, se houver negócio, ele vira Ganho com os valores do orçamento."""
     orc = await obter_completo(sessao, id_)
+    await escopo.exigir_edicao(sessao, "orcamento", id_)
     _aplicar_status(orc, StatusOrcamento.APROVADO.value)
     if orc.negocio_id:
         negocio = await obter(sessao, Negocio, orc.negocio_id, "Negócio")
@@ -110,5 +112,6 @@ async def aprovar(sessao: AsyncSession, id_: UUID) -> Orcamento:
 
 async def excluir(sessao: AsyncSession, id_: UUID) -> None:
     orc = await obter(sessao, Orcamento, id_, "Orçamento")
+    await escopo.exigir_edicao(sessao, "orcamento", id_)
     await sessao.delete(orc)
     await confirmar(sessao)

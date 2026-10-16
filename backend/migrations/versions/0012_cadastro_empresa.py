@@ -1,4 +1,4 @@
-"""Sócios como parceiros, conta de aporte e recorrência de títulos.
+"""Cadastro completo da empresa, logomarca e paleta de cores.
 
 Revision ID: 0012
 Revises: 0011
@@ -13,8 +13,8 @@ depends_on = None
 
 
 def upgrade() -> None:
-    executar_sql("0012_socios_e_recorrencia.sql")
+    executar_sql("0012_cadastro_empresa.sql")
 
 
 def downgrade() -> None:
-    executar_sql("0012_socios_e_recorrencia_down.sql")
+    executar_sql("0012_cadastro_empresa_down.sql")

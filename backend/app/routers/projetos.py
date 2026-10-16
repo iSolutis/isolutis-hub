@@ -3,15 +3,18 @@ from urllib.parse import quote
 from uuid import UUID
 
 from fastapi import APIRouter, Query, Response
-from sqlalchemy import select
+from sqlalchemy import select, text
 
-from app.deps import Sessao
+from app.deps import EmpresaAtual, Sessao
 from app.documents.render import projeto_html, slug
 from app.models import Usuario
+from app.schemas.escopo import EtapaAtualizacao, ParticipanteEntrada, ProjetoReferencia
 from app.schemas.projeto import EtapaSugerida, ModeloProjeto, ProjetoAtualizar, ProjetoEntrada, ProjetoLeitura
 from app.schemas.usuario import MembroEquipe
+from app.services import empresa as svc_empresa
+from app.services import equipes as svc_equipes
 from app.services import projetos as svc
-from app.services.parceiros import exigir_cliente
+from app.services.parceiros import cliente_para_documento
 
 router = APIRouter(prefix="/projetos", tags=["Projetos"])
 
@@ -19,6 +22,15 @@ router = APIRouter(prefix="/projetos", tags=["Projetos"])
 @router.get("", response_model=list[ProjetoLeitura])
 async def listar(sessao: Sessao):
     return await svc.listar(sessao)
+
+
+@router.get("/referencias", response_model=list[ProjetoReferencia])
+async def referencias(sessao: Sessao):
+    """Id e título dos projetos que a pessoa vê, ou das tarefas que executa (sem acesso ao projeto)."""
+    return [
+        ProjetoReferencia(id=i, titulo=t)
+        for i, t in (await sessao.execute(text("select id, titulo from app_projetos_referencia()"))).all()
+    ]
 
 
 @router.get("/modelo", response_model=ModeloProjeto)
@@ -47,12 +59,35 @@ async def excluir(id_: UUID, sessao: Sessao) -> Response:
     return Response(status_code=204)
 
 
+@router.patch("/{id_}/etapas/{etapa_id}", response_model=ProjetoLeitura)
+async def atualizar_etapa(id_: UUID, etapa_id: UUID, dados: EtapaAtualizacao, sessao: Sessao):
+    """O responsável da etapa atualiza só a sua etapa (o projeto inteiro exige permissão no projeto)."""
+    await svc_equipes.atualizar_etapa(sessao, id_, etapa_id, dados)
+    return await svc.obter_completo(sessao, id_)
+
+
+@router.get("/{id_}/participantes", response_model=list[UUID])
+async def participantes(id_: UUID, sessao: Sessao):
+    return await svc_equipes.participantes(sessao, id_)
+
+
+@router.post("/{id_}/participantes", response_model=list[UUID])
+async def incluir_participante(id_: UUID, dados: ParticipanteEntrada, empresa: EmpresaAtual, sessao: Sessao):
+    return await svc_equipes.incluir_participante(sessao, empresa.id, id_, dados.usuario_id)
+
+
+@router.delete("/{id_}/participantes/{usuario_id}", response_model=list[UUID])
+async def retirar_participante(id_: UUID, usuario_id: UUID, sessao: Sessao):
+    return await svc_equipes.retirar_participante(sessao, id_, usuario_id)
+
+
 @router.get("/{id_}/relatorio", response_class=Response)
-async def relatorio(id_: UUID, sessao: Sessao) -> Response:
+async def relatorio(id_: UUID, sessao: Sessao, empresa: EmpresaAtual) -> Response:
     projeto = await svc.obter_completo(sessao, id_)
-    cliente = await exigir_cliente(sessao, projeto.cliente_id)
+    cliente = await cliente_para_documento(sessao, projeto.cliente_id, projeto.cliente_nome)
     equipe = {u.id: MembroEquipe.model_validate(u) for u in (await sessao.scalars(select(Usuario))).all()}
-    html = projeto_html(projeto, cliente, equipe.get(projeto.responsavel_id), equipe)
+    emissor = await svc_empresa.identidade(sessao, empresa)
+    html = projeto_html(projeto, cliente, equipe.get(projeto.responsavel_id), equipe, emissor)
     nome = f"Plano-de-entrega-{slug(projeto.titulo)}-{slug(cliente.nome)}.html"
     return Response(
         html,

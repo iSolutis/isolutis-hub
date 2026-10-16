@@ -32,6 +32,16 @@ export type LancamentoEntrada = S["LancamentoEntrada"];
 export type FaturamentoEmLote = S["FaturamentoEmLote"];
 export type ResumoFaturamento = S["ResumoFaturamento"];
 export type Projeto = S["ProjetoLeitura"];
+export type ProjetoReferencia = S["ProjetoReferencia"];
+export type PessoaReferencia = S["PessoaReferencia"];
+export type Equipe = S["EquipeLeitura"];
+/** `GET /escopo/eu`: o que a interface precisa saber do escopo da pessoa. */
+export interface MeuEscopo {
+  ve_tudo: boolean;
+  lider: boolean;
+  liderados: number;
+  equipes: number;
+}
 export type ProjetoEntrada = S["ProjetoEntrada"];
 export type EtapaEntrada = S["EtapaEntrada"];
 export type EtapaSugerida = S["EtapaSugerida"];

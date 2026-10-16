@@ -6,6 +6,7 @@ O arquivo baixado é autocontido (logo embutida) e vira PDF pelo "Imprimir → S
 
 import base64
 import re
+from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 from functools import lru_cache
@@ -40,7 +41,7 @@ def _qtd(v: Decimal) -> str:
     return f"{v.normalize():f}".replace(".", ",")
 
 
-def _cnpj(v: str) -> str:
+def formatar_documento(v: str) -> str:
     """Formata CNPJ (14 dígitos) ou CPF (11); outro tamanho volta como veio."""
     if len(v) == 14:
         return re.sub(r"(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})", r"\1.\2.\3/\4-\5", v)
@@ -52,7 +53,9 @@ def _cnpj(v: str) -> str:
 @lru_cache
 def _ambiente() -> Environment:
     env = Environment(loader=FileSystemLoader(PASTA / "templates"), autoescape=select_autoescape(["html"]))
-    env.filters.update(brl=_brl, qtd=_qtd, cnpj=_cnpj, data_br=lambda d: d.strftime("%d/%m/%Y") if d else "—")
+    env.filters.update(
+        brl=_brl, qtd=_qtd, cnpj=formatar_documento, data_br=lambda d: d.strftime("%d/%m/%Y") if d else "—"
+    )
     return env
 
 
@@ -66,18 +69,37 @@ def _css(nome: str) -> str:
     return (PASTA / "templates" / nome).read_text(encoding="utf-8")
 
 
-def orcamento_html(orc: Orcamento, cliente: Parceiro) -> str:
+@dataclass(frozen=True)
+class Identidade:
+    """Quem emite o documento: dados do cadastro da empresa e a logomarca dela (data URL), se houver."""
+
+    nome: str
+    subtitulo: str | None = None
+    documento: str | None = None
+    contato: str | None = None
+    endereco: str | None = None
+    logo: str | None = None
+
+    @property
+    def rodape(self) -> str:
+        return " · ".join(p for p in (self.nome, self.subtitulo, self.documento, self.contato) if p)
+
+
+PADRAO = Identidade(nome="iSolutis", subtitulo="Soluções e Inovações Tecnológicas")
+
+
+def orcamento_html(orc: Orcamento, cliente: Parceiro, empresa: Identidade = PADRAO) -> str:
     return (
         _ambiente()
         .get_template("orcamento.html")
-        .render(o=orc, c=cliente, css=_css("_orcamento.css"), logo=_imagem("logo.png"))
+        .render(o=orc, c=cliente, e=empresa, css=_css("_orcamento.css"), logo=empresa.logo or _imagem("logo.png"))
     )
 
 
-def orcamento_pdf(orc: Orcamento, cliente: Parceiro) -> bytes:
+def orcamento_pdf(orc: Orcamento, cliente: Parceiro, empresa: Identidade = PADRAO) -> bytes:
     from weasyprint import HTML
 
-    html_content = orcamento_html(orc, cliente)
+    html_content = orcamento_html(orc, cliente, empresa)
     return HTML(string=html_content).write_pdf()  # type: ignore[no-any-return]
 
 
@@ -110,7 +132,9 @@ def _gantt(projeto: Projeto, inicio: date, fim: date) -> dict:
     return {"marcas": marcas, "linhas": linhas}
 
 
-def projeto_html(projeto: Projeto, cliente: Parceiro, responsavel: MembroEquipe | None, equipe: dict) -> str:
+def projeto_html(
+    projeto: Projeto, cliente: Parceiro, responsavel: MembroEquipe | None, equipe: dict, empresa: Identidade = PADRAO
+) -> str:
     etapas = projeto.etapas
     datas = sorted(
         [d for e in etapas for d in (e.inicio, e.fim) if d] + [d for d in (projeto.inicio, projeto.entrega) if d]
@@ -139,7 +163,8 @@ def projeto_html(projeto: Projeto, cliente: Parceiro, responsavel: MembroEquipe 
         _ambiente()
         .get_template("relatorio_projeto.html")
         .render(
-            p=projeto, contato=cliente.contato, css=_css("_relatorio.css"), logo=_imagem("logo-horizontal.png"),
+            p=projeto, contato=cliente.contato, css=_css("_relatorio.css"), e=empresa,
+            logo=empresa.logo or _imagem("logo-horizontal.png"), logo_propria=bool(empresa.logo),
             semanas=max(1, round(span / 7)) if span else 0, status_rotulo=STATUS_PROJETO.get(projeto.status, ""),
             responsavel=responsavel.nome if responsavel else None, escopo=_linhas(projeto.escopo),
             fora_escopo=_linhas(projeto.fora_escopo), gantt=gantt, passos=passos, emitido_em=hoje(),

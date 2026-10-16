@@ -2,6 +2,7 @@
 
 from collections.abc import Iterable
 from decimal import Decimal
+from types import SimpleNamespace
 from uuid import UUID
 
 from sqlalchemy import exists, func, select, text
@@ -25,6 +26,7 @@ from app.models import (
     Projeto,
     Tarefa,
 )
+from app.services import escopo
 from app.services.base import conferir_versao, confirmar
 
 PAPEL_CLIENTE = "cliente"
@@ -113,6 +115,14 @@ async def exigir_cliente(sessao: AsyncSession, id_: UUID) -> Parceiro:
     return await obter_completo(sessao, await empresa_atual(sessao), id_, PAPEL_CLIENTE)
 
 
+async def cliente_para_documento(sessao: AsyncSession, id_: UUID, nome: str) -> Parceiro | SimpleNamespace:
+    """Cliente completo para o documento se a pessoa enxerga o cadastro; senão, só o nome (escopo de acesso)."""
+    try:
+        return await exigir_cliente(sessao, id_)
+    except NaoEncontrado:
+        return SimpleNamespace(nome=nome, contato=None, cargo=None, cpf_cnpj=None, tipo_pessoa="PJ")
+
+
 async def listar_papeis(sessao: AsyncSession, visiveis: Visiveis = None) -> list[PapelParceiro]:
     q = select(PapelParceiro).where(PapelParceiro.ativo).order_by(PapelParceiro.nome)
     if visiveis is not None:
@@ -199,6 +209,7 @@ async def criar(
     participacao: Decimal | None = None, visiveis: Visiveis = None,
 ) -> Parceiro:
     await _validar(sessao, campos)
+    campos["responsavel_id"] = await escopo.dono_padrao(sessao, "responsavel_id" in campos, campos.get("responsavel_id"))
     codigos = await _papeis_validos(sessao, papeis)
     if visiveis is not None and codigos - visiveis:
         raise SemPermissao("Seu papel nesta empresa não permite cadastrar parceiros com este papel.")
@@ -214,6 +225,7 @@ async def atualizar(
     papeis: Iterable[str] | None = None, participacao: Decimal | None = None, visiveis: Visiveis = None,
 ) -> Parceiro:
     parceiro = await obter_completo(sessao, empresa, id_, visiveis=visiveis)
+    await escopo.exigir_edicao(sessao, "cliente", id_)
     conferir_versao(parceiro, versao)
     await _validar(sessao, campos)
     for nome, valor in campos.items():

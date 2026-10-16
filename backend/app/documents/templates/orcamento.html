@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Orçamento {{ o.numero }} · iSolutis</title>
+<title>Orçamento {{ o.numero }} · {{ e.nome }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
 <style>
 {{ css | safe }}
@@ -10,7 +10,7 @@
 </head>
 <body>
 <header>
-  <div class="brand"><img src="{{ logo }}" width="72" height="72" alt="iSolutis"><div><div class="mark">iSolutis</div><div class="sm">Soluções e Inovações Tecnológicas</div></div></div>
+  <div class="brand"><img src="{{ logo }}" height="72" alt="{{ e.nome }}"><div><div class="mark">{{ e.nome }}</div>{% if e.subtitulo %}<div class="sm">{{ e.subtitulo }}</div>{% endif %}{% if e.documento %}<div class="sm">{{ e.documento }}</div>{% endif %}</div></div>
   <div style="text-align:right"><b>Orçamento Nº {{ o.numero }}</b><br>{{ o.data | data_br }}<br>Válido até {{ o.valido_ate | data_br }}</div>
 </header>
 <h1>{{ c.nome }}</h1>
@@ -30,6 +30,6 @@
   {% if o.total_mensal %}<br>Manutenção mensal: <b>{{ o.total_mensal | brl }}/mês</b>{% endif %}
 </div>
 {% if o.obs %}<div class="box">{{ o.obs }}</div>{% endif %}
-<footer>iSolutis · Soluções e Inovações Tecnológicas · +55 71 99239-0992</footer>
+<footer>{{ e.rodape }}{% if e.endereco %}<br>{{ e.endereco }}{% endif %}</footer>
 </body>
 </html>

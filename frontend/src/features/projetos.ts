@@ -4,7 +4,7 @@ import { $ } from "@/core/dom";
 import { dataBR, hoje } from "@/core/formato";
 import { html, raw, type Safe } from "@/core/html";
 import { ETAPA_STATUS, PROJ_STATUS } from "@/domain/constantes";
-import { dados, eu, nomeCliente, podeEscrever, ui } from "@/state/estado";
+import { dados, nomeCliente, nomeMembro, podeEscrever, ui } from "@/state/estado";
 import { registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
@@ -13,7 +13,7 @@ import { tentar } from "@/ui/erros";
 import { registrarAbertura } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, opcoesEquipe, resolverCliente, seletorCliente } from "@/ui/formularios";
+import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, opcoesEquipe, resolverCliente, seletorCliente, seletorDono, soLeitura } from "@/ui/formularios";
 import { excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
@@ -70,7 +70,117 @@ function progressoDe(etapas: readonly EtapaTela[]): number {
   return etapas.length ? Math.round((100 * etapas.filter((e) => e.status === "concluida").length) / etapas.length) : 0;
 }
 
+/** Participantes incluídos no projeto (além do responsável e dos responsáveis de etapa). */
+function listaParticipantes(ids: readonly string[], editavel: boolean): Safe {
+  if (!ids.length) return html`<p class="sub">Ninguém incluído além dos responsáveis do projeto e das etapas.</p>`;
+  return html`<ul class="participantes">${ids.map(
+    (id) => html`<li><span>${nomeMembro(id) || "Pessoa da equipe"}</span>${editavel ? html`<button type="button" class="btn ghost" data-rm-part="${id}" aria-label="${"Retirar " + (nomeMembro(id) || "participante")}">Retirar</button>` : ""}</li>`,
+  )}</ul>`;
+}
+
+const SECAO_PARTICIPANTES = html`<div class="secao-participantes"><h2>Participantes</h2><p class="sub">Veem o projeto inteiro e só alteram o que é deles. Responsáveis de etapa já participam.</p><div id="partBox"><p class="sub">Carregando…</p></div></div>`;
+
+/** Liga a seção de participantes: lista, inclusão e retirada (só para quem edita o projeto). */
+function ligarParticipantes(projetoId: string, L: HTMLElement, editavel: boolean): void {
+  const box = $("#partBox", L) as HTMLElement | null;
+  if (!box) return;
+  let ids: string[] = [];
+  const desenhar = (): void => {
+    const fora = dados.equipe.filter((m) => m.ativo && !ids.includes(m.id));
+    box.innerHTML = String(html`${listaParticipantes(ids, editavel)}${
+      editavel && fora.length
+        ? html`<div class="fila"><select id="novoPart" aria-label="Pessoa a incluir"><option value="">Incluir participante…</option>${fora.map((m) => html`<option value="${m.id}">${m.nome}</option>`)}</select><button type="button" class="btn" id="incluirPart">Incluir</button></div>`
+        : ""
+    }`);
+  };
+  void tentar(() => api.projetos.participantes(projetoId)).then((r) => {
+    ids = r ?? [];
+    desenhar();
+  });
+  box.addEventListener("click", async (e) => {
+    const alvo = e.target as HTMLElement;
+    const rm = alvo.closest<HTMLElement>("[data-rm-part]");
+    if (rm) {
+      if ((await tentar(() => api.projetos.retirarParticipante(projetoId, rm.dataset.rmPart ?? ""))) === null) return;
+      ids = ids.filter((x) => x !== rm.dataset.rmPart);
+      return desenhar();
+    }
+    if (alvo.closest("#incluirPart")) {
+      const usuario = ($("#novoPart", box) as HTMLSelectElement | null)?.value;
+      if (!usuario) return void toast("Escolha a pessoa a incluir.");
+      const novos = await tentar(() => api.projetos.incluirParticipante(projetoId, usuario));
+      if (novos) {
+        ids = novos;
+        desenhar();
+        toast("Participante incluído.");
+      }
+    }
+  });
+}
+
+/**
+ * Projeto que a pessoa vê mas não edita por inteiro (escopo de acesso): tudo em leitura, e só as etapas de
+ * que ela é responsável (`pode_editar`) ganham situação, datas e descrição editáveis.
+ */
+function formProjetoLeitura(p: Projeto): void {
+  const [rot] = PROJ_STATUS[p.status] ?? PROJ_STATUS.planejamento!;
+  const texto = (t?: string | null): Safe => (t ? html`<p class="texto-leitura">${t}</p>` : html`<p class="sub">—</p>`);
+  abrirGaveta({
+    titulo: p.titulo,
+    registro: { recurso: "projetos", id: p.id, versao: p.versao },
+    autoria: linhaAutoria(p),
+    corpo: html`<dl class="resumo-leitura">
+        <div><dt>Cliente</dt><dd>${p.cliente_nome}</dd></div><div><dt>Situação</dt><dd>${rot}</dd></div>
+        <div><dt>Responsável técnico</dt><dd>${nomeMembro(p.responsavel_id) || "Sem responsável"}</dd></div>
+        <div><dt>Período</dt><dd>${p.inicio ? dataBR(p.inicio) : "?"} a ${p.entrega ? dataBR(p.entrega) : "?"}</dd></div>
+      </dl>
+      <h2>Objetivo</h2>${texto(p.objetivo)}<h2>Escopo</h2>${texto(p.escopo)}
+      <div><h2>Passo a passo da construção</h2><span class="sub">${p.progresso}% concluído</span>
+      <div class="etapas">${p.etapas.map((e, i) => {
+        const [st] = ETAPA_STATUS[e.status] ?? ["—"];
+        return html`<div class="etapa${e.pode_editar ? " minha" : ""}" data-etapa="${e.id}">
+          <div class="et-h"><span class="et-n num">${String(i + 1).padStart(2, "0")}</span><b>${e.titulo}</b><span class="sub">${nomeMembro(e.responsavel_id) || "Sem responsável"}</span></div>
+          ${
+            e.pode_editar
+              ? html`<div class="fields">
+                <div class="field"><label for="et-st-${e.id}">Situação</label><select id="et-st-${e.id}" data-k="status">${Object.entries(ETAPA_STATUS).map(([k, x]) => html`<option value="${k}"${raw(e.status === k ? " selected" : "")}>${x[0]}</option>`)}</select></div>
+                <div class="field"><label for="et-in-${e.id}">Início</label><input type="date" id="et-in-${e.id}" data-k="inicio" value="${e.inicio ?? ""}"></div>
+                <div class="field"><label for="et-fi-${e.id}">Término previsto</label><input type="date" id="et-fi-${e.id}" data-k="fim" value="${e.fim ?? ""}"></div>
+                <div class="field full"><label for="et-de-${e.id}">O que acontece nesta etapa</label><textarea id="et-de-${e.id}" data-k="descricao">${e.descricao ?? ""}</textarea></div>
+                <div class="field full"><label for="et-en-${e.id}">Entregáveis (um por linha)</label><textarea id="et-en-${e.id}" data-k="entregaveis">${e.entregaveis ?? ""}</textarea></div>
+                <div class="fila"><button type="button" class="btn primary" data-salvar-etapa="${e.id}">Salvar esta etapa</button></div></div>`
+              : html`<p class="sub">${st}${e.inicio || e.fim ? ` · ${e.inicio ? dataBR(e.inicio) : "?"} a ${e.fim ? dataBR(e.fim) : "?"}` : ""}</p>`
+          }</div>`;
+      })}</div></div>
+      ${SECAO_PARTICIPANTES}`,
+    rodape: html`${avisoSoLeitura()}${espaco}<button class="btn" data-relatorio>Gerar relatório de entrega</button>`,
+    montar: (_f, fechar, L) => {
+      ligarParticipantes(p.id, L, false);
+      L.addEventListener("click", async (e) => {
+        const botao = (e.target as Element).closest<HTMLButtonElement>("[data-salvar-etapa]");
+        if (botao) {
+          const card = botao.closest<HTMLElement>("[data-etapa]");
+          const valor = (k: string): string => (card?.querySelector<HTMLInputElement>(`[data-k="${k}"]`)?.value ?? "").trim();
+          const etapaId = botao.dataset.salvarEtapa ?? "";
+          const salvo = await gravar({
+            recarregar: ["projetos"], mensagem: "Etapa atualizada",
+            operacao: () => api.projetos.atualizarEtapa(p.id, etapaId, {
+              status: valor("status") as EtapaEntrada["status"], inicio: valor("inicio") || null, fim: valor("fim") || null,
+              descricao: valor("descricao") || null, entregaveis: valor("entregaveis") || null,
+            }),
+          });
+          if (salvo) fechar();
+        }
+        if ((e.target as Element).closest("[data-relatorio]")) {
+          if ((await tentar(() => api.projetos.relatorio(p.id))) !== null) toast("Relatório baixado. Abra no navegador e use Imprimir → Salvar como PDF.");
+        }
+      });
+    },
+  });
+}
+
 export function formProjeto(p?: Projeto, inicial: Partial<ProjetoEntrada> = {}): void {
+  if (p && soLeitura(p)) return formProjetoLeitura(p);
   let atual = p;
   const etapas: EtapaTela[] = (p?.etapas ?? []).map((e) => ({ id: e.id, titulo: e.titulo, status: e.status as EtapaTela["status"], responsavel_id: e.responsavel_id, inicio: e.inicio, fim: e.fim, descricao: e.descricao, entregaveis: e.entregaveis }));
   const ganhos = dados.negocios.filter((n) => n.etapa === "ganho");
@@ -82,7 +192,7 @@ export function formProjeto(p?: Projeto, inicial: Partial<ProjetoEntrada> = {}):
     corpo: html`<div class="fields">
       ${campo("Nome do projeto", inp("titulo", v("titulo"), 'placeholder="Ex.: Portal do cliente"'), true)}
       ${seletorCliente(v("cliente_id"))}<div class="field"><label for="f-negocio_id">Negócio vendido</label>${sel("negocio_id", [["", "Sem vínculo"], ...ganhos.map((n) => [n.id, `${n.titulo} · ${nomeCliente(n.cliente_id)}`] as const)], v("negocio_id"))}</div>
-      ${campo("Situação", sel("status", Object.entries(PROJ_STATUS).map(([k, x]) => [k, x[0]] as const), v("status") ?? "planejamento"))}${campo("Responsável técnico", sel("responsavel_id", opcoesEquipe("Sem responsável", true), v("responsavel_id") ?? (p ? "" : eu.id)))}
+      ${campo("Situação", sel("status", Object.entries(PROJ_STATUS).map(([k, x]) => [k, x[0]] as const), v("status") ?? "planejamento"))}${seletorDono("Responsável técnico", v("responsavel_id"), !p)}
       ${campo("Início", inp("inicio", v("inicio") ?? hoje(), 'type="date"'))}${campo("Entrega prevista", inp("entrega", v("entrega"), 'type="date"'))}
       ${campo("Objetivo do projeto", area("objetivo", v("objetivo"), "O problema que o sistema resolve para o cliente, em uma ou duas frases."), true)}
       ${campo("Escopo (o que será entregue)", area("escopo", v("escopo"), "Uma linha por item."), true)}
@@ -91,11 +201,13 @@ export function formProjeto(p?: Projeto, inicial: Partial<ProjetoEntrada> = {}):
     </div>
     <div><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><h2 style="margin:0">Passo a passo da construção</h2><span class="sub" id="progTxt"></span></div>
       <div id="etapasBox" class="etapas"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" type="button" id="addEtapa">Adicionar etapa</button><button class="btn ghost" type="button" id="padrao">Usar as etapas padrão da iSolutis</button></div></div>`,
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" type="button" id="addEtapa">Adicionar etapa</button><button class="btn ghost" type="button" id="padrao">Usar as etapas padrão da iSolutis</button></div></div>
+    ${p ? SECAO_PARTICIPANTES : ""}`,
     rodape: html`${botaoSalvar()}${p || podeEscrever() ? html`<button class="btn" data-relatorio>Gerar relatório de entrega</button>` : ""}${espaco}${botaoExcluir(!!p)}`,
     montar: (f, fechar, L) => {
       melhorarFormulario(f);
       ligarNovoCliente(f);
+      if (p) ligarParticipantes(p.id, L, true);
       const box = $("#etapasBox", L) as HTMLElement;
       const equipeOps = opcoesEquipe("Sem responsável");
       const desenhar = (): void => {

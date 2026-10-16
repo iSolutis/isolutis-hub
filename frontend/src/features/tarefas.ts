@@ -4,7 +4,7 @@ import { $ } from "@/core/dom";
 import { dataBR, hoje, iniciais, pluralizar } from "@/core/formato";
 import { html, raw, type Safe } from "@/core/html";
 import { COLUNAS_TAREFA, PRIORIDADES } from "@/domain/constantes";
-import { dados, eu, nomeCliente, nomeMembro, podeEscrever, ui } from "@/state/estado";
+import { dados, eu, nomeCliente, nomeMembro, podeEscrever, tituloProjeto, ui } from "@/state/estado";
 import { recarregar, registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
@@ -13,7 +13,7 @@ import { tentar } from "@/ui/erros";
 import { registrarAbertura, registrarSoltar } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { botaoExcluir, botaoSalvar, espaco, opcoesClientes, opcoesEquipe } from "@/ui/formularios";
+import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, opcoesClientes, opcoesEquipe, soLeitura } from "@/ui/formularios";
 import { excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
@@ -32,7 +32,7 @@ function ordenar(a: Tarefa, b: Tarefa): number {
   );
 }
 
-const vinculo = (t: Tarefa): string => (t.projeto_id ? (dados.projetos.find((p) => p.id === t.projeto_id)?.titulo ?? "") : t.cliente_id ? nomeCliente(t.cliente_id) : "");
+const vinculo = (t: Tarefa): string => (t.projeto_id ? tituloProjeto(t.projeto_id) : t.cliente_id ? nomeCliente(t.cliente_id) : "");
 
 function vista(): Safe {
   const h = hoje();
@@ -42,7 +42,7 @@ function vista(): Safe {
   const filtradas = dados.tarefas.filter(
     (t) =>
       (p === "todas" || (p === "minhas" ? t.responsavel_id === eu.id : p === "sem" ? !t.responsavel_id : t.responsavel_id === p)) &&
-      (!q || [t.titulo, t.descricao, t.cliente_id ? nomeCliente(t.cliente_id) : "", dados.projetos.find((x) => x.id === t.projeto_id)?.titulo].join(" ").toLowerCase().includes(q)),
+      (!q || [t.titulo, t.descricao, t.cliente_id ? nomeCliente(t.cliente_id) : "", tituloProjeto(t.projeto_id)].join(" ").toLowerCase().includes(q)),
   );
   const atrasadas = dados.tarefas.filter((t) => t.coluna !== "concluido" && t.prazo && t.prazo < h).length;
   const minhas = dados.tarefas.filter((t) => t.coluna !== "concluido" && t.responsavel_id === eu.id).length;
@@ -96,7 +96,11 @@ type ItemCk = { id?: string | null; texto: string; feito: boolean };
 
 export function formTarefa(t?: Tarefa, colunaInicial = "a_fazer"): void {
   const checklist: ItemCk[] = (t?.checklist ?? []).map((i) => ({ id: i.id, texto: i.texto, feito: i.feito }));
-  const projs = dados.projetos.filter((p) => p.status !== "entregue" || p.id === t?.projeto_id);
+  const projs: Array<readonly [string, string]> = dados.projetos
+    .filter((p) => p.status !== "entregue" || p.id === t?.projeto_id)
+    .map((p) => [p.id, `${p.titulo} · ${p.cliente_nome}`] as const);
+  // Quem só executa a tarefa não vê o projeto dela: mantém o vínculo pelo título (referência mínima).
+  if (t?.projeto_id && !projs.some(([id]) => id === t.projeto_id)) projs.push([t.projeto_id, tituloProjeto(t.projeto_id) || "Projeto"]);
   abrirGaveta({
     titulo: t ? t.titulo : "Nova tarefa",
     registro: t ? { recurso: "tarefas", id: t.id, versao: t.versao } : null,
@@ -108,12 +112,12 @@ export function formTarefa(t?: Tarefa, colunaInicial = "a_fazer"): void {
       ${campo("Prazo", inp("prazo", t?.prazo, 'type="date"'))}
       ${campo("Prioridade", sel("prioridade", Object.entries(PRIORIDADES).map(([k, v]) => [k, v[0]] as const), t?.prioridade ?? "media"))}
       ${campo("Cliente", sel("cliente_id", opcoesClientes("Nenhum"), t?.cliente_id))}
-      ${campo("Projeto", sel("projeto_id", [["", "Nenhum"], ...projs.map((p) => [p.id, `${p.titulo} · ${p.cliente_nome}`] as const)], t?.projeto_id))}
+      ${campo("Projeto", sel("projeto_id", [["", "Nenhum"], ...projs], t?.projeto_id))}
       ${campo("Detalhes", area("descricao", t?.descricao, "Contexto, links, o que é preciso para considerar pronta…"), true)}
     </div>
     <div><h2 style="margin-bottom:6px">Checklist</h2><div id="ckBox" class="ck"></div>
       <div style="display:flex;gap:8px;margin-top:8px"><input id="ckNovo" class="search" style="flex:1;width:auto" placeholder="Adicionar item e apertar Enter"><button class="btn" type="button" id="ckAdd">Adicionar</button></div></div>`,
-    rodape: html`${botaoSalvar()}${t && t.coluna !== "concluido" && podeEscrever() ? html`<button class="btn" data-concluir>Concluir</button>` : ""}${espaco}${botaoExcluir(!!t)}`,
+    rodape: html`${soLeitura(t) ? avisoSoLeitura() : botaoSalvar()}${t && t.coluna !== "concluido" && podeEscrever() && !soLeitura(t) ? html`<button class="btn" data-concluir>Concluir</button>` : ""}${espaco}${botaoExcluir(!!t && !soLeitura(t))}`,
     montar: (f, fechar, L) => {
       melhorarFormulario(f);
       const box = $("#ckBox", L) as HTMLElement;

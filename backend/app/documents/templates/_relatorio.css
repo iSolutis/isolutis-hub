@@ -6,6 +6,7 @@ body{margin:0;background:#fff;color:var(--ink);font:14px/1.6 "IBM Plex Sans",Ari
 .capa:after{content:"";position:absolute;right:-90px;top:-90px;width:300px;height:300px;border-radius:50%;border:38px solid var(--teal);opacity:.16}
 .capa .in{max-width:780px;margin:0 auto;position:relative}
 .capa img{width:190px;height:auto;display:block}
+.capa img.logo-propria{width:auto;max-width:220px;max-height:80px;padding:10px 14px;border-radius:8px;background:#fff}
 .eyebrow{margin-top:34px;font:700 11px Montserrat,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
 .capa h1{font:800 34px/1.15 Montserrat,Arial,sans-serif;margin:8px 0 6px;letter-spacing:-.01em}
 .capa .cli{font-size:17px;color:#c9d6e8}

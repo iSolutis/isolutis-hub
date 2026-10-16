@@ -803,6 +803,781 @@
             }
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Obter",
+        "operationId": "obter_api_v1_empresas_ativa_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpresaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Atualizar",
+        "operationId": "atualizar_api_v1_empresas_ativa_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmpresaDados"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpresaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/empresas/ativa/logo": {
+      "put": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Definir Logo",
+        "operationId": "definir_logo_api_v1_empresas_ativa_logo_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpresaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Remover Logo",
+        "operationId": "remover_logo_api_v1_empresas_ativa_logo_delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/empresas/ativa/paleta": {
+      "put": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Definir Paleta",
+        "operationId": "definir_paleta_api_v1_empresas_ativa_paleta_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Paleta"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpresaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Empresa"
+        ],
+        "summary": "Restaurar Paleta",
+        "description": "Volta à paleta padrão do Hub.",
+        "operationId": "restaurar_paleta_api_v1_empresas_ativa_paleta_delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpresaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/equipes": {
+      "get": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Listar Equipes",
+        "operationId": "listar_equipes_api_v1_equipes_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EquipeLeitura"
+                  },
+                  "title": "Response Listar Equipes Api V1 Equipes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Criar Equipe",
+        "operationId": "criar_equipe_api_v1_equipes_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipeEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipeLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/equipes/{id_}": {
+      "put": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Atualizar Equipe",
+        "operationId": "atualizar_equipe_api_v1_equipes__id___put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipeEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipeLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Excluir Equipe",
+        "operationId": "excluir_equipe_api_v1_equipes__id___delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escopo/pessoas": {
+      "get": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Pessoas Atribuiveis",
+        "description": "Quem a pessoa pode pôr como dono: todos (admin), ela e os liderados (líder) ou só ela.",
+        "operationId": "pessoas_atribuiveis_api_v1_escopo_pessoas_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PessoaReferencia"
+                  },
+                  "title": "Response Pessoas Atribuiveis Api V1 Escopo Pessoas Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escopo/eu": {
+      "get": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Meu Escopo",
+        "description": "Para a interface: se a pessoa é admin, se lidera alguém e quantas equipes a empresa tem.",
+        "operationId": "meu_escopo_api_v1_escopo_eu_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Meu Escopo Api V1 Escopo Eu Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escopo/transferir": {
+      "post": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Transferir",
+        "operationId": "transferir_api_v1_escopo_transferir_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferenciaEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/projetos": {
@@ -910,6 +1685,66 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProjetoLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projetos/referencias": {
+      "get": {
+        "tags": [
+          "Projetos"
+        ],
+        "summary": "Referencias",
+        "description": "Id e título dos projetos que a pessoa vê, ou das tarefas que executa (sem acesso ao projeto).",
+        "operationId": "referencias_api_v1_projetos_referencias_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjetoReferencia"
+                  },
+                  "title": "Response Referencias Api V1 Projetos Referencias Get"
                 }
               }
             }
@@ -1202,6 +2037,320 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projetos/{id_}/etapas/{etapa_id}": {
+      "patch": {
+        "tags": [
+          "Projetos"
+        ],
+        "summary": "Atualizar Etapa",
+        "description": "O responsável da etapa atualiza só a sua etapa (o projeto inteiro exige permissão no projeto).",
+        "operationId": "atualizar_etapa_api_v1_projetos__id___etapas__etapa_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "etapa_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Etapa Id"
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EtapaAtualizacao"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjetoLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projetos/{id_}/participantes": {
+      "get": {
+        "tags": [
+          "Projetos"
+        ],
+        "summary": "Participantes",
+        "operationId": "participantes_api_v1_projetos__id___participantes_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "title": "Response Participantes Api V1 Projetos  Id   Participantes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Projetos"
+        ],
+        "summary": "Incluir Participante",
+        "operationId": "incluir_participante_api_v1_projetos__id___participantes_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParticipanteEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "title": "Response Incluir Participante Api V1 Projetos  Id   Participantes Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projetos/{id_}/participantes/{usuario_id}": {
+      "delete": {
+        "tags": [
+          "Projetos"
+        ],
+        "summary": "Retirar Participante",
+        "operationId": "retirar_participante_api_v1_projetos__id___participantes__usuario_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Usuario Id"
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "title": "Response Retirar Participante Api V1 Projetos  Id   Participantes  Usuario Id  Delete"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -6301,169 +7450,6 @@
         }
       }
     },
-    "/api/v1/auth/2fa/setup": {
-      "post": {
-        "tags": [
-          "auth",
-          "Autenticação"
-        ],
-        "summary": "Setup 2Fa",
-        "description": "Inicia o setup do 2FA: gera segredo, QR code e backup codes provisórios.\n\nO 2FA só fica ativo após confirmar um código em /auth/2fa/confirmar.",
-        "operationId": "setup_2fa_api_v1_auth_2fa_setup_post",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SetupTotpSaida"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/api/v1/auth/2fa/confirmar": {
-      "post": {
-        "tags": [
-          "auth",
-          "Autenticação"
-        ],
-        "summary": "Confirmar 2Fa",
-        "description": "Confirma o primeiro código TOTP e ativa 2FA.\n\nInvalida todas as sessões existentes (incrementa versao_sessao) e emite\num novo JWT completo para a sessão atual continuar sem re-login.",
-        "operationId": "confirmar_2fa_api_v1_auth_2fa_confirmar_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConfirmarTotpEntrada"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenSaida"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/api/v1/auth/2fa/verificar": {
-      "post": {
-        "tags": [
-          "auth",
-          "Autenticação"
-        ],
-        "summary": "Verificar 2Fa",
-        "description": "Endpoint público: valida código TOTP ou backup code após login parcial e emite JWT completo.\n\nO token parcial é de uso único e é invalidado após 5 códigos incorretos.",
-        "operationId": "verificar_2fa_api_v1_auth_2fa_verificar_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VerificarTotpEntrada"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenSaida"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/auth/2fa": {
-      "delete": {
-        "tags": [
-          "auth",
-          "Autenticação"
-        ],
-        "summary": "Desativar 2Fa",
-        "description": "Desativa 2FA após confirmar o código TOTP atual.",
-        "operationId": "desativar_2fa_api_v1_auth_2fa_delete",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "codigo",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 6,
-              "maxLength": 6,
-              "title": "Codigo"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/saude": {
       "get": {
         "tags": [
@@ -6833,6 +7819,18 @@
             ],
             "title": "Municipio Id"
           },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
+          },
           "versao": {
             "type": "integer",
             "minimum": 1.0,
@@ -6988,6 +7986,18 @@
               }
             ],
             "title": "Municipio Id"
+          },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
           }
         },
         "additionalProperties": false,
@@ -7047,6 +8057,18 @@
           "versao": {
             "type": "integer",
             "title": "Versao"
+          },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
           },
           "tipo_pessoa": {
             "type": "string",
@@ -7351,6 +8373,18 @@
             "type": "integer",
             "title": "Versao"
           },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
+          },
           "tipo_pessoa": {
             "type": "string",
             "title": "Tipo Pessoa"
@@ -7575,32 +8609,6 @@
         "type": "object",
         "title": "ConcluirOnboardingEntrada"
       },
-      "ConfirmarTotpEntrada": {
-        "properties": {
-          "codigo": {
-            "type": "string",
-            "maxLength": 6,
-            "minLength": 6,
-            "title": "Codigo"
-          },
-          "backup_codes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "maxItems": 8,
-            "minItems": 8,
-            "title": "Backup Codes"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "codigo",
-          "backup_codes"
-        ],
-        "title": "ConfirmarTotpEntrada"
-      },
       "ContaBancariaEntrada": {
         "properties": {
           "instituicao_financeira_id": {
@@ -7810,6 +8818,564 @@
         ],
         "title": "EmpresaAtualizar"
       },
+      "EmpresaDados": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Nome",
+            "description": "Nome de exibição no Hub"
+          },
+          "tipo_inscricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "CNPJ",
+                  "CPF"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo Inscricao"
+          },
+          "inscricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 18
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao"
+          },
+          "razao_social": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Razao Social"
+          },
+          "nome_fantasia": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nome Fantasia"
+          },
+          "inscricao_estadual": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao Estadual"
+          },
+          "inscricao_municipal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao Municipal"
+          },
+          "cnae_codigo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cnae Codigo"
+          },
+          "cnae_descricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cnae Descricao"
+          },
+          "regime_tributario": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "mei",
+                  "simples_nacional",
+                  "lucro_presumido",
+                  "lucro_real"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regime Tributario"
+          },
+          "data_abertura": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Abertura"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150,
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "telefone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefone"
+          },
+          "site": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site"
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 9
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cep"
+          },
+          "logradouro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logradouro"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "complemento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Complemento"
+          },
+          "bairro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bairro"
+          },
+          "municipio_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipio Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nome"
+        ],
+        "title": "EmpresaDados",
+        "description": "Campos editáveis do cadastro (o que a tela \"Dados da empresa\" envia)."
+      },
+      "EmpresaLeitura": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Nome",
+            "description": "Nome de exibição no Hub"
+          },
+          "tipo_inscricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "CNPJ",
+                  "CPF"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo Inscricao"
+          },
+          "inscricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 18
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao"
+          },
+          "razao_social": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Razao Social"
+          },
+          "nome_fantasia": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nome Fantasia"
+          },
+          "inscricao_estadual": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao Estadual"
+          },
+          "inscricao_municipal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inscricao Municipal"
+          },
+          "cnae_codigo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cnae Codigo"
+          },
+          "cnae_descricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cnae Descricao"
+          },
+          "regime_tributario": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "mei",
+                  "simples_nacional",
+                  "lucro_presumido",
+                  "lucro_real"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regime Tributario"
+          },
+          "data_abertura": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Abertura"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150,
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "telefone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefone"
+          },
+          "site": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site"
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 9
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cep"
+          },
+          "logradouro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logradouro"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "complemento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Complemento"
+          },
+          "bairro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bairro"
+          },
+          "municipio_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipio Id"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "segmento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segmento"
+          },
+          "uf": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uf",
+            "description": "UF do município do endereço"
+          },
+          "logo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo",
+            "description": "Logomarca como data URL (data:image/...;base64,...)"
+          },
+          "paleta": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Paleta"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "nome",
+          "id"
+        ],
+        "title": "EmpresaLeitura"
+      },
       "EmpresaOnboardingEntrada": {
         "properties": {
           "nome": {
@@ -7836,6 +9402,158 @@
           "nome"
         ],
         "title": "EmpresaOnboardingEntrada"
+      },
+      "EquipeEntrada": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Nome"
+          },
+          "lideres": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Lideres"
+          },
+          "membros": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 500,
+            "title": "Membros"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nome"
+        ],
+        "title": "EquipeEntrada"
+      },
+      "EquipeLeitura": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nome": {
+            "type": "string",
+            "title": "Nome"
+          },
+          "lideres": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Lideres"
+          },
+          "membros": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Membros"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "lideres",
+          "membros"
+        ],
+        "title": "EquipeLeitura"
+      },
+      "EtapaAtualizacao": {
+        "properties": {
+          "versao": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Versao",
+            "description": "Versão lida; se informada, protege contra edição concorrente."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "a_fazer",
+              "andamento",
+              "concluida"
+            ],
+            "title": "Status"
+          },
+          "inicio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inicio"
+          },
+          "fim": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fim"
+          },
+          "descricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descricao"
+          },
+          "entregaveis": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entregaveis"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "EtapaAtualizacao",
+        "description": "O que o responsável de uma etapa altera nela, sem precisar editar o projeto inteiro."
       },
       "EtapaEntrada": {
         "properties": {
@@ -7960,6 +9678,12 @@
       },
       "EtapaLeitura": {
         "properties": {
+          "pode_editar": {
+            "type": "boolean",
+            "title": "Pode Editar",
+            "description": "A pessoa da requisição pode alterar este registro (escopo).",
+            "default": true
+          },
           "id": {
             "type": "string",
             "format": "uuid",
@@ -8765,6 +10489,20 @@
         ],
         "title": "LoginEntrada"
       },
+      "LogoEntrada": {
+        "properties": {
+          "imagem": {
+            "type": "string",
+            "title": "Imagem",
+            "description": "Imagem PNG, JPEG ou WebP como data URL ou base64 puro (até 512 KB)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "imagem"
+        ],
+        "title": "LogoEntrada"
+      },
       "MembroEquipe": {
         "properties": {
           "id": {
@@ -9390,6 +11128,12 @@
             "type": "integer",
             "title": "Versao"
           },
+          "pode_editar": {
+            "type": "boolean",
+            "title": "Pode Editar",
+            "description": "A pessoa da requisição pode alterar este registro (escopo).",
+            "default": true
+          },
           "titulo": {
             "type": "string",
             "title": "Titulo"
@@ -9777,6 +11521,12 @@
             "type": "integer",
             "title": "Versao"
           },
+          "pode_editar": {
+            "type": "boolean",
+            "title": "Pode Editar",
+            "description": "A pessoa da requisição pode alterar este registro (escopo).",
+            "default": true
+          },
           "numero": {
             "type": "string",
             "title": "Numero"
@@ -10106,6 +11856,27 @@
         "title": "Painel",
         "description": "Campos de `financeiro` e `comercial` só vêm quando o papel tem a permissão; o front omite o que não vier."
       },
+      "Paleta": {
+        "properties": {
+          "primaria": {
+            "type": "string",
+            "title": "Primaria",
+            "description": "Cor principal (barra lateral, botões), #rrggbb"
+          },
+          "destaque": {
+            "type": "string",
+            "title": "Destaque",
+            "description": "Cor de destaque (seleção, links, gráficos), #rrggbb"
+          }
+        },
+        "type": "object",
+        "required": [
+          "primaria",
+          "destaque"
+        ],
+        "title": "Paleta",
+        "description": "Duas cores escolhidas; a interface deriva os demais tons (claro e escuro) a partir delas."
+      },
       "PapelLeitura": {
         "properties": {
           "codigo": {
@@ -10265,6 +12036,18 @@
               }
             ],
             "title": "Municipio Id"
+          },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
           },
           "tipo_pessoa": {
             "type": "string",
@@ -10457,6 +12240,18 @@
             ],
             "title": "Municipio Id"
           },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
+          },
           "tipo_pessoa": {
             "type": "string",
             "enum": [
@@ -10549,6 +12344,18 @@
           "versao": {
             "type": "integer",
             "title": "Versao"
+          },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
           },
           "tipo_pessoa": {
             "type": "string",
@@ -10748,6 +12555,40 @@
           "papeis"
         ],
         "title": "ParceiroLeitura"
+      },
+      "ParticipanteEntrada": {
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Usuario Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "usuario_id"
+        ],
+        "title": "ParticipanteEntrada"
+      },
+      "PessoaReferencia": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nome": {
+            "type": "string",
+            "title": "Nome"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nome"
+        ],
+        "title": "PessoaReferencia"
       },
       "PlanoContaEntrada": {
         "properties": {
@@ -11615,6 +13456,12 @@
             "type": "integer",
             "title": "Versao"
           },
+          "pode_editar": {
+            "type": "boolean",
+            "title": "Pode Editar",
+            "description": "A pessoa da requisição pode alterar este registro (escopo).",
+            "default": true
+          },
           "titulo": {
             "type": "string",
             "title": "Titulo"
@@ -11774,6 +13621,25 @@
           "etapas"
         ],
         "title": "ProjetoLeitura"
+      },
+      "ProjetoReferencia": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "titulo": {
+            "type": "string",
+            "title": "Titulo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "titulo"
+        ],
+        "title": "ProjetoReferencia"
       },
       "ProximoCodigo": {
         "properties": {
@@ -12302,32 +14168,6 @@
         ],
         "title": "ResumoFaturamento"
       },
-      "SetupTotpSaida": {
-        "properties": {
-          "qr_code": {
-            "type": "string",
-            "title": "Qr Code"
-          },
-          "provisioning_uri": {
-            "type": "string",
-            "title": "Provisioning Uri"
-          },
-          "backup_codes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Backup Codes"
-          }
-        },
-        "type": "object",
-        "required": [
-          "qr_code",
-          "provisioning_uri",
-          "backup_codes"
-        ],
-        "title": "SetupTotpSaida"
-      },
       "TagEntrada": {
         "properties": {
           "nome": {
@@ -12652,6 +14492,12 @@
           "versao": {
             "type": "integer",
             "title": "Versao"
+          },
+          "pode_editar": {
+            "type": "boolean",
+            "title": "Pode Editar",
+            "description": "A pessoa da requisição pode alterar este registro (escopo).",
+            "default": true
           },
           "titulo": {
             "type": "string",
@@ -13096,6 +14942,46 @@
         ],
         "title": "TokenSaida"
       },
+      "TransferenciaEntrada": {
+        "properties": {
+          "entidade": {
+            "type": "string",
+            "enum": [
+              "cliente",
+              "negocio",
+              "projeto",
+              "tarefa"
+            ],
+            "title": "Entidade"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "para": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Para",
+            "description": "Novo dono; nulo deixa o registro sem dono (só líder/admin)."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "entidade",
+          "id",
+          "para"
+        ],
+        "title": "TransferenciaEntrada"
+      },
       "TrocarSenhaEntrada": {
         "properties": {
           "senha_atual": {
@@ -13323,27 +15209,6 @@
           "type"
         ],
         "title": "ValidationError"
-      },
-      "VerificarTotpEntrada": {
-        "properties": {
-          "token_temporario": {
-            "type": "string",
-            "title": "Token Temporario"
-          },
-          "codigo": {
-            "type": "string",
-            "maxLength": 12,
-            "minLength": 6,
-            "title": "Codigo"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "token_temporario",
-          "codigo"
-        ],
-        "title": "VerificarTotpEntrada"
       }
     },
     "securitySchemes": {

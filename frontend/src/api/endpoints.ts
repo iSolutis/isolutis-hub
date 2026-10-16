@@ -9,6 +9,13 @@ export const api = {
   empresas: {
     listar: () => http.get<T.EmpresaAcesso[]>("/empresas"),
     atualizar: (nome: string) => http.patch<void>("/empresas/ativa", { nome }),
+    /** Cadastro completo, logomarca e paleta da empresa ativa (qualquer papel lê; só administradores alteram). */
+    ativa: () => http.get<S["EmpresaLeitura"]>("/empresas/ativa"),
+    salvar: (d: S["EmpresaDados"]) => http.put<S["EmpresaLeitura"]>("/empresas/ativa", d),
+    enviarLogo: (imagem: string) => http.put<S["EmpresaLeitura"]>("/empresas/ativa/logo", { imagem }),
+    removerLogo: () => http.delete("/empresas/ativa/logo"),
+    salvarPaleta: (p: S["Paleta"]) => http.put<S["EmpresaLeitura"]>("/empresas/ativa/paleta", p),
+    restaurarPaleta: () => http.delete("/empresas/ativa/paleta"),
   },
   auth: {
     login: (email: string, senha: string) => http.post<T.LoginResposta>("/auth/login", { email, senha }),
@@ -96,6 +103,24 @@ export const api = {
     atualizar: (id: string, d: T.ProjetoEntrada & { versao: number }) => http.put<T.Projeto>(`/projetos/${id}`, d),
     excluir: (id: string) => http.delete(`/projetos/${id}`),
     relatorio: (id: string) => http.baixar(`/projetos/${id}/relatorio`),
+    /** Id e título dos projetos que a pessoa vê ou cujas tarefas executa (sem acesso ao projeto). */
+    referencias: () => http.get<T.ProjetoReferencia[]>("/projetos/referencias"),
+    atualizarEtapa: (id: string, etapaId: string, d: S["EtapaAtualizacao"]) => http.patch<T.Projeto>(`/projetos/${id}/etapas/${etapaId}`, d),
+    participantes: (id: string) => http.get<string[]>(`/projetos/${id}/participantes`),
+    incluirParticipante: (id: string, usuario_id: string) => http.post<string[]>(`/projetos/${id}/participantes`, { usuario_id }),
+    retirarParticipante: (id: string, usuarioId: string) => http.delete(`/projetos/${id}/participantes/${usuarioId}`),
+  },
+  /** Escopo de acesso: equipes (admin), quem pode ser dono e transferência de dono. */
+  escopo: {
+    eu: () => http.get<T.MeuEscopo>("/escopo/eu"),
+    pessoas: () => http.get<T.PessoaReferencia[]>("/escopo/pessoas"),
+    transferir: (d: S["TransferenciaEntrada"]) => http.post<void>("/escopo/transferir", d),
+  },
+  equipes: {
+    listar: () => http.get<T.Equipe[]>("/equipes"),
+    criar: (d: S["EquipeEntrada"]) => http.post<T.Equipe>("/equipes", d),
+    atualizar: (id: string, d: S["EquipeEntrada"]) => http.put<T.Equipe>(`/equipes/${id}`, d),
+    excluir: (id: string) => http.delete(`/equipes/${id}`),
   },
   tarefas: {
     listar: () => http.get<T.Tarefa[]>("/tarefas"),

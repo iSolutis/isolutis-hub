@@ -1,4 +1,4 @@
--- 0012 · sócios como parceiros, aporte no plano de contas e títulos recorrentes.
+-- 0014 · sócios como parceiros, aporte no plano de contas e títulos recorrentes.
 --
 -- 1. Papel `socio` no hub de parceiros e participação do sócio na empresa (1:1 com o parceiro).
 -- 2. plano_contas.aporte_socio: marca a conta (analítica, de receita) em que entram os aportes de sócios.
