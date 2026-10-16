@@ -46,3 +46,28 @@
   .previa-paleta{grid-template-columns:minmax(0,1fr)}
   .logo-previa{width:100%}
 }
+
+/* Escopo de acesso: dono, somente leitura, participantes e equipes */
+.campo-fixo{display:flex;align-items:center;min-height:var(--controle-md);padding:0 var(--esp-3);border:1px dashed var(--line-strong);border-radius:var(--r-md);color:var(--muted);background:var(--sunk)}
+.aviso-leitura{display:inline-flex;align-items:center;gap:var(--esp-2);font-size:var(--text-sm);color:var(--muted)}
+.aviso-leitura::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.secao-participantes{margin-top:var(--esp-5)}
+.secao-participantes h2{margin:0}
+.participantes{list-style:none;margin:var(--esp-2) 0;padding:0;display:flex;flex-direction:column;gap:var(--esp-1)}
+.participantes li{display:flex;align-items:center;justify-content:space-between;gap:var(--esp-2);padding:6px var(--esp-3);border:1px solid var(--line);border-radius:var(--r-md)}
+.resumo-leitura{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--esp-3);margin:0 0 var(--esp-4)}
+.resumo-leitura dt{font-size:var(--text-xs);color:var(--muted)}
+.resumo-leitura dd{margin:2px 0 0;font-weight:500}
+.texto-leitura{white-space:pre-wrap;margin:0 0 var(--esp-3)}
+.etapa.minha{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal-pale)}
+.equipes{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--esp-4)}
+.equipe-card{padding:var(--esp-4) var(--esp-5);cursor:pointer}
+.equipe-card:hover{border-color:var(--teal)}
+.equipe-card h2{margin:0 0 var(--esp-2)}
+.equipe-card dl{margin:0;display:flex;flex-direction:column;gap:var(--esp-2)}
+.equipe-card dt{font-size:var(--text-xs);color:var(--muted)}
+.equipe-card dd{margin:0}
+.escolhas{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--esp-3);display:flex;flex-direction:column;gap:6px;max-height:320px;overflow:auto}
+.escolhas legend{padding:0 var(--esp-1);font-weight:600}
+.duas-colunas{display:grid;grid-template-columns:1fr 1fr;gap:var(--esp-3)}
+@media (max-width:640px){.duas-colunas{grid-template-columns:1fr}}

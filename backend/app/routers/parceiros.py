@@ -55,7 +55,7 @@ async def listar(
 
 
 def _campos(dados: ParceiroEntrada) -> dict:
-    return dados.model_dump(exclude={"papeis", "versao"})
+    return dados.campos_para_gravar("papeis", "versao")
 
 
 @router.post("", response_model=ParceiroLeitura, status_code=201)

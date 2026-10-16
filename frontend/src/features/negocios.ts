@@ -6,7 +6,7 @@ import { html, type Safe } from "@/core/html";
 import { numero, paraCampo } from "@/core/numero";
 import { ABERTAS, ETAPAS, MOTIVOS_PERDA, ORC_STATUS, ORIGENS, etapaNome } from "@/domain/constantes";
 import { botaoWa } from "@/domain/whatsapp";
-import { dados, eu, nomeMembro, podeEscrever, ui } from "@/state/estado";
+import { dados, nomeMembro, podeEscrever, ui } from "@/state/estado";
 import { recarregar, registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
@@ -15,7 +15,7 @@ import { tentar } from "@/ui/erros";
 import { registrarAbertura, registrarSoltar } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, opcoesEquipe, resolverCliente, seletorCliente } from "@/ui/formularios";
+import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, resolverCliente, seletorCliente, seletorDono, soLeitura } from "@/ui/formularios";
 import { excluir, gravar } from "@/ui/gravacao";
 import { melhorarFormulario } from "@/ui/acessibilidade";
 import { toast } from "@/ui/toast";
@@ -75,12 +75,12 @@ export function formNegocio(n: Inicial = { etapa: "lead" }, existente?: Negocio)
       ${campo("Título do negócio", inp("titulo", n.titulo, 'placeholder="Ex.: Portal do cliente para a distribuidora"'), true)}
       ${seletorCliente(n.cliente_id)}${campo("Etapa", sel("etapa", ETAPAS.map((e) => [e.id, e.nome] as const), n.etapa ?? "lead"))}
       ${campo("Valor do projeto (R$)", inp("valor", paraCampo(n.valor), 'inputmode="decimal" placeholder="0,00"'))}${campo("Manutenção mensal (R$)", inp("mensal", paraCampo(n.mensal), 'inputmode="decimal" placeholder="0,00"'))}
-      ${campo("Previsão de fechamento", inp("previsao", n.previsao, 'type="date"'))}${campo("Responsável", sel("responsavel_id", opcoesEquipe("Sem responsável", true), n.responsavel_id ?? (reg ? "" : eu.id)))}
+      ${campo("Previsão de fechamento", inp("previsao", n.previsao, 'type="date"'))}${seletorDono("Responsável", n.responsavel_id, !reg)}
       ${campo("Origem", sel("origem", [["", "—"], ...ORIGENS.map((o) => [o, o] as const)], n.origem))}
       <div class="field" id="motivoBox"${n.etapa === "perdido" ? "" : " hidden"}><label>Motivo da perda</label>${sel("motivo_perda", [["", "—"], ...MOTIVOS_PERDA.map((m) => [m, m] as const)], n.motivo_perda)}</div>
       ${campo("Anotações", area("obs", n.obs, "Dores do cliente, próximos passos, quem decide…"), true)}</div>
       ${orcs.length ? html`<div class="related"><h3>Orçamentos deste negócio</h3>${orcs.map((o) => html`<div class="li" data-open="orcamento:${o.id}"><span class="t">Nº ${o.numero}</span><span class="sub">${ORC_STATUS[o.status_exibido]?.[0]} · ${brl(o.total_projeto)}</span></div>`)}</div>` : ""}`,
-    rodape: html`${botaoSalvar()}${reg && cliente ? botaoWa(cliente, "WhatsApp do cliente") : ""}${reg && podeEscrever() ? html`<button class="btn" data-orc>Gerar orçamento</button>` : ""}${reg && reg.etapa === "ganho" ? html`<button class="btn" data-proj>${projeto ? "Ver projeto" : "Abrir projeto"}</button>` : ""}${espaco}${botaoExcluir(!!reg)}`,
+    rodape: html`${soLeitura(reg) ? avisoSoLeitura() : botaoSalvar()}${reg && cliente ? botaoWa(cliente, "WhatsApp do cliente") : ""}${reg && podeEscrever() ? html`<button class="btn" data-orc>Gerar orçamento</button>` : ""}${reg && reg.etapa === "ganho" ? html`<button class="btn" data-proj>${projeto ? "Ver projeto" : "Abrir projeto"}</button>` : ""}${espaco}${botaoExcluir(!!reg && !soLeitura(reg))}`,
     montar: (f, fechar, L) => {
       // Melhorar acessibilidade
       melhorarFormulario(f);

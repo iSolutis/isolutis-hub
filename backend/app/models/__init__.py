@@ -3,8 +3,18 @@ from app.models.comercial import Negocio, Orcamento, OrcamentoItem, Produto
 from app.models.financeiro import Despesa, Investimento, LancamentoReceita
 from app.models.parceiro import Empresa, Municipio, PapelParceiro, Parceiro, ParceiroPapel
 from app.models.posvenda import Projeto, ProjetoEtapa, Tarefa, TarefaChecklist
+from app.models.tenant import (
+    Convite,
+    Equipe,
+    EquipeLider,
+    EquipeMembro,
+    ParceiroTag,
+    ProjetoParticipante,
+    TagParceiro,
+    TransferenciaDono,
+    UsuarioEmpresa,
+)
 from app.models.usuario import CategoriaDespesa, Investidor, Usuario
-from app.models.tenant import Convite, ParceiroTag, TagParceiro, UsuarioEmpresa
 
 __all__ = [
     "Base",
@@ -28,6 +38,11 @@ __all__ = [
     "Investidor",
     "Usuario",
     "UsuarioEmpresa",
+    "Equipe",
+    "EquipeLider",
+    "EquipeMembro",
+    "ProjetoParticipante",
+    "TransferenciaDono",
     "TagParceiro",
     "ParceiroTag",
     "Convite",

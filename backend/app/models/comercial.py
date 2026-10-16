@@ -3,9 +3,9 @@ from datetime import date, datetime
 from datetime import date as _date
 from decimal import Decimal
 
-from sqlalchemy import Computed, FetchedValue, ForeignKey
+from sqlalchemy import Computed, FetchedValue, ForeignKey, func
 from sqlalchemy.dialects.postgresql import TIMESTAMP
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
 
 from app.domain.constantes import StatusOrcamento
 from app.domain.datas import hoje
@@ -45,9 +45,8 @@ class Negocio(ComAuditoria, ComEmpresa, Base):
     # Preenchido pela consulta (EXISTS em lancamentos_receita); não é coluna.
     faturado: bool = False
 
-    @property
-    def cliente_nome(self) -> str:
-        return self.cliente.nome
+    # Só o nome, sem depender de enxergar o cadastro do cliente (RLS por dono): ver app_nome_cliente na 0013.
+    cliente_nome: Mapped[str] = column_property(func.app_nome_cliente(cliente_id))
 
 
 class Orcamento(ComAuditoria, ComEmpresa, Base):
@@ -70,9 +69,8 @@ class Orcamento(ComAuditoria, ComEmpresa, Base):
         back_populates="orcamento", cascade="all, delete-orphan", order_by="OrcamentoItem.ordem", lazy="raise"
     )
 
-    @property
-    def cliente_nome(self) -> str:
-        return self.cliente.nome
+    # Só o nome, sem depender de enxergar o cadastro do cliente (RLS por dono): ver app_nome_cliente na 0013.
+    cliente_nome: Mapped[str] = column_property(func.app_nome_cliente(cliente_id))
 
     @property
     def valido_ate(self) -> _date:
@@ -108,3 +106,8 @@ class OrcamentoItem(ComAuditoria, ComEmpresa, Base):
     subtotal: Mapped[Decimal] = mapped_column(Computed("round(qtd * preco_unitario, 2)", persisted=True))
 
     orcamento: Mapped[Orcamento] = relationship(back_populates="itens", lazy="raise")
+
+
+# Permissão de edição calculada pelo banco para a pessoa da requisição (escopo de acesso, migração 0013).
+Negocio.pode_editar = column_property(func.app_pode_editar_negocio(Negocio.id))  # type: ignore[attr-defined]
+Orcamento.pode_editar = column_property(func.app_pode_editar_orcamento(Orcamento.id))  # type: ignore[attr-defined]

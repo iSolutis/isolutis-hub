@@ -3,6 +3,7 @@
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import DBAPIError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
@@ -63,6 +64,16 @@ def registrar_tratadores(app: FastAPI) -> None:
     async def _validacao(_: Request, e: RequestValidationError) -> JSONResponse:
         campos = [{"campo": ".".join(str(p) for p in err["loc"][1:]), "mensagem": err["msg"]} for err in e.errors()]
         return _resposta(422, "validacao", "Alguns campos estão inválidos.", campos)
+
+    @app.exception_handler(DBAPIError)
+    async def _banco(_: Request, e: DBAPIError) -> JSONResponse:
+        # Rede de segurança: recusas de escopo que escaparam de `confirmar` (ex.: autoflush numa consulta).
+        from app.services.escopo import traduzir_erro_de_escopo
+
+        traduzido = traduzir_erro_de_escopo(e)
+        if traduzido is None:
+            raise e
+        return _resposta(traduzido.status, traduzido.codigo, traduzido.mensagem)
 
     @app.exception_handler(StarletteHTTPException)
     async def _http(_: Request, e: StarletteHTTPException) -> JSONResponse:

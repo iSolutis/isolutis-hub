@@ -44,6 +44,7 @@ class MoverEtapa(Entrada):
 
 
 class NegocioLeitura(Auditoria):
+    pode_editar: bool = Field(True, description="A pessoa da requisição pode alterar este registro (escopo).")
     titulo: str
     cliente_id: UUID
     cliente_nome: str

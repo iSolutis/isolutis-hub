@@ -4,7 +4,7 @@ import { MES3, MESES, brl, brlCurto, dataBR, hoje, pluralizar, primeiroNome } fr
 import { html, type Safe } from "@/core/html";
 import { carregando } from "@/ui/componentes";
 import { etapaNome } from "@/domain/constantes";
-import { eu, podeEscrever, temPermissao } from "@/state/estado";
+import { dados, eu, podeEscrever, temPermissao } from "@/state/estado";
 import { registrarVista } from "@/state/nucleo";
 import { botaoNovo } from "./comum";
 import { graficoFaturamento, legendaFaturamento } from "./grafico";
@@ -99,9 +99,16 @@ function vista(): Safe {
   const comercial = temPermissao("comercial");
   return html`<div class="head"><div><h1>${eu.nome ? "Olá, " + primeiroNome(eu.nome) : "Painel"}</h1><p>Painel · ${mesNome} de ${p.ano}</p></div><div class="tools">${comercial ? botaoNovo("novoNegocio", "Novo negócio") : ""}</div></div>
   ${p.banco_vazio ? html`<div class="empty" style="margin-bottom:16px"><b>O Hub Comercial está pronto para receber os primeiros registros</b>Comece pelos produtos que a iSolutis vende, depois cadastre clientes e abra negócios no funil. O painel se preenche sozinho.<br>${escrever && comercial ? html`<button class="btn primary" data-go="produtos">Cadastrar produtos</button> <button class="btn" data-act="novoCliente">Cadastrar cliente</button>` : ""}</div>` : ""}
+  ${avisoSemEquipes()}
   ${vistaAlertas(p.alertas)}
   ${blocoFinanceiro(p, mesNome, h)}
   ${blocoComercial(p, h)}`;
+}
+
+/** Escopo de acesso: sem equipes, líderes não enxergam o time. O admin é avisado até montar as equipes. */
+export function avisoSemEquipes(): Safe {
+  if (!dados.escopo.ve_tudo || dados.escopo.equipes > 0) return html``;
+  return html`<div class="banner" role="status"><b>Monte as equipes da empresa.</b> Cada pessoa vê só o que é dela e o que não tem dono; os líderes só enxergam o time depois que as equipes forem criadas. <button class="btn" data-go="equipes">Criar equipes</button></div>`;
 }
 
 registrarVista({

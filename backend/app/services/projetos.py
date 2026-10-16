@@ -11,8 +11,8 @@ from app.domain.projeto import ETAPAS_PADRAO, POS_ENTREGA_PADRAO
 from app.errors import NaoEncontrado, RegraDeNegocio
 from app.models import Negocio, Orcamento, Projeto, ProjetoEtapa
 from app.schemas.projeto import EtapaEntrada, ProjetoAtualizar, ProjetoEntrada
+from app.services import escopo
 from app.services.base import aplicar, conferir_versao, confirmar, obter
-from app.services.parceiros import exigir_cliente
 
 
 def consulta():
@@ -31,7 +31,7 @@ async def obter_completo(sessao: AsyncSession, id_: UUID) -> Projeto:
 
 
 async def _validar_vinculos(sessao: AsyncSession, dados: ProjetoEntrada, id_atual: UUID | None = None) -> None:
-    await exigir_cliente(sessao, dados.cliente_id)
+    await escopo.exigir_vinculo_cliente(sessao, dados.cliente_id, dados.negocio_id)
     if dados.negocio_id:
         negocio = await obter(sessao, Negocio, dados.negocio_id, "Negócio")
         if negocio.cliente_id != dados.cliente_id:
@@ -64,7 +64,11 @@ def _sincronizar_etapas(projeto: Projeto, etapas: list[EtapaEntrada]) -> None:
 
 async def criar(sessao: AsyncSession, dados: ProjetoEntrada) -> Projeto:
     await _validar_vinculos(sessao, dados)
-    projeto = Projeto(**dados.model_dump(exclude={"etapas"}), etapas=[])
+    campos = dados.model_dump(exclude={"etapas"})
+    campos["responsavel_id"] = await escopo.dono_padrao(
+        sessao, "responsavel_id" in dados.model_fields_set, dados.responsavel_id
+    )
+    projeto = Projeto(**campos, etapas=[])
     _sincronizar_etapas(projeto, dados.etapas)
     sessao.add(projeto)
     await confirmar(sessao)
@@ -73,6 +77,7 @@ async def criar(sessao: AsyncSession, dados: ProjetoEntrada) -> Projeto:
 
 async def atualizar(sessao: AsyncSession, id_: UUID, dados: ProjetoAtualizar) -> Projeto:
     projeto = await obter_completo(sessao, id_)
+    await escopo.exigir_edicao(sessao, "projeto", id_)
     conferir_versao(projeto, dados.versao)
     await _validar_vinculos(sessao, dados, id_)
     aplicar(projeto, dados.model_dump(), ignorar=("versao", "etapas"))
@@ -82,7 +87,9 @@ async def atualizar(sessao: AsyncSession, id_: UUID, dados: ProjetoAtualizar) ->
 
 
 async def excluir(sessao: AsyncSession, id_: UUID) -> None:
-    await sessao.delete(await obter(sessao, Projeto, id_, "Projeto"))
+    projeto = await obter(sessao, Projeto, id_, "Projeto")
+    await escopo.exigir_edicao(sessao, "projeto", id_)
+    await sessao.delete(projeto)
     await confirmar(sessao)
 
 

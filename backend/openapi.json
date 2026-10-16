@@ -1151,6 +1151,435 @@
         }
       }
     },
+    "/api/v1/equipes": {
+      "get": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Listar Equipes",
+        "operationId": "listar_equipes_api_v1_equipes_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EquipeLeitura"
+                  },
+                  "title": "Response Listar Equipes Api V1 Equipes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Criar Equipe",
+        "operationId": "criar_equipe_api_v1_equipes_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipeEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipeLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/equipes/{id_}": {
+      "put": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Atualizar Equipe",
+        "operationId": "atualizar_equipe_api_v1_equipes__id___put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipeEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipeLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Excluir Equipe",
+        "operationId": "excluir_equipe_api_v1_equipes__id___delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escopo/pessoas": {
+      "get": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Pessoas Atribuiveis",
+        "description": "Quem a pessoa pode pôr como dono: todos (admin), ela e os liderados (líder) ou só ela.",
+        "operationId": "pessoas_atribuiveis_api_v1_escopo_pessoas_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PessoaReferencia"
+                  },
+                  "title": "Response Pessoas Atribuiveis Api V1 Escopo Pessoas Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escopo/eu": {
+      "get": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Meu Escopo",
+        "description": "Para a interface: se a pessoa é admin, se lidera alguém e quantas equipes a empresa tem.",
+        "operationId": "meu_escopo_api_v1_escopo_eu_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Meu Escopo Api V1 Escopo Eu Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escopo/transferir": {
+      "post": {
+        "tags": [
+          "Escopo de acesso"
+        ],
+        "summary": "Transferir",
+        "operationId": "transferir_api_v1_escopo_transferir_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferenciaEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projetos": {
       "get": {
         "tags": [
@@ -1256,6 +1685,66 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProjetoLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projetos/referencias": {
+      "get": {
+        "tags": [
+          "Projetos"
+        ],
+        "summary": "Referencias",
+        "description": "Id e título dos projetos que a pessoa vê, ou das tarefas que executa (sem acesso ao projeto).",
+        "operationId": "referencias_api_v1_projetos_referencias_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjetoReferencia"
+                  },
+                  "title": "Response Referencias Api V1 Projetos Referencias Get"
                 }
               }
             }
@@ -1548,6 +2037,320 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projetos/{id_}/etapas/{etapa_id}": {
+      "patch": {
+        "tags": [
+          "Projetos"
+        ],
+        "summary": "Atualizar Etapa",
+        "description": "O responsável da etapa atualiza só a sua etapa (o projeto inteiro exige permissão no projeto).",
+        "operationId": "atualizar_etapa_api_v1_projetos__id___etapas__etapa_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "etapa_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Etapa Id"
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EtapaAtualizacao"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjetoLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projetos/{id_}/participantes": {
+      "get": {
+        "tags": [
+          "Projetos"
+        ],
+        "summary": "Participantes",
+        "operationId": "participantes_api_v1_projetos__id___participantes_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "title": "Response Participantes Api V1 Projetos  Id   Participantes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Projetos"
+        ],
+        "summary": "Incluir Participante",
+        "operationId": "incluir_participante_api_v1_projetos__id___participantes_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParticipanteEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "title": "Response Incluir Participante Api V1 Projetos  Id   Participantes Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projetos/{id_}/participantes/{usuario_id}": {
+      "delete": {
+        "tags": [
+          "Projetos"
+        ],
+        "summary": "Retirar Participante",
+        "operationId": "retirar_participante_api_v1_projetos__id___participantes__usuario_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Usuario Id"
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "title": "Response Retirar Participante Api V1 Projetos  Id   Participantes  Usuario Id  Delete"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -7556,6 +8359,18 @@
             ],
             "title": "Municipio Id"
           },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
+          },
           "versao": {
             "type": "integer",
             "minimum": 1.0,
@@ -7711,6 +8526,18 @@
               }
             ],
             "title": "Municipio Id"
+          },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
           }
         },
         "additionalProperties": false,
@@ -7770,6 +8597,18 @@
           "versao": {
             "type": "integer",
             "title": "Versao"
+          },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
           },
           "tipo_pessoa": {
             "type": "string",
@@ -8062,6 +8901,18 @@
           "versao": {
             "type": "integer",
             "title": "Versao"
+          },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
           },
           "tipo_pessoa": {
             "type": "string",
@@ -9426,6 +10277,158 @@
         ],
         "title": "EmpresaOnboardingEntrada"
       },
+      "EquipeEntrada": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Nome"
+          },
+          "lideres": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Lideres"
+          },
+          "membros": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 500,
+            "title": "Membros"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nome"
+        ],
+        "title": "EquipeEntrada"
+      },
+      "EquipeLeitura": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nome": {
+            "type": "string",
+            "title": "Nome"
+          },
+          "lideres": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Lideres"
+          },
+          "membros": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Membros"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "lideres",
+          "membros"
+        ],
+        "title": "EquipeLeitura"
+      },
+      "EtapaAtualizacao": {
+        "properties": {
+          "versao": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Versao",
+            "description": "Versão lida; se informada, protege contra edição concorrente."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "a_fazer",
+              "andamento",
+              "concluida"
+            ],
+            "title": "Status"
+          },
+          "inicio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inicio"
+          },
+          "fim": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fim"
+          },
+          "descricao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descricao"
+          },
+          "entregaveis": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entregaveis"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "EtapaAtualizacao",
+        "description": "O que o responsável de uma etapa altera nela, sem precisar editar o projeto inteiro."
+      },
       "EtapaEntrada": {
         "properties": {
           "id": {
@@ -9549,6 +10552,12 @@
       },
       "EtapaLeitura": {
         "properties": {
+          "pode_editar": {
+            "type": "boolean",
+            "title": "Pode Editar",
+            "description": "A pessoa da requisição pode alterar este registro (escopo).",
+            "default": true
+          },
           "id": {
             "type": "string",
             "format": "uuid",
@@ -11284,6 +12293,12 @@
             "type": "integer",
             "title": "Versao"
           },
+          "pode_editar": {
+            "type": "boolean",
+            "title": "Pode Editar",
+            "description": "A pessoa da requisição pode alterar este registro (escopo).",
+            "default": true
+          },
           "titulo": {
             "type": "string",
             "title": "Titulo"
@@ -11702,6 +12717,12 @@
           "versao": {
             "type": "integer",
             "title": "Versao"
+          },
+          "pode_editar": {
+            "type": "boolean",
+            "title": "Pode Editar",
+            "description": "A pessoa da requisição pode alterar este registro (escopo).",
+            "default": true
           },
           "numero": {
             "type": "string",
@@ -12213,6 +13234,18 @@
             ],
             "title": "Municipio Id"
           },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
+          },
           "tipo_pessoa": {
             "type": "string",
             "enum": [
@@ -12387,6 +13420,18 @@
             ],
             "title": "Municipio Id"
           },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
+          },
           "tipo_pessoa": {
             "type": "string",
             "enum": [
@@ -12462,6 +13507,18 @@
           "versao": {
             "type": "integer",
             "title": "Versao"
+          },
+          "responsavel_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsavel Id"
           },
           "tipo_pessoa": {
             "type": "string",
@@ -12650,6 +13707,40 @@
           "papeis"
         ],
         "title": "ParceiroLeitura"
+      },
+      "ParticipanteEntrada": {
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Usuario Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "usuario_id"
+        ],
+        "title": "ParticipanteEntrada"
+      },
+      "PessoaReferencia": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nome": {
+            "type": "string",
+            "title": "Nome"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nome"
+        ],
+        "title": "PessoaReferencia"
       },
       "PlanoContaEntrada": {
         "properties": {
@@ -13507,6 +14598,12 @@
             "type": "integer",
             "title": "Versao"
           },
+          "pode_editar": {
+            "type": "boolean",
+            "title": "Pode Editar",
+            "description": "A pessoa da requisição pode alterar este registro (escopo).",
+            "default": true
+          },
           "titulo": {
             "type": "string",
             "title": "Titulo"
@@ -13666,6 +14763,25 @@
           "etapas"
         ],
         "title": "ProjetoLeitura"
+      },
+      "ProjetoReferencia": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "titulo": {
+            "type": "string",
+            "title": "Titulo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "titulo"
+        ],
+        "title": "ProjetoReferencia"
       },
       "ProximoCodigo": {
         "properties": {
@@ -14250,6 +15366,12 @@
             "type": "integer",
             "title": "Versao"
           },
+          "pode_editar": {
+            "type": "boolean",
+            "title": "Pode Editar",
+            "description": "A pessoa da requisição pode alterar este registro (escopo).",
+            "default": true
+          },
           "titulo": {
             "type": "string",
             "title": "Titulo"
@@ -14680,6 +15802,46 @@
           "usuario"
         ],
         "title": "TokenSaida"
+      },
+      "TransferenciaEntrada": {
+        "properties": {
+          "entidade": {
+            "type": "string",
+            "enum": [
+              "cliente",
+              "negocio",
+              "projeto",
+              "tarefa"
+            ],
+            "title": "Entidade"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "para": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Para",
+            "description": "Novo dono; nulo deixa o registro sem dono (só líder/admin)."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "entidade",
+          "id",
+          "para"
+        ],
+        "title": "TransferenciaEntrada"
       },
       "TrocarSenhaEntrada": {
         "properties": {

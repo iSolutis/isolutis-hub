@@ -27,6 +27,14 @@ class _CamposDoParceiro(Entrada):
     endereco: Annotated[str | None, Field(max_length=150)] = None
     cep: TextoOpcional = None
     municipio_id: UUID | None = None
+    # Dono (carteira). Omitido: quem cria é o dono; na edição, omitido mantém o atual. Só líder/admin altera.
+    responsavel_id: UUID | None = None
+
+    def campos_para_gravar(self, *excluir: str) -> dict:
+        campos = self.model_dump(exclude=set(excluir))
+        if "responsavel_id" not in self.model_fields_set:
+            campos.pop("responsavel_id")
+        return campos
 
     @model_validator(mode="after")
     def _normalizar(self) -> "_CamposDoParceiro":
@@ -46,6 +54,7 @@ class ParceiroAtualizar(ParceiroEntrada):
 
 
 class ParceiroLeitura(Auditoria):
+    responsavel_id: UUID | None = None
     tipo_pessoa: str
     cpf_cnpj: str | None
     nome: str

@@ -2,11 +2,11 @@
 
 from uuid import UUID
 
-from sqlalchemy import Row, case, exists, func, select
+from sqlalchemy import Row, case, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.constantes import ETAPAS_ABERTAS
-from app.models import LancamentoReceita, Negocio, Orcamento, Parceiro, ParceiroPapel
+from app.models import LancamentoReceita, Negocio, Orcamento, Parceiro
 from app.schemas.cliente import ClienteAtualizar, ClienteEntrada, ClienteRelacionados
 from app.services import parceiros as svc
 from app.services.orcamentos import consulta as consulta_orcamentos
@@ -15,7 +15,7 @@ PAPEL = svc.PAPEL_CLIENTE
 
 
 def _campos(dados: ClienteEntrada) -> dict:
-    campos = dados.model_dump()
+    campos = dados.campos_para_gravar()
     campos["tipo_pessoa"] = "PF" if campos.get("cpf_cnpj") and len(campos["cpf_cnpj"]) == 11 else "PJ"
     return campos
 
@@ -42,21 +42,8 @@ async def listar(sessao: AsyncSession) -> list[tuple[Parceiro, int, object]]:
 
 
 async def referencias(sessao: AsyncSession) -> list[Row]:
-    """Só id e nome dos clientes da empresa ativa, sem contato, documento ou observações."""
-    empresa = await svc.empresa_atual(sessao)
-    consulta = (
-        select(Parceiro.id, Parceiro.nome)
-        .where(
-            Parceiro.empresa_id == empresa.id,
-            exists().where(
-                ParceiroPapel.empresa_id == empresa.id,
-                ParceiroPapel.parceiro_id == Parceiro.id,
-                ParceiroPapel.papel == PAPEL,
-            ),
-        )
-        .order_by(Parceiro.nome)
-    )
-    return list((await sessao.execute(consulta)).all())
+    """Só id e nome, e só dos clientes que a pessoa enxerga ou que aparecem em algo que ela enxerga (escopo)."""
+    return list((await sessao.execute(text("select id, nome from app_clientes_referencia()"))).all())
 
 
 async def criar(sessao: AsyncSession, dados: ClienteEntrada) -> Parceiro:

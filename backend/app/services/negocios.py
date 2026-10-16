@@ -10,8 +10,8 @@ from app.domain.datas import hoje
 from app.errors import RegraDeNegocio
 from app.models import LancamentoReceita, Negocio
 from app.schemas.negocio import MoverEtapa, NegocioAtualizar, NegocioEntrada
+from app.services import escopo
 from app.services.base import aplicar, conferir_versao, confirmar, obter
-from app.services.parceiros import exigir_cliente
 
 
 def _consulta():
@@ -57,8 +57,11 @@ def definir_etapa(negocio: Negocio, etapa: str, motivo_perda: str | None, hoje_:
 
 
 async def criar(sessao: AsyncSession, dados: NegocioEntrada) -> Negocio:
-    await exigir_cliente(sessao, dados.cliente_id)
+    await escopo.exigir_vinculo_cliente(sessao, dados.cliente_id)
     campos = dados.model_dump(exclude={"etapa", "motivo_perda"})
+    campos["responsavel_id"] = await escopo.dono_padrao(
+        sessao, "responsavel_id" in dados.model_fields_set, dados.responsavel_id
+    )
     negocio = Negocio(**campos, etapa="lead")
     definir_etapa(negocio, dados.etapa, dados.motivo_perda)
     sessao.add(negocio)
@@ -68,6 +71,7 @@ async def criar(sessao: AsyncSession, dados: NegocioEntrada) -> Negocio:
 
 async def atualizar(sessao: AsyncSession, id_: UUID, dados: NegocioAtualizar) -> Negocio:
     negocio = await obter(sessao, Negocio, id_, "Negócio")
+    await escopo.exigir_edicao(sessao, "negocio", id_)
     conferir_versao(negocio, dados.versao)
     if dados.cliente_id != negocio.cliente_id:
         raise RegraDeNegocio("Não é possível trocar o cliente de um negócio já aberto. Crie um novo negócio.")
@@ -79,6 +83,7 @@ async def atualizar(sessao: AsyncSession, id_: UUID, dados: NegocioAtualizar) ->
 
 async def mover(sessao: AsyncSession, id_: UUID, dados: MoverEtapa) -> Negocio:
     negocio = await obter(sessao, Negocio, id_, "Negócio")
+    await escopo.exigir_edicao(sessao, "negocio", id_)
     conferir_versao(negocio, dados.versao)
     definir_etapa(negocio, dados.etapa, dados.motivo_perda)
     await confirmar(sessao)
@@ -87,5 +92,6 @@ async def mover(sessao: AsyncSession, id_: UUID, dados: MoverEtapa) -> Negocio:
 
 async def excluir(sessao: AsyncSession, id_: UUID) -> None:
     negocio = await obter(sessao, Negocio, id_, "Negócio")
+    await escopo.exigir_edicao(sessao, "negocio", id_)
     await sessao.delete(negocio)
     await confirmar(sessao)
