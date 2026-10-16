@@ -7,7 +7,7 @@ const fixtures = JSON.parse(readFileSync(new URL("../visual/fixtures.json", impo
 export const ID_CLIENTE = (fixtures["/clientes"] as Array<{ id: string }>)[0]!.id;
 export const USUARIO = { id: "00000000-0000-0000-0000-0000000000a1", nome: "Ana Souza", email: "ana@isolutis.example", admin: true, ativo: true, totp_ativo: false, versao: 1, senha_definida: true };
 const EMPRESA = { id: "e1", nome: "iSolutis Tecnologia", papel: "admin", onboarding_concluido: true };
-const PERMISSOES = { admin: ["base", "comercial", "financeiro", "administracao"], membro: ["base"] } as const;
+const PERMISSOES = { admin: ["base", "comercial", "financeiro", "administracao"], membro: ["base"] };
 
 const json = (corpo: unknown, status = 200) => ({ status, contentType: "application/json", body: JSON.stringify(corpo) });
 
@@ -49,6 +49,7 @@ export async function sessaoAberta(page: Page, aba = "painel"): Promise<void> {
     sessionStorage.setItem("e2e.semeado", "1");
     localStorage.setItem("hub.token", "acesso");
     localStorage.setItem("hub.empresa", "e1");
+    sessionStorage.setItem("hub.empresa", "e1"); // a empresa é por aba: sem isto o app pergunta qual usar
     localStorage.setItem("hub.aba", telaInicial);
   }, aba);
 }

@@ -15,4 +15,4 @@
 
 ## Migration Plan
 
-`alembic upgrade head` (0012). Rollback: `alembic downgrade 0011` remove colunas, checks e índice (dados novos descartados).
+`alembic upgrade head` (0014). Rollback: `alembic downgrade 0013` remove colunas, checks e índice (dados novos descartados).

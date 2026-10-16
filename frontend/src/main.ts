@@ -34,7 +34,7 @@ import "@/features/projetos";
 import "@/features/tarefas";
 import "@/features/produtos";
 import "@/features/financeiro";
-import "@/features/despesas";
+import "@/features/parceiros/telas";
 import "@/features/faturamento";
 import "@/features/relatorios";
 import "@/features/equipe";

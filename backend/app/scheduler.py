@@ -32,6 +32,28 @@ def _executar_job_notificacoes() -> None:
         logger.exception("Erro no job de notificações.")
 
 
+def _executar_job_recorrencias() -> None:
+    """Completa os títulos das recorrências sem fim até o horizonte (idempotente)."""
+    try:
+        from sqlalchemy.ext.asyncio import async_sessionmaker
+
+        from app.db import criar_engine
+        from app.financeiro.recorrencias import renovar_horizonte
+
+        async def _run() -> int:
+            # Engine próprio: o do app está preso ao laço de eventos da API, e este job roda num laço novo.
+            engine = criar_engine()
+            try:
+                return await renovar_horizonte(async_sessionmaker(engine, expire_on_commit=False))
+            finally:
+                await engine.dispose()
+
+        criados = asyncio.run(_run())
+        logger.info("Recorrências renovadas: %s título(s) criado(s).", criados)
+    except Exception:
+        logger.exception("Erro no job de recorrências.")
+
+
 def iniciar_scheduler() -> None:
     """Registra e inicia o scheduler. Chamado no evento startup da aplicação."""
     _scheduler.add_job(
@@ -41,8 +63,16 @@ def iniciar_scheduler() -> None:
         id="notificacoes",
         replace_existing=True,
     )
+    _scheduler.add_job(
+        _executar_job_recorrencias,
+        trigger="cron",
+        hour=2,
+        minute=30,
+        id="recorrencias",
+        replace_existing=True,
+    )
     _scheduler.start()
-    logger.info("Scheduler de notificações iniciado (intervalo: 1 hora).")
+    logger.info("Scheduler iniciado (notificações a cada 1 hora; recorrências diariamente às 02:30).")
 
 
 def parar_scheduler() -> None:

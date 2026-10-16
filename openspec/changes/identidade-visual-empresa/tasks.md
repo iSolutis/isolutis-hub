@@ -1,6 +1,6 @@
 ## 1. Banco
 
-- [x] 1.1 Migração 0012 aditiva + down: cadastro completo, logomarca (`bytea` ≤ 512 KB, tipo), paleta (`jsonb`), checks e índice único parcial da inscrição
+- [x] 1.1 Migração 0014 aditiva + down: cadastro completo, logomarca (`bytea` ≤ 512 KB, tipo), paleta (`jsonb`), checks e índice único parcial da inscrição
 - [x] 1.2 Model `Empresa` com as novas colunas (`logo` deferred)
 
 ## 2. Backend

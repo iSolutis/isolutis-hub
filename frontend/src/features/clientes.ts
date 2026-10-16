@@ -74,6 +74,7 @@ function vista(): Safe {
 
 registrarVista({
   id: "clientes",
+  grupo: "Cadastros",
   permissao: "comercial",
   nome: "Clientes",
   contagem: () => dados.clientes.length,
@@ -117,7 +118,7 @@ export function formCliente(c?: Cliente): void {
 
         await comTrava(botao, async () => {
           const corpo = Object.fromEntries(
-            Object.entries(lido).filter(([k]) => k !== "tipo_pessoa" && k !== "papeis")
+            Object.entries(lido).filter(([k]) => k !== "tipo_pessoa" && k !== "papeis" && k !== "participacao_percentual")
           ) as Parameters<typeof api.clientes.criar>[0];
 
           return gravar({

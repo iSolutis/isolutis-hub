@@ -4793,756 +4793,6 @@
         }
       }
     },
-    "/api/v1/despesas": {
-      "get": {
-        "tags": [
-          "Despesas e investimentos"
-        ],
-        "summary": "Listar",
-        "operationId": "listar_api_v1_despesas_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "ano",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer",
-                  "maximum": 2100,
-                  "minimum": 2000
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Ano"
-            }
-          },
-          {
-            "name": "mes",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer",
-                  "maximum": 12,
-                  "minimum": 1
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Mes"
-            }
-          },
-          {
-            "name": "X-Empresa-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Empresa-Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DespesaLeitura"
-                  },
-                  "title": "Response Listar Api V1 Despesas Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Despesas e investimentos"
-        ],
-        "summary": "Criar",
-        "operationId": "criar_api_v1_despesas_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "X-Empresa-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Empresa-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DespesaEntrada"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DespesaLeitura"
-                  },
-                  "title": "Response Criar Api V1 Despesas Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/despesas/opcoes": {
-      "get": {
-        "tags": [
-          "Despesas e investimentos"
-        ],
-        "summary": "Opcoes",
-        "operationId": "opcoes_api_v1_despesas_opcoes_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "X-Empresa-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Empresa-Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OpcoesDespesa"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/despesas/resumo": {
-      "get": {
-        "tags": [
-          "Despesas e investimentos"
-        ],
-        "summary": "Resumo",
-        "operationId": "resumo_api_v1_despesas_resumo_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "ano",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "maximum": 2100,
-              "minimum": 2000,
-              "title": "Ano"
-            }
-          },
-          {
-            "name": "X-Empresa-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Empresa-Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResumoDespesas"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/despesas/{id_}": {
-      "put": {
-        "tags": [
-          "Despesas e investimentos"
-        ],
-        "summary": "Atualizar",
-        "operationId": "atualizar_api_v1_despesas__id___put",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id_",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id "
-            }
-          },
-          {
-            "name": "X-Empresa-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Empresa-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DespesaAtualizar"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DespesaLeitura"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Despesas e investimentos"
-        ],
-        "summary": "Excluir",
-        "operationId": "excluir_api_v1_despesas__id___delete",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id_",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id "
-            }
-          },
-          {
-            "name": "X-Empresa-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Empresa-Id"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/despesas/{id_}/pagar": {
-      "post": {
-        "tags": [
-          "Despesas e investimentos"
-        ],
-        "summary": "Pagar",
-        "operationId": "pagar_api_v1_despesas__id___pagar_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id_",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id "
-            }
-          },
-          {
-            "name": "X-Empresa-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Empresa-Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DespesaLeitura"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/investimentos": {
-      "get": {
-        "tags": [
-          "Despesas e investimentos"
-        ],
-        "summary": "Listar Investimentos",
-        "operationId": "listar_investimentos_api_v1_investimentos_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "ano",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer",
-                  "maximum": 2100,
-                  "minimum": 2000
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Ano"
-            }
-          },
-          {
-            "name": "X-Empresa-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Empresa-Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/InvestimentoLeitura"
-                  },
-                  "title": "Response Listar Investimentos Api V1 Investimentos Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Despesas e investimentos"
-        ],
-        "summary": "Criar Investimento",
-        "operationId": "criar_investimento_api_v1_investimentos_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "X-Empresa-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Empresa-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InvestimentoEntrada"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InvestimentoLeitura"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/investimentos/{id_}": {
-      "put": {
-        "tags": [
-          "Despesas e investimentos"
-        ],
-        "summary": "Atualizar Investimento",
-        "operationId": "atualizar_investimento_api_v1_investimentos__id___put",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id_",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id "
-            }
-          },
-          {
-            "name": "X-Empresa-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Empresa-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InvestimentoAtualizar"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InvestimentoLeitura"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Despesas e investimentos"
-        ],
-        "summary": "Excluir Investimento",
-        "operationId": "excluir_investimento_api_v1_investimentos__id___delete",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id_",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id "
-            }
-          },
-          {
-            "name": "X-Empresa-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Empresa-Id"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/financeiro/plano-contas": {
       "get": {
         "tags": [
@@ -6532,6 +5782,398 @@
         }
       }
     },
+    "/api/v1/financeiro/recorrencias": {
+      "get": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Listar Recorrencias",
+        "operationId": "listar_recorrencias_api_v1_financeiro_recorrencias_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecorrenciaLeitura"
+                  },
+                  "title": "Response Listar Recorrencias Api V1 Financeiro Recorrencias Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Criar Recorrencia",
+        "operationId": "criar_recorrencia_api_v1_financeiro_recorrencias_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecorrenciaEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorrenciaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/recorrencias/{id_}": {
+      "put": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Atualizar Recorrencia",
+        "operationId": "atualizar_recorrencia_api_v1_financeiro_recorrencias__id___put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecorrenciaAtualizar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorrenciaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/recorrencias/{id_}/pausar": {
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Pausar Recorrencia",
+        "operationId": "pausar_recorrencia_api_v1_financeiro_recorrencias__id___pausar_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorrenciaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/recorrencias/{id_}/retomar": {
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Retomar Recorrencia",
+        "operationId": "retomar_recorrencia_api_v1_financeiro_recorrencias__id___retomar_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorrenciaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financeiro/recorrencias/{id_}/encerrar": {
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "summary": "Encerrar Recorrencia",
+        "operationId": "encerrar_recorrencia_api_v1_financeiro_recorrencias__id___encerrar_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          },
+          {
+            "name": "X-Empresa-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Empresa-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorrenciaLeitura"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/financeiro/municipios": {
       "get": {
         "tags": [
@@ -7350,7 +6992,7 @@
           "Parceiros de negócio"
         ],
         "summary": "Papeis",
-        "description": "Papéis que um parceiro pode assumir (qualquer pessoa logada pode consultar).",
+        "description": "Papéis que o usuário pode atribuir a um parceiro (qualquer pessoa logada pode consultar).",
         "operationId": "papeis_api_v1_parceiros_papeis_get",
         "security": [
           {
@@ -7808,169 +7450,6 @@
         }
       }
     },
-    "/api/v1/auth/2fa/setup": {
-      "post": {
-        "tags": [
-          "auth",
-          "Autenticação"
-        ],
-        "summary": "Setup 2Fa",
-        "description": "Inicia o setup do 2FA: gera segredo, QR code e backup codes provisórios.\n\nO 2FA só fica ativo após confirmar um código em /auth/2fa/confirmar.",
-        "operationId": "setup_2fa_api_v1_auth_2fa_setup_post",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SetupTotpSaida"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/api/v1/auth/2fa/confirmar": {
-      "post": {
-        "tags": [
-          "auth",
-          "Autenticação"
-        ],
-        "summary": "Confirmar 2Fa",
-        "description": "Confirma o primeiro código TOTP e ativa 2FA.\n\nInvalida todas as sessões existentes (incrementa versao_sessao) e emite\num novo JWT completo para a sessão atual continuar sem re-login.",
-        "operationId": "confirmar_2fa_api_v1_auth_2fa_confirmar_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConfirmarTotpEntrada"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenSaida"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/api/v1/auth/2fa/verificar": {
-      "post": {
-        "tags": [
-          "auth",
-          "Autenticação"
-        ],
-        "summary": "Verificar 2Fa",
-        "description": "Endpoint público: valida código TOTP ou backup code após login parcial e emite JWT completo.\n\nO token parcial é de uso único e é invalidado após 5 códigos incorretos.",
-        "operationId": "verificar_2fa_api_v1_auth_2fa_verificar_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VerificarTotpEntrada"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenSaida"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/auth/2fa": {
-      "delete": {
-        "tags": [
-          "auth",
-          "Autenticação"
-        ],
-        "summary": "Desativar 2Fa",
-        "description": "Desativa 2FA após confirmar o código TOTP atual.",
-        "operationId": "desativar_2fa_api_v1_auth_2fa_delete",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "codigo",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 6,
-              "maxLength": 6,
-              "title": "Codigo"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/saude": {
       "get": {
         "tags": [
@@ -8135,25 +7614,6 @@
           "negocio_id"
         ],
         "title": "AprovacaoSaida"
-      },
-      "CategoriaLeitura": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "nome": {
-            "type": "string",
-            "title": "Nome"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "nome"
-        ],
-        "title": "CategoriaLeitura"
       },
       "ChecklistEntrada": {
         "properties": {
@@ -8768,6 +8228,17 @@
             },
             "type": "array",
             "title": "Papeis"
+          },
+          "participacao_percentual": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participacao Percentual"
           }
         },
         "type": "object",
@@ -9073,6 +8544,17 @@
             "type": "array",
             "title": "Papeis"
           },
+          "participacao_percentual": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participacao Percentual"
+          },
           "negocios_abertos": {
             "type": "integer",
             "title": "Negocios Abertos"
@@ -9126,32 +8608,6 @@
         },
         "type": "object",
         "title": "ConcluirOnboardingEntrada"
-      },
-      "ConfirmarTotpEntrada": {
-        "properties": {
-          "codigo": {
-            "type": "string",
-            "maxLength": 6,
-            "minLength": 6,
-            "title": "Codigo"
-          },
-          "backup_codes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "maxItems": 8,
-            "minItems": 8,
-            "title": "Backup Codes"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "codigo",
-          "backup_codes"
-        ],
-        "title": "ConfirmarTotpEntrada"
       },
       "ContaBancariaEntrada": {
         "properties": {
@@ -9346,336 +8802,6 @@
           "expira_em"
         ],
         "title": "ConviteLeitura"
-      },
-      "DespesaAtualizar": {
-        "properties": {
-          "data": {
-            "type": "string",
-            "format": "date",
-            "title": "Data"
-          },
-          "descricao": {
-            "type": "string",
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Descricao"
-          },
-          "valor": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)"
-              }
-            ],
-            "title": "Valor"
-          },
-          "categoria_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Categoria Id"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "pago",
-              "a_pagar"
-            ],
-            "title": "Status"
-          },
-          "fornecedor": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fornecedor"
-          },
-          "obs": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 20000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Obs"
-          },
-          "versao": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Versao"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "data",
-          "descricao",
-          "valor",
-          "categoria_id",
-          "status",
-          "versao"
-        ],
-        "title": "DespesaAtualizar"
-      },
-      "DespesaEntrada": {
-        "properties": {
-          "data": {
-            "type": "string",
-            "format": "date",
-            "title": "Data"
-          },
-          "descricao": {
-            "type": "string",
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Descricao"
-          },
-          "valor": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)"
-              }
-            ],
-            "title": "Valor"
-          },
-          "categoria_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Categoria Id"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "pago",
-              "a_pagar"
-            ],
-            "title": "Status",
-            "default": "pago"
-          },
-          "fornecedor": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fornecedor"
-          },
-          "obs": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 20000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Obs"
-          },
-          "repetir": {
-            "type": "integer",
-            "maximum": 36.0,
-            "minimum": 1.0,
-            "title": "Repetir",
-            "default": 1
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "data",
-          "descricao",
-          "valor",
-          "categoria_id"
-        ],
-        "title": "DespesaEntrada"
-      },
-      "DespesaLeitura": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "empresa_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Empresa Id"
-          },
-          "criado_em": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Criado Em"
-          },
-          "atualizado_em": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Atualizado Em"
-          },
-          "criado_por": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Criado Por"
-          },
-          "atualizado_por": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Atualizado Por"
-          },
-          "versao": {
-            "type": "integer",
-            "title": "Versao"
-          },
-          "data": {
-            "type": "string",
-            "format": "date",
-            "title": "Data"
-          },
-          "descricao": {
-            "type": "string",
-            "title": "Descricao"
-          },
-          "valor": {
-            "type": "number",
-            "title": "Valor"
-          },
-          "categoria_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Categoria Id"
-          },
-          "categoria_nome": {
-            "type": "string",
-            "title": "Categoria Nome"
-          },
-          "status": {
-            "type": "string",
-            "title": "Status"
-          },
-          "pago_em": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pago Em"
-          },
-          "fornecedor": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fornecedor"
-          },
-          "obs": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Obs"
-          },
-          "grupo_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Grupo Id"
-          },
-          "parcela": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Parcela"
-          },
-          "total_parcelas": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total Parcelas"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "empresa_id",
-          "criado_em",
-          "atualizado_em",
-          "criado_por",
-          "atualizado_por",
-          "versao",
-          "data",
-          "descricao",
-          "valor",
-          "categoria_id",
-          "categoria_nome",
-          "status",
-          "pago_em",
-          "fornecedor",
-          "obs",
-          "grupo_id",
-          "parcela",
-          "total_parcelas"
-        ],
-        "title": "DespesaLeitura"
       },
       "EmpresaAtualizar": {
         "properties": {
@@ -10787,6 +9913,11 @@
             "type": "number",
             "title": "Total Entradas"
           },
+          "total_aportes": {
+            "type": "number",
+            "title": "Total Aportes",
+            "default": 0.0
+          },
           "total_saidas": {
             "type": "number",
             "title": "Total Saidas"
@@ -10839,279 +9970,6 @@
           "nome"
         ],
         "title": "InstituicaoLeitura"
-      },
-      "InvestidorResumo": {
-        "properties": {
-          "nome": {
-            "type": "string",
-            "title": "Nome"
-          },
-          "no_ano": {
-            "type": "number",
-            "title": "No Ano"
-          },
-          "total": {
-            "type": "number",
-            "title": "Total"
-          },
-          "percentual": {
-            "type": "integer",
-            "title": "Percentual"
-          }
-        },
-        "type": "object",
-        "required": [
-          "nome",
-          "no_ano",
-          "total",
-          "percentual"
-        ],
-        "title": "InvestidorResumo"
-      },
-      "InvestimentoAtualizar": {
-        "properties": {
-          "data": {
-            "type": "string",
-            "format": "date",
-            "title": "Data"
-          },
-          "descricao": {
-            "type": "string",
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Descricao"
-          },
-          "valor": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)"
-              }
-            ],
-            "title": "Valor"
-          },
-          "investidor": {
-            "type": "string",
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Investidor"
-          },
-          "forma": {
-            "type": "string",
-            "enum": [
-              "Dinheiro (aporte)",
-              "Equipamento",
-              "Pagamento de despesa da empresa",
-              "Outro"
-            ],
-            "title": "Forma",
-            "default": "Dinheiro (aporte)"
-          },
-          "obs": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 20000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Obs"
-          },
-          "versao": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Versao"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "data",
-          "descricao",
-          "valor",
-          "investidor",
-          "versao"
-        ],
-        "title": "InvestimentoAtualizar"
-      },
-      "InvestimentoEntrada": {
-        "properties": {
-          "data": {
-            "type": "string",
-            "format": "date",
-            "title": "Data"
-          },
-          "descricao": {
-            "type": "string",
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Descricao"
-          },
-          "valor": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)"
-              }
-            ],
-            "title": "Valor"
-          },
-          "investidor": {
-            "type": "string",
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Investidor"
-          },
-          "forma": {
-            "type": "string",
-            "enum": [
-              "Dinheiro (aporte)",
-              "Equipamento",
-              "Pagamento de despesa da empresa",
-              "Outro"
-            ],
-            "title": "Forma",
-            "default": "Dinheiro (aporte)"
-          },
-          "obs": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 20000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Obs"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "data",
-          "descricao",
-          "valor",
-          "investidor"
-        ],
-        "title": "InvestimentoEntrada"
-      },
-      "InvestimentoLeitura": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "empresa_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Empresa Id"
-          },
-          "criado_em": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Criado Em"
-          },
-          "atualizado_em": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Atualizado Em"
-          },
-          "criado_por": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Criado Por"
-          },
-          "atualizado_por": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Atualizado Por"
-          },
-          "versao": {
-            "type": "integer",
-            "title": "Versao"
-          },
-          "data": {
-            "type": "string",
-            "format": "date",
-            "title": "Data"
-          },
-          "descricao": {
-            "type": "string",
-            "title": "Descricao"
-          },
-          "valor": {
-            "type": "number",
-            "title": "Valor"
-          },
-          "investidor_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Investidor Id"
-          },
-          "investidor_nome": {
-            "type": "string",
-            "title": "Investidor Nome"
-          },
-          "forma": {
-            "type": "string",
-            "title": "Forma"
-          },
-          "obs": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Obs"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "empresa_id",
-          "criado_em",
-          "atualizado_em",
-          "criado_por",
-          "atualizado_por",
-          "versao",
-          "data",
-          "descricao",
-          "valor",
-          "investidor_id",
-          "investidor_nome",
-          "forma",
-          "obs"
-        ],
-        "title": "InvestimentoLeitura"
       },
       "ItemEntrada": {
         "properties": {
@@ -11722,6 +10580,16 @@
             "type": "number",
             "title": "Entradas Previstas"
           },
+          "aportes_realizados": {
+            "type": "number",
+            "title": "Aportes Realizados",
+            "default": 0.0
+          },
+          "aportes_previstos": {
+            "type": "number",
+            "title": "Aportes Previstos",
+            "default": 0.0
+          },
           "saidas_realizadas": {
             "type": "number",
             "title": "Saidas Realizadas"
@@ -11750,39 +10618,6 @@
           "saldo_acumulado"
         ],
         "title": "MesFluxo"
-      },
-      "MesResultado": {
-        "properties": {
-          "mes": {
-            "type": "integer",
-            "title": "Mes"
-          },
-          "recebido": {
-            "type": "number",
-            "title": "Recebido"
-          },
-          "despesas": {
-            "type": "number",
-            "title": "Despesas"
-          },
-          "resultado": {
-            "type": "number",
-            "title": "Resultado"
-          },
-          "investimentos": {
-            "type": "number",
-            "title": "Investimentos"
-          }
-        },
-        "type": "object",
-        "required": [
-          "mes",
-          "recebido",
-          "despesas",
-          "resultado",
-          "investimentos"
-        ],
-        "title": "MesResultado"
       },
       "ModeloProjeto": {
         "properties": {
@@ -12422,38 +11257,6 @@
           "faturado"
         ],
         "title": "NegocioLeitura"
-      },
-      "OpcoesDespesa": {
-        "properties": {
-          "categorias": {
-            "items": {
-              "$ref": "#/components/schemas/CategoriaLeitura"
-            },
-            "type": "array",
-            "title": "Categorias"
-          },
-          "investidores": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Investidores"
-          },
-          "fornecedores": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Fornecedores"
-          }
-        },
-        "type": "object",
-        "required": [
-          "categorias",
-          "investidores",
-          "fornecedores"
-        ],
-        "title": "OpcoesDespesa"
       },
       "OrcamentoAguardando": {
         "properties": {
@@ -13263,6 +12066,23 @@
             "minItems": 1,
             "title": "Papeis"
           },
+          "participacao_percentual": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,3}|(?=[\\d.]{1,6}0*$)\\d{0,3}\\.\\d{0,2}0*$)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participacao Percentual"
+          },
           "versao": {
             "type": "integer",
             "minimum": 1.0,
@@ -13448,6 +12268,23 @@
             "type": "array",
             "minItems": 1,
             "title": "Papeis"
+          },
+          "participacao_percentual": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,3}|(?=[\\d.]{1,6}0*$)\\d{0,3}\\.\\d{0,2}0*$)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participacao Percentual"
           }
         },
         "additionalProperties": false,
@@ -13678,6 +12515,17 @@
             },
             "type": "array",
             "title": "Papeis"
+          },
+          "participacao_percentual": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participacao Percentual"
           }
         },
         "type": "object",
@@ -13790,6 +12638,11 @@
               }
             ],
             "title": "Natureza"
+          },
+          "aporte_socio": {
+            "type": "boolean",
+            "title": "Aporte Socio",
+            "default": false
           }
         },
         "additionalProperties": false,
@@ -13839,6 +12692,11 @@
           "nivel": {
             "type": "integer",
             "title": "Nivel"
+          },
+          "aporte_socio": {
+            "type": "boolean",
+            "title": "Aporte Socio",
+            "default": false
           },
           "possui_filhas": {
             "type": "boolean",
@@ -14841,6 +13699,368 @@
         ],
         "title": "ProximoFechamento"
       },
+      "RecorrenciaAtualizar": {
+        "properties": {
+          "termino": {
+            "type": "string",
+            "enum": [
+              "data",
+              "quantidade",
+              "sem_fim"
+            ],
+            "title": "Termino"
+          },
+          "data_fim": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Fim"
+          },
+          "quantidade": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 600.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantidade"
+          },
+          "conta_bancaria_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Conta Bancaria Id"
+          },
+          "plano_conta_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plano Conta Id"
+          },
+          "parceiro_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Parceiro Id"
+          },
+          "valor_titulo": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,14}0*$)\\d{0,11}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Valor Titulo"
+          },
+          "anotacao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anotacao"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "termino",
+          "conta_bancaria_id",
+          "plano_conta_id",
+          "parceiro_id",
+          "valor_titulo"
+        ],
+        "title": "RecorrenciaAtualizar",
+        "description": "O que se pode mudar numa recorrência; frequência e início são fixos (encerre e crie outra para mudá-los)."
+      },
+      "RecorrenciaEntrada": {
+        "properties": {
+          "termino": {
+            "type": "string",
+            "enum": [
+              "data",
+              "quantidade",
+              "sem_fim"
+            ],
+            "title": "Termino"
+          },
+          "data_fim": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Fim"
+          },
+          "quantidade": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 600.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantidade"
+          },
+          "conta_bancaria_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Conta Bancaria Id"
+          },
+          "plano_conta_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plano Conta Id"
+          },
+          "parceiro_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Parceiro Id"
+          },
+          "valor_titulo": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,14}0*$)\\d{0,11}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Valor Titulo"
+          },
+          "anotacao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anotacao"
+          },
+          "tipo_conta": {
+            "type": "string",
+            "enum": [
+              "P",
+              "R"
+            ],
+            "title": "Tipo Conta"
+          },
+          "frequencia": {
+            "type": "string",
+            "enum": [
+              "semanal",
+              "quinzenal",
+              "mensal",
+              "bimestral",
+              "trimestral",
+              "semestral",
+              "anual"
+            ],
+            "title": "Frequencia"
+          },
+          "data_inicio": {
+            "type": "string",
+            "format": "date",
+            "title": "Data Inicio"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "termino",
+          "conta_bancaria_id",
+          "plano_conta_id",
+          "parceiro_id",
+          "valor_titulo",
+          "tipo_conta",
+          "frequencia",
+          "data_inicio"
+        ],
+        "title": "RecorrenciaEntrada"
+      },
+      "RecorrenciaLeitura": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "tipo_conta": {
+            "type": "string",
+            "title": "Tipo Conta"
+          },
+          "conta_bancaria_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Conta Bancaria Id"
+          },
+          "conta_bancaria_nome": {
+            "type": "string",
+            "title": "Conta Bancaria Nome"
+          },
+          "plano_conta_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plano Conta Id"
+          },
+          "plano_conta_codigo": {
+            "type": "string",
+            "title": "Plano Conta Codigo"
+          },
+          "plano_conta_nome": {
+            "type": "string",
+            "title": "Plano Conta Nome"
+          },
+          "parceiro_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Parceiro Id"
+          },
+          "parceiro_nome": {
+            "type": "string",
+            "title": "Parceiro Nome"
+          },
+          "valor_titulo": {
+            "type": "number",
+            "title": "Valor Titulo"
+          },
+          "anotacao": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anotacao"
+          },
+          "frequencia": {
+            "type": "string",
+            "title": "Frequencia"
+          },
+          "data_inicio": {
+            "type": "string",
+            "format": "date",
+            "title": "Data Inicio"
+          },
+          "termino": {
+            "type": "string",
+            "title": "Termino"
+          },
+          "data_fim": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Fim"
+          },
+          "quantidade": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantidade"
+          },
+          "ativa": {
+            "type": "boolean",
+            "title": "Ativa"
+          },
+          "encerrada_em": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encerrada Em"
+          },
+          "titulos_gerados": {
+            "type": "integer",
+            "title": "Titulos Gerados"
+          },
+          "titulos_abertos": {
+            "type": "integer",
+            "title": "Titulos Abertos"
+          },
+          "proximo_vencimento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proximo Vencimento"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "tipo_conta",
+          "conta_bancaria_id",
+          "conta_bancaria_nome",
+          "plano_conta_id",
+          "plano_conta_codigo",
+          "plano_conta_nome",
+          "parceiro_id",
+          "parceiro_nome",
+          "valor_titulo",
+          "anotacao",
+          "frequencia",
+          "data_inicio",
+          "termino",
+          "data_fim",
+          "quantidade",
+          "ativa",
+          "encerrada_em",
+          "titulos_gerados",
+          "titulos_abertos",
+          "proximo_vencimento"
+        ],
+        "title": "RecorrenciaLeitura"
+      },
       "RelNegocio": {
         "properties": {
           "id": {
@@ -14904,73 +14124,6 @@
         ],
         "title": "RelOrcamento"
       },
-      "ResumoDespesas": {
-        "properties": {
-          "ano": {
-            "type": "integer",
-            "title": "Ano"
-          },
-          "anos_disponiveis": {
-            "items": {
-              "type": "integer"
-            },
-            "type": "array",
-            "title": "Anos Disponiveis"
-          },
-          "recebido_no_ano": {
-            "type": "number",
-            "title": "Recebido No Ano"
-          },
-          "despesas_pagas": {
-            "type": "number",
-            "title": "Despesas Pagas"
-          },
-          "despesas_a_pagar": {
-            "type": "number",
-            "title": "Despesas A Pagar"
-          },
-          "resultado": {
-            "type": "number",
-            "title": "Resultado"
-          },
-          "investido_no_ano": {
-            "type": "number",
-            "title": "Investido No Ano"
-          },
-          "investido_total": {
-            "type": "number",
-            "title": "Investido Total"
-          },
-          "meses": {
-            "items": {
-              "$ref": "#/components/schemas/MesResultado"
-            },
-            "type": "array",
-            "title": "Meses"
-          },
-          "investidores": {
-            "items": {
-              "$ref": "#/components/schemas/InvestidorResumo"
-            },
-            "type": "array",
-            "title": "Investidores"
-          }
-        },
-        "type": "object",
-        "required": [
-          "ano",
-          "anos_disponiveis",
-          "recebido_no_ano",
-          "despesas_pagas",
-          "despesas_a_pagar",
-          "resultado",
-          "investido_no_ano",
-          "investido_total",
-          "meses",
-          "investidores"
-        ],
-        "title": "ResumoDespesas"
-      },
       "ResumoFaturamento": {
         "properties": {
           "ano": {
@@ -15014,32 +14167,6 @@
           "total_recorrente"
         ],
         "title": "ResumoFaturamento"
-      },
-      "SetupTotpSaida": {
-        "properties": {
-          "qr_code": {
-            "type": "string",
-            "title": "Qr Code"
-          },
-          "provisioning_uri": {
-            "type": "string",
-            "title": "Provisioning Uri"
-          },
-          "backup_codes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Backup Codes"
-          }
-        },
-        "type": "object",
-        "required": [
-          "qr_code",
-          "provisioning_uri",
-          "backup_codes"
-        ],
-        "title": "SetupTotpSaida"
       },
       "TagEntrada": {
         "properties": {
@@ -15754,6 +14881,18 @@
               }
             ],
             "title": "Anotacao"
+          },
+          "recorrencia_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recorrencia Id"
           }
         },
         "type": "object",
@@ -16070,27 +15209,6 @@
           "type"
         ],
         "title": "ValidationError"
-      },
-      "VerificarTotpEntrada": {
-        "properties": {
-          "token_temporario": {
-            "type": "string",
-            "title": "Token Temporario"
-          },
-          "codigo": {
-            "type": "string",
-            "maxLength": 12,
-            "minLength": 6,
-            "title": "Codigo"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "token_temporario",
-          "codigo"
-        ],
-        "title": "VerificarTotpEntrada"
       }
     },
     "securitySchemes": {

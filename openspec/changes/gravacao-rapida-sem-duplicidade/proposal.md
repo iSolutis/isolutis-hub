@@ -22,6 +22,6 @@ Salvar demora (um a vários segundos) e o usuário, sem retorno, clica de novo: 
 ## Impact
 
 - Frontend: `ui/gravacao.ts` (`gravar`, `excluir`), `ui/salvar-helper.ts`, `api/http.ts` (cabeçalho), telas com botão de salvar próprio (`clientes`, `tarefas`, `faturamento`, `produtos`, `orcamentos`, `financeiro/*`, `parceiros`), `ui/formularios.ts` (`resolverCliente`), testes unitários e e2e.
-- Backend: middleware/dependência de idempotência nos `POST` de criação, nova tabela `idempotencia` (migração 0014, RLS de tenant, limpeza por validade), ajustes de serviços para reduzir instruções.
+- Backend: middleware/dependência de idempotência nos `POST` de criação, nova tabela `idempotencia` (migração 0016, RLS de tenant, limpeza por validade), ajustes de serviços para reduzir instruções.
 - Infra: Function Region da Vercel (configuração manual); sem mudança de banco além da tabela nova.
 - Sem mudança de contrato para clientes que não enviam a chave (continua funcionando como hoje).

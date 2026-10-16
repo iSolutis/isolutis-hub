@@ -13,7 +13,7 @@ describe("normalizar", () => {
 });
 
 describe("filtrarItens", () => {
-  const todos = [item("Painel"), item("Clientes"), item("Orçamentos"), item("Novo orçamento", "Ações"), item("Plano de Contas"), item("Despesas e investimentos")];
+  const todos = [item("Painel"), item("Clientes"), item("Orçamentos"), item("Novo orçamento", "Ações"), item("Plano de Contas"), item("Fornecedores")];
 
   it("consulta vazia devolve tudo, na ordem original", () => {
     expect(filtrarItens(todos, "")).toEqual(todos);

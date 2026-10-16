@@ -20,15 +20,15 @@ dúzia delas, então salvar passa de um segundo só em rede.
 | `POST /negocios` | 15 | 12 |
 | `POST /clientes` | 17 | 14 |
 
-O ganho veio de reunir usuário, empresa e escopo numa só chamada (`app_iniciar_contexto`, migração 0014), tanto no
+O ganho veio de reunir usuário, empresa e escopo numa só chamada (`app_iniciar_contexto`, migração 0016), tanto no
 início da requisição quanto a cada nova transação. O restante (verificação de vínculo com o cliente, dono padrão,
 leitura do registro gravado) fica como está para não enfraquecer o escopo de acesso.
 
-## Idempotência de gravações (migração 0014)
+## Idempotência de gravações (migração 0016)
 
 - O front envia `Idempotency-Key` nos `POST` de criação; a tabela `idempotencia` guarda a resposta por 24 h
   (limpeza oportunista a cada ~100 gravações com chave, pois não há processo fixo em ambiente sem servidor).
-- Ordem de deploy: **migração 0014 → backend → frontend**. O backend ignora a chave quando ela não vem, então um
+- Ordem de deploy: **migração 0016 → backend → frontend**. O backend ignora a chave quando ela não vem, então um
   frontend antigo continua funcionando.
 - Aplicar no Neon: `alembic upgrade head` com a URL do dono do banco (a migração cria a tabela, concede ao
-  `hub_runtime` e cria `app_iniciar_contexto`). Reversão: `alembic downgrade 0013`.
+  `hub_runtime` e cria `app_iniciar_contexto`). Reversão: `alembic downgrade 0015`.

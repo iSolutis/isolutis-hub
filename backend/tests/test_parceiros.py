@@ -29,7 +29,8 @@ async def test_papeis_disponiveis(api: AsyncClient):
         "cliente",
         "fornecedor",
         "funcionario",
-    ]  # por nome: Cliente, Fornecedor, Funcionário
+        "socio",
+    ]  # por nome: Cliente, Fornecedor, Funcionário, Sócio
 
 
 async def test_um_parceiro_assume_varios_papeis(api: AsyncClient):
@@ -190,3 +191,45 @@ async def test_clientes_existentes_tem_titulos_e_documentos_com_o_mesmo_parceiro
     assert orc.status_code == 201 and orc.json()["cliente_nome"] == "Alfa"
     doc = await api.get(f"{API}/orcamentos/{orc.json()['id']}/documento")
     assert doc.status_code == 200 and "CNPJ 11.222.333/0001-81" in doc.text
+
+
+# ----------------------------------------------------------------------------- sócios e participação
+async def test_socio_exige_participacao(api: AsyncClient):
+    r = await api.post(P, json={"nome": "Maria", "tipo_pessoa": "PF", "papeis": ["socio"]})
+    assert r.status_code == 422 and "participação" in r.text.lower()
+
+
+async def test_socio_guarda_participacao_e_acumula_papeis(api: AsyncClient):
+    p = await _parceiro(api, "Maria", ["socio", "funcionario"], tipo_pessoa="PF", participacao_percentual=40)
+    assert p["papeis"] == ["funcionario", "socio"] and p["participacao_percentual"] == 40
+    listado = (await api.get(P, params={"papel": "socio"})).json()
+    assert [x["participacao_percentual"] for x in listado] == [40]
+
+
+@pytest.mark.parametrize("valor", [0, -5, 100.01])
+async def test_participacao_fora_do_intervalo_e_recusada(api: AsyncClient, valor: float):
+    r = await api.post(P, json={"nome": "Maria", "papeis": ["socio"], "participacao_percentual": valor})
+    assert r.status_code == 422
+
+
+async def test_soma_das_participacoes_nao_passa_de_100(api: AsyncClient):
+    await _parceiro(api, "Maria", ["socio"], participacao_percentual=80)
+    r = await api.post(P, json={"nome": "João", "papeis": ["socio"], "participacao_percentual": 30})
+    assert r.status_code == 422 and "100%" in r.text
+    ok = await _parceiro(api, "João", ["socio"], participacao_percentual=20)  # fecha exatamente 100
+    assert ok["participacao_percentual"] == 20
+
+
+async def test_editar_a_propria_participacao_nao_conta_duas_vezes(api: AsyncClient):
+    s = await _parceiro(api, "Maria", ["socio"], participacao_percentual=60)
+    corpo = {"nome": "Maria", "papeis": ["socio"], "participacao_percentual": 90, "versao": s["versao"]}
+    r = await api.put(f"{P}/{s['id']}", json=corpo)
+    assert r.status_code == 200 and r.json()["participacao_percentual"] == 90
+
+
+async def test_sair_do_papel_socio_apaga_a_participacao(api: AsyncClient):
+    s = await _parceiro(api, "Maria", ["socio", "cliente"], participacao_percentual=50)
+    r = await api.put(f"{P}/{s['id']}", json={"nome": "Maria", "papeis": ["cliente"], "versao": s["versao"]})
+    assert r.status_code == 200 and r.json()["participacao_percentual"] is None
+    # os 50% ficam livres para outro sócio
+    assert (await _parceiro(api, "João", ["socio"], participacao_percentual=100))["participacao_percentual"] == 100

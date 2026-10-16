@@ -56,7 +56,7 @@ function no(c: PlanoConta): Safe {
     <div class="tree-row">
       <button class="tree-caret${filhas.length ? "" : " vazio"}" type="button" data-act="alternarNo" data-id="${c.id}" aria-expanded="${aberto}" aria-label="${aberto ? "Recolher" : "Expandir"} ${c.nome}"><i>›</i></button>
       <span class="tree-cod">${c.codigo}</span><span class="tree-nome${c.tipo_conta === "S" ? " sintetica" : ""}">${c.nome}</span>
-      <span class="tree-pills"><span class="pill ${c.natureza === "R" ? "ok" : "bad"}">${c.natureza === "R" ? "Receita" : "Despesa"}</span><span class="pill">${c.tipo_conta === "S" ? "Sintética" : "Analítica"}</span></span>
+      <span class="tree-pills"><span class="pill ${c.natureza === "R" ? "ok" : "bad"}">${c.natureza === "R" ? "Receita" : "Despesa"}</span><span class="pill">${c.tipo_conta === "S" ? "Sintética" : "Analítica"}</span>${c.aporte_socio ? html`<span class="pill info">Aporte de sócio</span>` : ""}</span>
       <span class="tree-actions">
         <button type="button" data-act="editarConta" data-id="${c.id}" title="Editar">✏️</button>
         <button type="button" data-act="excluirConta" data-id="${c.id}" title="Excluir">🗑️</button>
@@ -100,6 +100,7 @@ function formConta(modo: "nova" | "editar", base?: PlanoConta, paiInicial?: Plan
       ${campo("Nome", inp("nome", base?.nome, 'maxlength="150"'))}
       ${campo("Tipo", sel("tipo_conta", [["A", "Analítica (recebe lançamentos)"], ["S", "Sintética (agrupa contas)"]], base?.tipo_conta ?? "A"))}
       ${campo("Natureza", sel("natureza", [["R", "Receita"], ["D", "Despesa"]], natureza))}
+      <div class="field full" id="campoAporte"><label class="check"><input type="checkbox" name="aporte_socio"${raw(base?.aporte_socio ? " checked" : "")}> Conta de aporte de sócio</label><span class="sub">Títulos nesta conta só aceitam parceiros com o papel de sócio e ficam fora da receita operacional.</span></div>
     </div>
     <p class="sub" id="dicaConta" style="margin:0"></p>`,
     rodape: html`<button class="btn primary" data-salvar>Salvar</button>${espaco}`,
@@ -109,6 +110,7 @@ function formConta(modo: "nova" | "editar", base?: PlanoConta, paiInicial?: Plan
       const tipo = f.elements.namedItem("tipo_conta") as HTMLSelectElement;
       const nat = f.elements.namedItem("natureza") as HTMLSelectElement;
       const dica = $("#dicaConta", L)!;
+      const aporte = f.elements.namedItem("aporte_socio") as HTMLInputElement;
       const paiEscolhido = (): PlanoConta | undefined => todas.find((c) => c.id === pai.value);
 
       const ajustar = (): void => {
@@ -119,12 +121,19 @@ function formConta(modo: "nova" | "editar", base?: PlanoConta, paiInicial?: Plan
         if (terceiro) tipo.value = "A"; // o terceiro nível é sempre analítico
         tipo.disabled = terceiro || temFilhas;
         if (temFilhas) tipo.value = "S";
+        // só uma conta analítica de receita pode receber aportes
+        const podeAporte = tipo.value === "A" && nat.value === "R";
+        const campoAporte = $("#campoAporte", L);
+        if (campoAporte) campoAporte.hidden = !podeAporte;
+        if (!podeAporte) aporte.checked = false;
         dica.textContent = terceiro ? "Contas do terceiro nível são sempre analíticas." : temFilhas ? "Esta conta tem filhas: código, natureza e tipo não podem mudar." : "";
       };
       const sugerir = async (): Promise<void> => {
         const r = await tentar(() => apiFinanceiro.plano.proximoCodigo(pai.value || null));
         if (r) codigo.value = r.codigo;
       };
+      tipo.addEventListener("change", ajustar);
+      nat.addEventListener("change", ajustar);
       pai.addEventListener("change", async () => {
         ajustar();
         if (!editando) await sugerir();
@@ -138,7 +147,7 @@ function formConta(modo: "nova" | "editar", base?: PlanoConta, paiInicial?: Plan
         if (!fv(f, "nome")) return void avisar("Informe o nome da conta.");
         const corpo: PlanoContaEntrada = {
           plano_pai_id: pai.value || null, codigo: fv(f, "codigo"), nome: fv(f, "nome"),
-          tipo_conta: tipo.value as "A" | "S", natureza: nat.value as "R" | "D",
+          tipo_conta: tipo.value as "A" | "S", natureza: nat.value as "R" | "D", aporte_socio: aporte.checked,
         };
         const salva = await gravar({
           recarregar: ["financeiro"], mensagem: "Conta salva", fechar,

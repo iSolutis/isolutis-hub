@@ -7,7 +7,7 @@
 
 ## 2. Idempotência
 
-- [x] 2.1 Migração 0014 com `idempotencia` (chave única empresa+usuário+chave, RLS de tenant) e down; verificar com `upgrade`/`downgrade` e teste SQL de isolamento entre empresas
+- [x] 2.1 Migração 0016 com `idempotencia` (chave única empresa+usuário+chave, RLS de tenant) e down; verificar com `upgrade`/`downgrade` e teste SQL de isolamento entre empresas
 - [x] 2.2 Dependência no backend para `POST` de criação: insert na mesma transação, reproduz resposta guardada, 422 para chave reutilizada em outra rota/corpo; verificar com teste de API: duas requisições com a mesma chave (sequenciais e concorrentes) criam um registro
 - [x] 2.3 Limpeza de chaves com mais de 24 h (oportunista no caminho da reivindicação, sem depender do agendador); verificar lendo o código e a tabela
 - [x] 2.4 `api/http.ts` envia `Idempotency-Key` nos `POST` de criação; chave por formulário, renovada só após sucesso; verificar com teste unitário e e2e (duplo clique grava uma vez)

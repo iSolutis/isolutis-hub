@@ -24,10 +24,6 @@ RECURSO_DA_TABELA = {
     "orcamentos": "orcamentos",
     "orcamento_itens": "orcamentos",
     "lancamentos_receita": "faturamento",
-    "despesas": "despesas",
-    "investimentos": "despesas",
-    "categorias_despesa": "despesas",
-    "investidores": "despesas",
     "projetos": "projetos",
     "projeto_etapas": "projetos",
     "tarefas": "tarefas",
@@ -43,6 +39,8 @@ RECURSO_DA_TABELA = {
     "plano_contas": "financeiro",
     "conta_bancaria": "financeiro",
     "titulo_financeiro": "financeiro",
+    "recorrencia_titulo": "financeiro",
+    "parceiro_socio": ("clientes", "financeiro"),
 }
 
 
@@ -77,7 +75,7 @@ async def definir_empresa_da_transacao(sessao: AsyncSession, empresa_id: UUID) -
 
 
 async def definir_escopo_da_transacao(sessao: AsyncSession) -> None:
-    """Calcula no banco quem a pessoa enxerga (ela + liderados; admin vê tudo). Ver migração 0013."""
+    """Calcula no banco quem a pessoa enxerga (ela + liderados; admin vê tudo). Ver migração 0015."""
     sessao.info["escopo"] = True
     await sessao.execute(text("select app_definir_escopo()"))
 

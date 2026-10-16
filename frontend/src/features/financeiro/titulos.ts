@@ -13,7 +13,7 @@ import { espaco } from "@/ui/formularios";
 import { gravar } from "@/ui/gravacao";
 import { avisar } from "@/ui/toast";
 import { apiFinanceiro, type ContaBancaria, type Parceiro, type PlanoConta, type Titulo, type TituloEntrada } from "./api";
-import { acoesDaLinha, confirmarExclusao, contasDoPlanoParaTitulo, formatarDocumento, GRUPO } from "./comum";
+import { acoesDaLinha, confirmarExclusao, contasDoPlanoParaTitulo, formatarDocumento, GRUPO, parceirosParaTitulo } from "./comum";
 
 const STATUS: Record<string, readonly [string, string]> = { A: ["Aberto", "info"], Q: ["Quitado", "ok"], C: ["Cancelado", ""] };
 const TIPO: Record<string, string> = { P: "A pagar", R: "A receber" };
@@ -34,7 +34,7 @@ function vista(): Safe {
   const aPagar = abertos.filter((t) => t.tipo_conta === "P").reduce((s, t) => s + t.valor_devido, 0);
   const aReceber = abertos.filter((t) => t.tipo_conta === "R").reduce((s, t) => s + t.valor_devido, 0);
   return html`<div class="head"><div><h1>Títulos financeiros</h1><p>Contas a pagar e a receber · em aberto: <b class="num">${brl(aReceber)}</b> a receber, <b class="num">${brl(aPagar)}</b> a pagar</p></div>
-    <div class="tools"><button class="btn primary" data-act="novoTitulo">Novo título</button></div></div>
+    <div class="tools"><button class="btn" data-act="novaRecorrencia">Nova recorrência</button><button class="btn primary" data-act="novoTitulo">Novo título</button></div></div>
   <div class="fin-filtros">${seg("filtroFinTipo", ui.finTipo, [["todos", "Todos"], ["R", "A receber"], ["P", "A pagar"]])}${seg("filtroFinStatus", ui.finStatus, [["todos", "Todos"], ["A", "Abertos"], ["Q", "Quitados"], ["C", "Cancelados"]])}</div>
   ${
     tela.titulos.length
@@ -43,7 +43,7 @@ function vista(): Safe {
         const [rot, cls] = STATUS[t.status] ?? ["", ""];
         const atrasado = t.status === "A" && t.data_vencimento < h;
         return html`<tr><td class="num">${dataBR(t.data_vencimento)}${atrasado ? html`<div class="sub" style="color:var(--bad-texto)">atrasado</div>` : ""}</td><td><span class="pill ${t.tipo_conta === "R" ? "ok" : "bad"}">${TIPO[t.tipo_conta]}</span></td>
-        <td><b>${t.parceiro_nome}</b></td><td><span class="num sub">${t.plano_conta_codigo}</span> ${t.plano_conta_nome}</td><td>${t.conta_bancaria_nome}</td>
+        <td><b>${t.parceiro_nome}</b>${t.recorrencia_id ? html` <a class="pill info" href="/fin-recorrencias" data-go="fin-recorrencias" title="Título gerado por uma recorrência">Recorrente</a>` : ""}</td><td><span class="num sub">${t.plano_conta_codigo}</span> ${t.plano_conta_nome}</td><td>${t.conta_bancaria_nome}</td>
         <td class="r num">${brl(t.valor_devido)}${t.status === "Q" && t.valor_quitacao !== t.valor_devido ? html`<div class="sub">pago ${brl(t.valor_quitacao)}</div>` : ""}</td><td><span class="pill ${cls}">${rot}</span>${t.data_pagamento ? html`<div class="sub num">${dataBR(t.data_pagamento)}</div>` : ""}</td><td class="r">${acoesDaLinha("titulo", t.id)}</td></tr>`;
       })}
       ${!lista.length ? html`<tr><td colspan="8" class="sub">Nenhum título com esses filtros.</td></tr>` : ""}
@@ -68,6 +68,14 @@ async function formTitulo(t?: Titulo): Promise<void> {
   const campoPlano = (tipo: string, atual?: string | null): Safe =>
     combobox({ nome: "plano_conta_id", rotulo: "Conta do plano de contas", opcoes: opcoesPlano(tipo), valor: atual, vazio: contasDoTipo(tipo).length ? "Digite para buscar…" : "Nenhuma conta disponível" });
 
+  /** Parceiros do tipo de título e da conta escolhidos (a conta de aporte só aceita sócios); o atual sempre fica na lista. */
+  const opcoesParceiro = (tipo: string, planoId: string, atual?: string): OpcaoCombobox[] => {
+    const aporte = plano.find((c) => c.id === planoId)?.aporte_socio ?? false;
+    const lista = parceirosParaTitulo(parceiros, tipo, aporte);
+    const atualFora = parceiros.find((p) => p.id === atual && !lista.some((x) => x.id === p.id));
+    return [...lista, ...(atualFora ? [atualFora] : [])].map((p) => ({ id: p.id, rotulo: `${p.nome} · ${formatarDocumento(p.cpf_cnpj)}` }));
+  };
+
   abrirGaveta({
     titulo: t ? `Título · ${t.parceiro_nome}` : "Novo título financeiro",
     corpo: html`<div class="fields">
@@ -75,7 +83,7 @@ async function formTitulo(t?: Titulo): Promise<void> {
       ${campo("Situação", sel("status", [["A", "Aberto"], ["Q", "Quitado"], ["C", "Cancelado"]], t?.status ?? "A"))}
       <div class="field full"><label for="f-plano_conta_id">Conta do plano de contas</label>${campoPlano(tipoInicial, t?.plano_conta_id)}<span class="sub" id="dicaPlano"></span></div>
       ${campo("Conta bancária", combobox({ nome: "conta_bancaria_id", rotulo: "Conta bancária", opcoes: contas.map((c) => ({ id: c.id, rotulo: `${c.nome} (${c.instituicao_codigo})` })), valor: t?.conta_bancaria_id }))}
-      ${campo("Parceiro de negócio", combobox({ nome: "parceiro_id", rotulo: "Parceiro de negócio", opcoes: parceiros.map((p) => ({ id: p.id, rotulo: `${p.nome} · ${formatarDocumento(p.cpf_cnpj)}` })), valor: t?.parceiro_id }))}
+      ${campo("Parceiro de negócio", combobox({ nome: "parceiro_id", rotulo: "Parceiro de negócio", opcoes: opcoesParceiro(tipoInicial, t?.plano_conta_id ?? "", t?.parceiro_id), valor: t?.parceiro_id }))}
       ${campo("Data de emissão", inp("data_emissao", t?.data_emissao, 'type="date"'))}${campo("Data de vencimento", inp("data_vencimento", t?.data_vencimento ?? hoje(), 'type="date"'))}
       ${campo("Valor do título (R$)", inp("valor_titulo", paraCampo(t?.valor_titulo), 'inputmode="decimal" placeholder="0,00"'))}${campo("Desconto (R$)", inp("valor_desconto", paraCampo(t?.valor_desconto), 'inputmode="decimal" placeholder="0,00"'))}
       ${campo("Multa (R$)", inp("valor_multa", paraCampo(t?.valor_multa), 'inputmode="decimal" placeholder="0,00"'))}${campo("Juros (R$)", inp("valor_juros", paraCampo(t?.valor_juros), 'inputmode="decimal" placeholder="0,00"'))}
@@ -87,15 +95,22 @@ async function formTitulo(t?: Titulo): Promise<void> {
     rodape: html`<button class="btn primary" data-salvar>Salvar</button>${espaco}`,
     montar: (f, fechar, L) => {
       const tipo = f.elements.namedItem("tipo_conta") as HTMLSelectElement;
+      const planoSel = f.elements.namedItem("plano_conta_id") as HTMLInputElement;
       const status = f.elements.namedItem("status") as HTMLSelectElement;
       const dica = $("#dicaPlano", L)!;
       const mostrarDica = (): void => {
         dica.textContent = contasDoTipo(tipo.value).length ? `Somente contas analíticas de ${tipo.value === "P" ? "despesa" : "receita"}.` : `Não há conta analítica de ${tipo.value === "P" ? "despesa" : "receita"} no plano de contas. Cadastre uma antes.`;
       };
+      const parceiroCbx = comboboxDe(f, "parceiro_id")!;
+      const refazerParceiros = (): void => {
+        parceiroCbx.definirOpcoes(opcoesParceiro(tipo.value, planoSel.value, fv(f, "parceiro_id")), { valor: fv(f, "parceiro_id") });
+      };
       tipo.addEventListener("change", () => {
         comboboxDe(f, "plano_conta_id")?.definirOpcoes(opcoesPlano(tipo.value), { valor: fv(f, "plano_conta_id") });
         mostrarDica();
+        refazerParceiros();
       });
+      planoSel.addEventListener("change", refazerParceiros);
       mostrarDica();
       const atualizar = (): void => {
         $$(".quitacao", L).forEach((e) => (e.hidden = status.value !== "Q"));

@@ -56,10 +56,10 @@ Configuração do projeto (Settings → Functions → Function Region = São Pau
 
 ## Migration Plan
 
-1. Migração 0014 (tabela `idempotencia` + RLS), compatível com o app antigo (tabela só é lida pelo código novo).
+1. Migração 0016 (tabela `idempotencia` + RLS), compatível com o app antigo (tabela só é lida pelo código novo).
 2. Deploy do backend, depois do frontend (o backend ignora a chave ausente).
 3. Usuário muda a Function Region para `gru1` e reimplanta.
-4. Reversão: remover o cabeçalho no front e, se necessário, `0014_down` (apaga a tabela); as demais mudanças são só de código.
+4. Reversão: remover o cabeçalho no front e, se necessário, `0016_down` (apaga a tabela); as demais mudanças são só de código.
 
 ## Open Questions
 

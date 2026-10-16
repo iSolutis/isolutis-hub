@@ -18,7 +18,6 @@ from app.financeiro import rotas as financeiro
 from app.routers import (
     auth,
     clientes,
-    despesas,
     empresa,
     equipe,
     escopo as router_escopo,
@@ -112,7 +111,7 @@ def criar_app() -> FastAPI:
     api.include_router(clientes.router_referencias)  # `base`: só id e nome
     for modulo in (clientes, produtos, negocios, orcamentos):  # `comercial`
         api.include_router(modulo.router, dependencies=[Depends(requer_comercial), Depends(idempotencia)])
-    for modulo in (faturamento, despesas):  # `financeiro`
+    for modulo in (faturamento,):  # `financeiro`
         api.include_router(modulo.router, dependencies=[Depends(requer_financeiro), Depends(idempotencia)])
     # Módulo financeiro (`financeiro`) e referências de apoio a formulários (`base`): dependências nos próprios routers.
     api.include_router(financeiro.router, dependencies=[Depends(idempotencia)])

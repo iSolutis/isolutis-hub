@@ -11,7 +11,8 @@ from sqlalchemy.orm import joinedload
 from app.domain.datas import adicionar_meses, hoje
 from app.domain.dinheiro import ZERO, dividir_em_parcelas
 from app.errors import RegraDeNegocio
-from app.models import Despesa, Investimento, LancamentoReceita, Negocio, Orcamento
+from app.financeiro.models import TituloFinanceiro
+from app.models import LancamentoReceita, Negocio, Orcamento
 from app.schemas.faturamento import FaturamentoEmLote, LancamentoAtualizar, LancamentoEntrada
 from app.services.base import aplicar, conferir_versao, confirmar, obter
 from app.services.parceiros import exigir_cliente
@@ -162,10 +163,10 @@ async def excluir(sessao: AsyncSession, id_: UUID) -> None:
 
 
 async def anos_disponiveis(sessao: AsyncSession) -> list[int]:
-    """Anos com movimento (receitas, despesas ou investimentos) mais o ano corrente."""
+    """Anos com movimento (receitas ou títulos financeiros) mais o ano corrente."""
     consultas = [
         select(extract("year", col).label("ano"))
-        for col in (LancamentoReceita.vencimento, Despesa.data, Investimento.data)
+        for col in (LancamentoReceita.vencimento, TituloFinanceiro.data_vencimento)
     ]
     anos = {int(a) for (a,) in (await sessao.execute(union(*consultas))).all()}
     return sorted(anos | {hoje().year})

@@ -476,3 +476,61 @@ async def test_banco_isola_empresas(sessao: AsyncSession, plano: dict):
         {"c": outra.id, "p": plano["receita"]["id"]},
     )
     assert "fk_plano_contas_pai" in erro or "conta pai" in erro
+
+
+# ============================================================================ parceiros nos títulos e aporte de sócio
+async def test_conta_a_pagar_exige_fornecedor_funcionario_ou_socio(
+    api: AsyncClient, plano: dict, conta_bancaria: dict
+):
+    so_cliente = await _criar_parceiro(api, {"nome": "Cliente Beta", "papeis": ["cliente"]})
+    corpo = _titulo(plano, conta_bancaria, so_cliente, tipo_conta="P", plano_conta_id=plano["salario"]["id"])
+    r = await api.post(f"{F}/titulos", json=corpo)
+    assert r.status_code == 422 and "fornecedor, funcionário ou sócio" in r.json()["erro"]["mensagem"]
+    funcionario = await _criar_parceiro(api, {"nome": "Zé", "papeis": ["funcionario"]})
+    await _criar(api, "/titulos", {**corpo, "parceiro_id": funcionario["id"]})  # salário a um funcionário
+
+
+async def test_conta_de_aporte_so_analitica_e_de_receita(api: AsyncClient, plano: dict):
+    sintetica = {"plano_pai_id": plano["receita"]["id"], "codigo": "1.02", "nome": "Aportes", "tipo_conta": "S", "aporte_socio": True}
+    assert (await api.post(f"{F}/plano-contas", json=sintetica)).status_code == 422
+    de_despesa = {"plano_pai_id": plano["pessoal"]["id"], "codigo": "2.01.002", "nome": "Aportes", "tipo_conta": "A", "aporte_socio": True}
+    assert (await api.post(f"{F}/plano-contas", json=de_despesa)).status_code == 422
+    ok = await _criar(
+        api, "/plano-contas",
+        {"plano_pai_id": plano["contrato"]["id"], "codigo": "1.01.002", "nome": "Aportes", "tipo_conta": "A", "aporte_socio": True},
+    )  # fmt: skip
+    assert ok["aporte_socio"] is True
+
+
+async def test_aporte_e_titulo_a_receber_de_socio(api: AsyncClient, plano: dict, conta_bancaria: dict):
+    aporte = await _criar(
+        api, "/plano-contas",
+        {"plano_pai_id": plano["contrato"]["id"], "codigo": "1.01.002", "nome": "Aportes", "tipo_conta": "A", "aporte_socio": True},
+    )  # fmt: skip
+    fornecedor = await _criar_parceiro(api, {"nome": "Fornecedor Alfa", "papeis": ["fornecedor"]})
+    corpo = _titulo(plano, conta_bancaria, fornecedor, plano_conta_id=aporte["id"])
+    r = await api.post(f"{F}/titulos", json=corpo)
+    assert r.status_code == 422 and "Aporte de sócio" in r.json()["erro"]["mensagem"]
+    socia = await _criar_parceiro(api, {"nome": "Maria", "papeis": ["socio"], "participacao_percentual": 50})
+    t = await _criar(api, "/titulos", {**corpo, "parceiro_id": socia["id"]})
+    assert t["tipo_conta"] == "R" and t["parceiro_nome"] == "Maria"
+    # com aporte lançado, a pessoa não deixa de ser sócia
+    r = await api.put(f"{P}/{socia['id']}", json={"nome": "Maria", "papeis": ["cliente"], "versao": socia["versao"]})
+    assert r.status_code == 422 and "aportes" in r.json()["erro"]["mensagem"]
+
+
+async def test_aporte_no_fluxo_de_caixa_fica_separado_das_entradas(api: AsyncClient, plano: dict, conta_bancaria: dict):
+    aporte = await _criar(
+        api, "/plano-contas",
+        {"plano_pai_id": plano["contrato"]["id"], "codigo": "1.01.002", "nome": "Aportes", "tipo_conta": "A", "aporte_socio": True},
+    )  # fmt: skip
+    socia = await _criar_parceiro(api, {"nome": "Maria", "papeis": ["socio"], "participacao_percentual": 50})
+    corpo = _titulo(
+        plano, conta_bancaria, socia, plano_conta_id=aporte["id"], valor_titulo=5000, data_emissao=None,
+        data_vencimento=f"{ANO}-03-05", status="Q", data_pagamento=f"{ANO}-03-05",
+    )  # fmt: skip
+    await _criar(api, "/titulos", corpo)
+    f = (await api.get(f"{F}/fluxo-de-caixa", params={"ano": ANO})).json()
+    mar = f["meses"][2]
+    assert (mar["aportes_realizados"], mar["entradas_realizadas"], mar["saldo_do_mes"]) == (5000, 0, 5000)
+    assert (f["total_aportes"], f["total_entradas"]) == (5000, 0)  # entra no caixa, não na receita operacional
