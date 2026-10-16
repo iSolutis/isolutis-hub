@@ -37,13 +37,13 @@
 
 ## 6. Frontend
 
-- [ ] 6.1 Tela Administração › Equipes (equipes, membros, líderes); verificar no navegador criar equipe, incluir membro e líder
-- [ ] 6.2 Campo "Dono" em cliente, negócio, projeto e tarefa: editável só para líder/admin, com lista de pessoas permitida; verificar no navegador com usuário comercial (somente leitura) e líder
-- [ ] 6.3 Seção Participantes no projeto e modo leitura por `pode_editar` em projeto/etapa/tarefa; verificar no navegador com responsável de etapa
-- [ ] 6.4 Registro fora do escopo aberto pela URL mostra "registro não encontrado"; verificar no navegador
-- [ ] 6.5 Aviso no painel do admin enquanto não houver equipes; testes unitários do front para os novos formulários (`vitest`)
+- [x] 6.1 Tela Administração › Equipes (equipes, membros, líderes); verificar no navegador criar equipe, incluir membro e líder
+- [x] 6.2 Campo "Dono" em cliente, negócio, projeto e tarefa: editável só para líder/admin, com lista de pessoas permitida; verificar no navegador com usuário comercial (somente leitura) e líder
+- [x] 6.3 Seção Participantes no projeto e modo leitura por `pode_editar` em projeto/etapa/tarefa; verificar no navegador com responsável de etapa
+- [x] 6.4 Registro fora do escopo aberto pela URL mostra "registro não encontrado"; verificar no navegador
+- [x] 6.5 Aviso no painel do admin enquanto não houver equipes; testes unitários do front para os novos formulários (`vitest`)
 
 ## 7. Integração e entrega
 
-- [ ] 7.1 Roteiro ponta a ponta com quatro pessoas (admin, líder, comercial, membro executor) cobrindo um cenário de cada spec; verificar que todos passam
-- [ ] 7.2 Aplicar a migração em branch do Neon, rodar suíte e `EXPLAIN ANALYZE`, e documentar o procedimento de deploy (montar equipes logo após) em `docs/MULTI_TENANCY.md`
+- [x] 7.1 Roteiro ponta a ponta com quatro pessoas (admin, líder, comercial, membro executor) cobrindo um cenário de cada spec; verificar que todos passam
+- [ ] 7.2 Aplicar a migração em branch do Neon, rodar suíte e `EXPLAIN ANALYZE`, e documentar o procedimento de deploy (montar equipes logo após) em `docs/MULTI_TENANCY.md` — procedimento documentado; **aplicação no Neon pendente** (depende de acesso ao banco do cliente)

@@ -38,6 +38,7 @@ import "@/features/despesas";
 import "@/features/faturamento";
 import "@/features/relatorios";
 import "@/features/equipe";
+import "@/features/equipes";
 import "@/features/empresa";
 import "@/features/aparencia";
 import "@/features/conta";

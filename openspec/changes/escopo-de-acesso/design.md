@@ -89,3 +89,13 @@ A presença deixa de transmitir o título do registro em edição (`"editando um
 3. Deploy do backend e frontend juntos, logo após a migração.
 4. Admin monta as equipes.
 5. Rollback: `0013_down` remove políticas de escopo, devolve `tenant_*` a permissivas, remove funções/gatilhos/tabelas/coluna (equipes, participantes e donos de cliente são perdidos); reverter o app.
+
+## Ajustes feitos na implementação
+
+- **Contexto reaplicado a cada transação**: as variáveis `app.*` são locais à transação e se perdiam após um `commit` na mesma requisição. Um ouvinte `after_begin` da sessão (`app/db.py`) passou a regravar usuário, empresa e escopo. Antes, isso já afetava leituras pós-commit com `hub_runtime`.
+- **Nome do cliente** vem de `app_nome_cliente()` (`column_property` nos models e na view `vw_orcamentos_totais`), não do relacionamento, que volta vazio quando o cadastro é invisível.
+- **Etapa editada sozinha**: o projeto era salvo inteiro (`PUT`). Para o responsável de etapa atuar só na sua, entrou `PATCH /projetos/{id}/etapas/{etapa}`. A interface mostra o projeto em leitura e edita só as etapas com `pode_editar`.
+- **Referências de projeto** (`GET /projetos/referencias`, `app_projetos_referencia`) dão ao executor de tarefa avulsa o título do projeto.
+- **Tarefas não têm vínculo com etapa** no modelo de dados. A regra da spec "a etapa e as tarefas dela" vale só para a etapa; tarefas seguem o responsável da tarefa e o editor do projeto.
+- **Recusas do banco** (SQLSTATE 42501) são traduzidas em `confirmar()` e num tratador global, pela dica do gatilho: `escopo_dono` → 403, `escopo_cliente` → 404 "Cliente", RLS → 404.
+- **Desempenho**: medido em `docs/MULTI_TENANCY.md`. As políticas fazem varredura sequencial (até ~475 ms em 20 mil tarefas para um líder). A otimização (conjuntos pré-calculados por transação e predicados indexáveis) fica para uma mudança seguinte.

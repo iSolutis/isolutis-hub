@@ -1,4 +1,4 @@
-import type { Cliente, ClienteReferencia, MembroEquipe, Negocio, Orcamento, Papel, Permissao, Produto, Projeto, Tarefa } from "@/api/tipos";
+import type { Cliente, ClienteReferencia, MembroEquipe, MeuEscopo, Negocio, Orcamento, Papel, Permissao, PessoaReferencia, Produto, Projeto, ProjetoReferencia, Tarefa } from "@/api/tipos";
 
 /** Pessoa logada. */
 export const eu = { id: "", nome: "", email: "" };
@@ -23,7 +23,16 @@ export const dados = {
   projetos: [] as Projeto[],
   tarefas: [] as Tarefa[],
   equipe: [] as MembroEquipe[],
+  /** Quem a pessoa pode pôr como dono (ela; ela e liderados; ou todos, se admin). */
+  atribuiveis: [] as PessoaReferencia[],
+  /** Id e título dos projetos visíveis ou das tarefas que a pessoa executa. */
+  referenciasProjetos: [] as ProjetoReferencia[],
+  /** Escopo de acesso da pessoa na empresa ativa (admin, líder). */
+  escopo: { ve_tudo: false, lider: false, liderados: 0, equipes: 0 } as MeuEscopo,
 };
+
+/** Admin ou líder: pode criar sem dono e atribuir a outra pessoa (o servidor confere a mesma regra). */
+export const defineDono = (): boolean => dados.escopo.ve_tudo || dados.escopo.lider;
 
 /** Filtros e escolhas de tela (não vão para o servidor). */
 export const ui = {
@@ -53,6 +62,8 @@ export const porId = <T extends { id: string }>(lista: readonly T[], id?: string
 
 export const nomeCliente = (id?: string | null): string => (porId(dados.referenciasClientes, id) ?? porId(dados.clientes, id))?.nome ?? "—";
 export const nomeMembro = (id?: string | null): string => porId(dados.equipe, id)?.nome ?? "";
+export const tituloProjeto = (id?: string | null): string =>
+  (porId(dados.projetos, id) ?? porId(dados.referenciasProjetos, id))?.titulo ?? "";
 /** Nome para frases ("você", "outra pessoa da equipe") na linha de autoria. */
 export const nomeDe = (id?: string | null): string =>
   id === eu.id ? "você" : nomeMembro(id) || "outra pessoa da equipe";

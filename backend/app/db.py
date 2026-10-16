@@ -17,7 +17,7 @@ from app.realtime import agendar_publicacao
 
 # Tabela -> recurso que a interface precisa recarregar quando a tabela muda.
 RECURSO_DA_TABELA = {
-    "parceiro_negocio": ("clientes", "financeiro"),
+    "parceiro_negocio": ("clientes", "financeiro", "negocios"),
     "parceiro_papel": ("clientes", "financeiro"),
     "produtos": "produtos",
     "negocios": "negocios",
@@ -34,6 +34,11 @@ RECURSO_DA_TABELA = {
     "tarefa_checklist": "tarefas",
     "usuarios": "equipe",
     "empresa": "empresa",  # cadastro, logomarca e paleta: as outras abas reaplicam a identidade visual
+    # equipes mudam o que cada um enxerga: as abas recarregam tudo (escopo de acesso)
+    "equipe": "escopo",
+    "equipe_membro": "escopo",
+    "equipe_lider": "escopo",
+    "projeto_participante": ("projetos", "tarefas"),
     # módulo financeiro (tudo o que ele grava avisa a tela "financeiro")
     "plano_contas": "financeiro",
     "conta_bancaria": "financeiro",

@@ -8,6 +8,7 @@ import { ORIGENS } from "@/domain/constantes";
 import { apiFinanceiro } from "@/features/financeiro/api";
 import { formatarCep, formatarDocumento } from "@/features/financeiro/comum";
 import { campo, fv, inp, sel, area } from "@/ui/campos";
+import { seletorDono } from "@/ui/formularios";
 import type { SecaoFormulario } from "@/ui/formulario-pagina";
 import { tentar } from "@/ui/erros";
 import { avisar } from "@/ui/toast";
@@ -16,6 +17,9 @@ export const UFS = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", 
 
 /** O que os formulários precisam saber de um parceiro já existente (compatível com cliente e parceiro da API). */
 export interface ValoresParceiro {
+  id?: string;
+  /** Dono (carteira) do cliente. */
+  responsavel_id?: string | null;
   tipo_pessoa?: string;
   cpf_cnpj?: string | null;
   nome?: string;
@@ -53,6 +57,8 @@ export interface CamposLidos {
   cep: string | null;
   municipio_id: string | null;
   papeis: string[];
+  /** Só presente quando o formulário tem o campo "Dono"; ausente, o servidor mantém (ou define quem cria). */
+  responsavel_id?: string | null;
 }
 
 /** Campos soltos do parceiro (com o valor atual), para montar numa grade única ou em seções. */
@@ -103,7 +109,7 @@ export function camposDoParceiro(v: ValoresParceiro = {}, papeis?: readonly Pape
 export function secoesDoParceiro(v: ValoresParceiro = {}): SecaoFormulario[] {
   const c = camposSoltos(v);
   return [
-    { id: "gerais", titulo: "Dados gerais", descricao: "Identificação da empresa", corpo: html`<div class="fields">${c.nome}${c.tipo}${c.doc}${c.segmento}${c.origem}</div>` },
+    { id: "gerais", titulo: "Dados gerais", descricao: "Identificação da empresa", corpo: html`<div class="fields">${c.nome}${c.tipo}${c.doc}${c.segmento}${c.origem}${seletorDono("Dono do cliente (carteira)", v.responsavel_id, !v.id)}</div>` },
     { id: "contato", titulo: "Contato", descricao: "Quem fala pela empresa", corpo: html`<div class="fields">${c.contato}${c.cargo}${c.telefone}${c.email}</div>` },
     { id: "endereco", titulo: "Endereço", corpo: html`<div class="fields">${c.endereco}${c.cep}${c.uf}${c.municipio}</div>` },
     { id: "obs", titulo: "Observações", corpo: html`<div class="fields">${c.obs}</div>` },
@@ -138,5 +144,6 @@ export function lerCamposDoParceiro(form: HTMLFormElement, papelFixo?: string): 
     telefone: fv(form, "telefone") || null, email: fv(form, "email") || null,
     origem: (fv(form, "origem") || null) as CamposLidos["origem"], obs: fv(form, "obs") || null,
     endereco: fv(form, "endereco") || null, cep: fv(form, "cep") || null, municipio_id: municipio || null, papeis,
+    ...(form.elements.namedItem("responsavel_id") ? { responsavel_id: fv(form, "responsavel_id") || null } : {}),
   };
 }
