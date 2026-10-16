@@ -20,15 +20,14 @@ export interface SecaoMenu {
 }
 
 export const ESTRUTURA_MENU: SecaoMenu[] = [
-  { itens: [{ id: "painel" }, { id: "clientes" }] },
+  { itens: [{ id: "painel" }, { grupo: "Cadastros", icone: "cadastros", filhos: ["clientes", "fornecedores", "funcionarios", "socios"] }] },
   { rotulo: "Comercial", itens: [{ id: "negocios" }, { id: "orcamentos" }, { id: "produtos" }] },
   { rotulo: "Operação", itens: [{ id: "projetos" }, { id: "tarefas" }] },
   {
     rotulo: "Financeiro",
     itens: [
-      { grupo: "Financeiro", icone: "financeiro", filhos: ["fin-titulos", "fin-fluxo", "fin-plano", "fin-contas", "fin-parceiros"] },
+      { grupo: "Financeiro", icone: "financeiro", filhos: ["fin-titulos", "fin-recorrencias", "fin-fluxo", "fin-plano", "fin-contas"] },
       { id: "faturamento" },
-      { id: "despesas" },
       { id: "relatorios" },
     ],
   },
@@ -43,13 +42,15 @@ export const ICONES_DAS_TELAS: Record<string, string> = {
   produtos: "produtos",
   projetos: "projetos",
   tarefas: "tarefas",
+  fornecedores: "fornecedores",
+  funcionarios: "funcionarios",
+  socios: "socios",
   "fin-titulos": "titulos",
+  "fin-recorrencias": "recorrencias",
   "fin-fluxo": "fluxo",
   "fin-plano": "plano",
   "fin-contas": "contas",
-  "fin-parceiros": "fornecedores",
   faturamento: "faturamento",
-  despesas: "despesas",
   relatorios: "relatorios",
   equipe: "equipe",
   empresa: "empresa",
@@ -64,12 +65,11 @@ export const ACOES_DAS_TELAS: Record<string, AcaoRapida[]> = {
   projetos: [{ id: "novoProjeto", rotulo: "Novo projeto", icone: "projetos" }],
   tarefas: [{ id: "novaTarefa", rotulo: "Nova tarefa", icone: "tarefas" }],
   faturamento: [{ id: "novoLanc", rotulo: "Novo lançamento", icone: "faturamento" }],
-  despesas: [
-    { id: "novaDespesa", rotulo: "Nova despesa", icone: "despesas" },
-    { id: "novoInvest", rotulo: "Novo investimento", icone: "despesas" },
-  ],
   "fin-titulos": [{ id: "novoTitulo", rotulo: "Novo título", icone: "titulos" }],
   "fin-contas": [{ id: "novaContaBancaria", rotulo: "Nova conta bancária", icone: "contas" }],
-  "fin-parceiros": [{ id: "novoParceiro", rotulo: "Novo fornecedor", icone: "fornecedores" }],
+  "fin-recorrencias": [{ id: "novaRecorrencia", rotulo: "Nova recorrência", icone: "recorrencias" }],
+  fornecedores: [{ id: "novoFornecedor", rotulo: "Novo fornecedor", icone: "fornecedores" }],
+  funcionarios: [{ id: "novoFuncionario", rotulo: "Novo funcionário", icone: "funcionarios" }],
+  socios: [{ id: "novoSocio", rotulo: "Novo sócio", icone: "socios" }],
   equipe: [{ id: "novoUsuario", rotulo: "Novo usuário", icone: "equipe" }],
 };

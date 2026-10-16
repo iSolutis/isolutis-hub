@@ -12,7 +12,7 @@ export const acesso: { empresaId: string; empresaNome: string; papel: Papel | ""
 };
 export const temPermissao = (p: Permissao): boolean => acesso.permissoes.includes(p);
 
-/** Coleções mantidas em memória (pequenas: equipe de poucas pessoas). Faturamento/despesas são por ano e ficam nas próprias telas. */
+/** Coleções mantidas em memória (pequenas: equipe de poucas pessoas). O faturamento é por ano e ficam nas próprias telas. */
 export const dados = {
   clientes: [] as Cliente[],
   /** Só id e nome: carregada para todos os papéis, serve para exibir o nome do cliente. */
@@ -34,7 +34,6 @@ export const ui = {
   ano: new Date().getFullYear(),
   mes: null as number | null,
   orcStatus: "todos",
-  despTipo: "todos",
   projStatus: "ativos",
   tarefaPessoa: "todas",
   tarefaBusca: "",

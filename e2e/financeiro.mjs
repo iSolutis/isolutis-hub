@@ -31,11 +31,11 @@ await page.waitForSelector("nav button");
 
 // menu Financeiro com os submenus do spec
 const sub = async () => page.$$eval("nav .nav-sub button", (b) => b.map((x) => x.textContent.replace(/\d+$/, "").trim()));
-await page.click('nav .nav-grupo');
+await page.click('nav .nav-grupo:has-text("Financeiro")');
 await page.waitForTimeout(200);
 const subs = await sub();
 console.log("submenus:", subs.join(" | "));
-for (const s of ["Plano de Contas", "Conta Bancária", "Parceiro de Negócio", "Títulos Financeiros"]) if (!subs.includes(s)) throw new Error("falta submenu " + s);
+for (const s of ["Plano de Contas", "Conta Bancária", "Títulos Financeiros", "Recorrências"]) if (!subs.includes(s)) throw new Error("falta submenu " + s);
 passo("menu Financeiro com submenus");
 
 // plano de contas
@@ -100,9 +100,9 @@ await page.keyboard.press("Escape");
 passo("conta bancária criada; duplicada recusada");
 
 // parceiro (CNPJ inválido, depois válido)
-await page.click('nav button[data-go="fin-parceiros"]'); await page.waitForTimeout(400);
-await page.click('[data-act="novoParceiro"]'); await page.waitForSelector(".drawer");
-await page.check('input[name="papel"][value="fornecedor"]'); await page.fill("#f-cpf_cnpj", cnpjErrado); await page.fill("#f-nome", `Fornecedor ${sufixo}`);
+await page.click('nav .nav-grupo:has-text("Cadastros")'); await page.click('nav [data-go="fornecedores"]'); await page.waitForTimeout(400);
+await page.click('[data-act="novoFornecedor"]'); await page.waitForSelector(".drawer");
+await page.fill("#f-cpf_cnpj", cnpjErrado); await page.fill("#f-nome", `Fornecedor ${sufixo}`);
 await page.selectOption("#f-uf", "BA");
 await page.waitForFunction(() => document.querySelectorAll("#f-municipio_id option").length > 100, null, { timeout: 5000 });
 await page.selectOption("#f-municipio_id", { label: "Salvador" });

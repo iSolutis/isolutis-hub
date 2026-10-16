@@ -65,6 +65,9 @@ export const iniciais = (nome?: string | null): string =>
 
 export const primeiroNome = (nome?: string | null): string => (nome ?? "").trim().split(/\s+/)[0] ?? "";
 
+/** 40 -> "40%"; 33.5 -> "33,5%" (no máximo duas casas). */
+export const formatarPercentual = (n: number): string => `${new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(n)}%`;
+
 export const pluralizar = (n: number, singular: string, plural: string): string => (n === 1 ? singular : plural);
 
 /** Minúsculas e sem acentos: "Orçamentos" casa com "orcamen". */

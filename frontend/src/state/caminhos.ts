@@ -18,6 +18,9 @@ export type RotaResolvida =
 
 const RESERVADAS = ["login", "convite", "assets", "api"];
 
+/** Endereços de telas que mudaram de lugar ou deixaram de existir: abrem a tela que as substituiu. */
+const TELAS_SUBSTITUIDAS: Record<string, string> = { despesas: "fin-titulos", investimentos: "fin-titulos", "fin-parceiros": "fornecedores" };
+
 export const caminhoDaTela = (vista: string): string => `/${vista}`;
 export const caminhoNovo = (vista: string): string => `/${vista}/novo`;
 export const caminhoDoRegistro = (vista: string, id: string): string => `/${vista}/${encodeURIComponent(id)}`;
@@ -28,6 +31,8 @@ export function resolverCaminho(caminho: string, telas: ReadonlySet<string>): Ro
   const partes = limpo.split("/").slice(1);
   const primeira = partes[0] ?? "";
   if (RESERVADAS.includes(primeira)) return { tipo: "reservada" };
+  const substituta = TELAS_SUBSTITUIDAS[primeira];
+  if (partes.length === 1 && !telas.has(primeira) && substituta !== undefined && telas.has(substituta)) return { tipo: "tela", vista: substituta };
   if (!telas.has(primeira) || partes.length > 2 || partes.some((p) => p === "")) return { tipo: "desconhecida" };
   if (partes.length === 1) return { tipo: "tela", vista: primeira };
   const segundo = partes[1] ?? "";

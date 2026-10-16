@@ -24,10 +24,6 @@ RECURSO_DA_TABELA = {
     "orcamentos": "orcamentos",
     "orcamento_itens": "orcamentos",
     "lancamentos_receita": "faturamento",
-    "despesas": "despesas",
-    "investimentos": "despesas",
-    "categorias_despesa": "despesas",
-    "investidores": "despesas",
     "projetos": "projetos",
     "projeto_etapas": "projetos",
     "tarefas": "tarefas",
@@ -37,6 +33,8 @@ RECURSO_DA_TABELA = {
     "plano_contas": "financeiro",
     "conta_bancaria": "financeiro",
     "titulo_financeiro": "financeiro",
+    "recorrencia_titulo": "financeiro",
+    "parceiro_socio": ("clientes", "financeiro"),
 }
 
 

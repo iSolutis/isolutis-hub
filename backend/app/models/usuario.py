@@ -1,11 +1,10 @@
-import uuid
 from datetime import datetime
 
-from sqlalchemy import Computed, ForeignKey, UniqueConstraint, text
-from sqlalchemy.dialects.postgresql import CITEXT, UUID
+from sqlalchemy import Computed
+from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import Base, ComAuditoria, ComEmpresa
+from app.models.base import Base, ComAuditoria
 
 
 class Usuario(ComAuditoria, Base):
@@ -25,21 +24,3 @@ class Usuario(ComAuditoria, Base):
 
     # Papel na empresa ativa: não é coluna; a listagem da equipe e a criação/atualização o preenchem para a resposta.
     papel = None
-
-
-class CategoriaDespesa(ComAuditoria, ComEmpresa, Base):
-    __tablename__ = "categorias_despesa"
-    __table_args__ = (UniqueConstraint("empresa_id", "nome", name="uq_categorias_despesa_empresa_nome"),)
-
-    nome: Mapped[str] = mapped_column(CITEXT)
-    ordem: Mapped[int] = mapped_column(default=0)
-    ativo: Mapped[bool] = mapped_column(default=True)
-
-
-class Investidor(ComAuditoria, ComEmpresa, Base):
-    __tablename__ = "investidores"
-    __table_args__ = (UniqueConstraint("empresa_id", "nome", name="uq_investidores_empresa_nome"),)
-
-    nome: Mapped[str] = mapped_column(CITEXT)
-    usuario_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
-    ativo: Mapped[bool] = mapped_column(default=True)

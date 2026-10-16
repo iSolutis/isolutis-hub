@@ -1,15 +1,18 @@
 """Contrato do cadastro único de parceiros (hub de papéis)."""
 
+from decimal import Decimal
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import AliasChoices, Field, model_validator
+from pydantic import AliasChoices, Field, PlainSerializer, model_validator
 
 from app.financeiro.regras import so_digitos
 from app.schemas.comum import Auditoria, Entrada, Leitura, TextoLongo, TextoOpcional
 
 Origem = Literal["Site", "Indicação", "LinkedIn", "Instagram", "WhatsApp", "Evento", "Prospecção ativa", "Outro"]
 Nome = Annotated[str, Field(min_length=1, max_length=150)]
+# Percentual: entra como número/texto, sai como número JSON (o front trabalha com number).
+Percentual = Annotated[Decimal, PlainSerializer(lambda v: float(v), return_type=float, when_used="json")]
 
 
 class _CamposDoParceiro(Entrada):
@@ -39,6 +42,8 @@ class _CamposDoParceiro(Entrada):
 class ParceiroEntrada(_CamposDoParceiro):
     tipo_pessoa: Literal["PJ", "PF"] = "PJ"
     papeis: Annotated[list[str], Field(min_length=1)]
+    # Só vale com o papel `socio` (obrigatória nele): participação do sócio na empresa, em %.
+    participacao_percentual: Annotated[Decimal | None, Field(gt=0, le=100, max_digits=5, decimal_places=2)] = None
 
 
 class ParceiroAtualizar(ParceiroEntrada):
@@ -63,6 +68,7 @@ class ParceiroLeitura(Auditoria):
     uf: str | None
     # Do ORM vem de `codigos_de_papel`; ao revalidar um dicionário (fachada de clientes) vem como `papeis`.
     papeis: list[str] = Field(validation_alias=AliasChoices("codigos_de_papel", "papeis"))
+    participacao_percentual: Percentual | None = None
 
 
 class PapelLeitura(Leitura):

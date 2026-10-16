@@ -60,7 +60,7 @@ ACESSO = [
     ("/orcamentos", {"admin", "comercial"}),
     ("/produtos", {"admin", "comercial"}),
     ("/faturamento", {"admin", "financeiro"}),
-    ("/despesas", {"admin", "financeiro"}),
+    ("/financeiro/recorrencias", {"admin", "financeiro"}),
     ("/relatorios/dre", {"admin", "financeiro"}),
     ("/financeiro/titulos", {"admin", "financeiro"}),
     ("/parceiros", {"admin", "financeiro"}),
@@ -210,3 +210,61 @@ async def test_convite_aceita_os_quatro_papeis(http: AsyncClient, por_papel: dic
         f"{API}/convite", json={"nome": "x", "email": "conv-x@x.com", "papel": "root"}, headers=por_papel["admin"]
     )
     assert r.status_code == 422
+
+
+# ----------------------------------------------------------------------------- cadastros por papel de parceiro
+async def _novo_parceiro(http: AsyncClient, cab: dict[str, str], nome: str, papeis: list[str], **extra) -> dict:
+    r = await http.post(f"{API}/parceiros", headers=cab, json={"nome": nome, "papeis": papeis, **extra})
+    assert r.status_code == 201, r.text
+    return r.json()
+
+
+async def test_financeiro_nao_ve_funcionarios_nem_socios(http: AsyncClient, por_papel: dict):
+    admin, fin = por_papel["admin"], por_papel["financeiro"]
+    await _novo_parceiro(http, admin, "Fornecedora", ["fornecedor"])
+    await _novo_parceiro(http, admin, "Maria Sócia", ["socio"], participacao_percentual=50)
+    await _novo_parceiro(http, admin, "Zé Funcionário", ["funcionario"])
+    nomes = [p["nome"] for p in (await http.get(f"{API}/parceiros", headers=fin)).json()]
+    assert nomes == ["Fornecedora"]
+    papeis = (await http.get(f"{API}/parceiros/papeis", headers=fin)).json()
+    assert [p["codigo"] for p in papeis] == ["cliente", "fornecedor"]
+    assert (await http.get(f"{API}/parceiros", headers=fin, params={"papel": "socio"})).status_code == 403
+
+
+async def test_financeiro_nao_cria_nem_edita_socio(http: AsyncClient, por_papel: dict):
+    admin, fin = por_papel["admin"], por_papel["financeiro"]
+    corpo_socio = {"nome": "X", "papeis": ["socio"], "participacao_percentual": 10}
+    r = await http.post(f"{API}/parceiros", headers=fin, json=corpo_socio)
+    assert r.status_code == 403
+    socia = await _novo_parceiro(http, admin, "Maria Sócia", ["socio"], participacao_percentual=50)
+    corpo = {"nome": "Maria", "papeis": ["fornecedor"], "versao": socia["versao"]}
+    assert (await http.put(f"{API}/parceiros/{socia['id']}", headers=fin, json=corpo)).status_code == 404
+    assert (await http.delete(f"{API}/parceiros/{socia['id']}", headers=fin)).status_code == 404
+
+
+async def test_parceiro_com_papel_oculto_aparece_sem_ele_e_o_mantem(http: AsyncClient, por_papel: dict):
+    admin, fin = por_papel["admin"], por_papel["financeiro"]
+    p = await _novo_parceiro(http, admin, "Alfa", ["fornecedor", "funcionario"])
+    visto = (await http.get(f"{API}/parceiros", headers=fin)).json()
+    assert [x["papeis"] for x in visto] == [["fornecedor"]]
+    # o financeiro troca fornecedor por cliente: o papel de funcionário, que ele nem vê, continua
+    corpo = {"nome": "Alfa", "papeis": ["cliente"], "versao": p["versao"]}
+    r = await http.put(f"{API}/parceiros/{p['id']}", headers=fin, json=corpo)
+    assert r.status_code == 200 and r.json()["papeis"] == ["cliente"]
+    como_admin = (await http.get(f"{API}/parceiros", headers=admin, params={"papel": "funcionario"})).json()
+    assert [x["papeis"] for x in como_admin] == [["cliente", "funcionario"]]
+
+
+async def test_financeiro_nao_exclui_parceiro_com_papel_que_nao_gerencia(http: AsyncClient, por_papel: dict):
+    admin, fin = por_papel["admin"], por_papel["financeiro"]
+    p = await _novo_parceiro(http, admin, "Alfa", ["fornecedor", "funcionario"])
+    assert (await http.delete(f"{API}/parceiros/{p['id']}", headers=fin)).status_code == 403
+
+
+async def test_participacao_do_socio_so_aparece_para_o_admin(http: AsyncClient, por_papel: dict):
+    admin, fin = por_papel["admin"], por_papel["financeiro"]
+    await _novo_parceiro(http, admin, "Maria", ["socio", "cliente"], participacao_percentual=30)
+    como_fin = (await http.get(f"{API}/parceiros", headers=fin)).json()
+    assert como_fin[0]["papeis"] == ["cliente"] and como_fin[0]["participacao_percentual"] is None
+    como_admin = (await http.get(f"{API}/parceiros", headers=admin)).json()
+    assert como_admin[0]["participacao_percentual"] == 30

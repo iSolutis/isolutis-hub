@@ -286,16 +286,3 @@ async def test_campos_opcionais_aceitam_null_explicito(api: AsyncClient, novo_cl
         },
     )
     assert f.status_code == 201, f.text
-    cat = (await api.get(f"{API}/despesas/opcoes")).json()["categorias"][0]["id"]
-    d = await api.post(
-        f"{API}/despesas",
-        json={
-            "data": HOJE.isoformat(),
-            "descricao": "d",
-            "valor": 1,
-            "categoria_id": cat,
-            "fornecedor": None,
-            "obs": None,
-        },
-    )
-    assert d.status_code == 201, d.text

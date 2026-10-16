@@ -109,9 +109,9 @@ const col = await page.$eval('article.card:has-text("Preparar diagnóstico")', (
 if (col !== "concluido") throw new Error("tarefa não concluiu");
 passo("tarefa arrastada para concluído");
 
-// 7. despesas + equipe
-await ir("despesas");
-await page.screenshot({ path: "tela-despesas2.png", fullPage: true });
+// 7. títulos + equipe
+await ir("fin-titulos");
+await page.screenshot({ path: "tela-titulos2.png", fullPage: true });
 await ir("equipe");
 await page.click('[data-act="novoUsuario"]');
 await page.fill("#f-nome", "Novo Membro");

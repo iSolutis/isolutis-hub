@@ -29,6 +29,8 @@ from app.config import get_settings
 from app.db import criar_engine
 
 CSV_PADRAO = Path(__file__).resolve().parents[1] / "financeiro" / "dados" / "plano_contas_padrao.csv"
+# Conta analítica de receita em que entram os aportes de sócios (7.02.001 "Aportes de Capital").
+CODIGO_APORTE_SOCIO = "7.02.001"
 
 
 def ler_plano(caminho: Path = CSV_PADRAO) -> list[dict[str, str]]:
@@ -103,12 +105,15 @@ async def carregar(empresa_id: UUID | None, empresa_nome: str | None, confirmar:
             for conta in plano:  # pais antes dos filhos; nível, natureza e regras vêm do trigger do banco
                 await sessao.execute(
                     text(
-                        "insert into plano_contas (id, empresa_id, plano_pai_id, codigo, nome, tipo_conta, natureza) "
-                        "values (:id, :e, :pai, :codigo, :nome, :tipo, :natureza)"
+                        "insert into plano_contas "
+                        "(id, empresa_id, plano_pai_id, codigo, nome, tipo_conta, natureza, aporte_socio) "
+                        "values (:id, :e, :pai, :codigo, :nome, :tipo, :natureza, :aporte)"
                     ),
                     {
                         "id": UUID(conta["id"]), "e": empresa, "pai": UUID(conta["plano_pai_id"]) if conta["plano_pai_id"] else None,
-                        "codigo": conta["codigo"], "nome": conta["nome"], "tipo": conta["tipo_conta"], "natureza": conta["natureza"],
+                        "codigo": conta["codigo"], "nome": conta["nome"], "tipo": conta["tipo_conta"],
+                        "natureza": conta["natureza"],
+                        "aporte": conta["codigo"] == CODIGO_APORTE_SOCIO,
                     },
                 )  # fmt: skip
             await sessao.commit()

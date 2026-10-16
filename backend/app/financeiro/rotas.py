@@ -7,6 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, Response
 
 from app.deps import Sessao, requer_base, requer_financeiro
+from app.financeiro import recorrencias as rec
 from app.financeiro import servicos as svc
 from app.financeiro.schemas import (
     ContaBancariaEntrada,
@@ -17,6 +18,9 @@ from app.financeiro.schemas import (
     PlanoContaEntrada,
     PlanoContaLeitura,
     ProximoCodigo,
+    RecorrenciaAtualizar,
+    RecorrenciaEntrada,
+    RecorrenciaLeitura,
     TituloEntrada,
     TituloLeitura,
 )
@@ -134,3 +138,34 @@ async def excluir_titulo(id_: UUID, sessao: Sessao) -> Response:
 @router.get("/fluxo-de-caixa", response_model=FluxoDeCaixa)
 async def fluxo_de_caixa(sessao: Sessao, ano: Ano):
     return await svc.fluxo_de_caixa(sessao, await _empresa(sessao), ano)
+
+
+# --------------------------------------------------------------------------- recorrências
+@router.get("/recorrencias", response_model=list[RecorrenciaLeitura])
+async def listar_recorrencias(sessao: Sessao):
+    return await rec.listar(sessao, await _empresa(sessao))
+
+
+@router.post("/recorrencias", response_model=RecorrenciaLeitura, status_code=201)
+async def criar_recorrencia(dados: RecorrenciaEntrada, sessao: Sessao):
+    return await rec.criar(sessao, await _empresa(sessao), dados)
+
+
+@router.put("/recorrencias/{id_}", response_model=RecorrenciaLeitura)
+async def atualizar_recorrencia(id_: UUID, dados: RecorrenciaAtualizar, sessao: Sessao):
+    return await rec.atualizar(sessao, await _empresa(sessao), id_, dados)
+
+
+@router.post("/recorrencias/{id_}/pausar", response_model=RecorrenciaLeitura)
+async def pausar_recorrencia(id_: UUID, sessao: Sessao):
+    return await rec.pausar(sessao, await _empresa(sessao), id_)
+
+
+@router.post("/recorrencias/{id_}/retomar", response_model=RecorrenciaLeitura)
+async def retomar_recorrencia(id_: UUID, sessao: Sessao):
+    return await rec.retomar(sessao, await _empresa(sessao), id_)
+
+
+@router.post("/recorrencias/{id_}/encerrar", response_model=RecorrenciaLeitura)
+async def encerrar_recorrencia(id_: UUID, sessao: Sessao):
+    return await rec.encerrar(sessao, await _empresa(sessao), id_)
