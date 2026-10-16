@@ -58,6 +58,9 @@ class Equipe(Base):
 
     __tablename__ = "equipe"
 
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
     empresa_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("empresa.id"), server_default=text("app_empresa_id()"))
     nome: Mapped[str]
     criado_em: Mapped[datetime] = mapped_column(server_default=func.now())
