@@ -1,17 +1,32 @@
-## 1. Componente
+## 1. Componente base
 
-- [ ] 1.1 Criar `ui/combobox.ts` (render + montagem de eventos; input visível + campo oculto com o valor)
-- [ ] 1.2 Filtro normalizado (acento/caixa) por rótulo e código, com limite de itens
-- [ ] 1.3 Teclado (setas, Enter, Esc, Tab) e ARIA (combobox, listbox, aria-activedescendant)
-- [ ] 1.4 Estilos pelos tokens do design system (claro/escuro, foco, vazio)
-- [ ] 1.5 Testes unitários do filtro e das interações principais
+- [ ] 1.1 Investigar `state/roteador.ts` (`popstate`, guarda de saída) e `ui/gaveta.ts` (`Esc`, `#layer`) e registrar no `design.md` a integração escolhida para o Voltar e o `Esc`; verificar com a nota no design e com os arquivos citados
+- [ ] 1.2 Criar `ui/combobox.ts`: campo visível + campo oculto, `definirValor`, `definirOpcoes`, evento `change`, estados (desabilitado, obrigatório, vazio, valor inicial); verificar com testes unitários do contrato (restaurar rótulo ao sair, nunca enviar texto livre, valor inicial na edição)
+- [ ] 1.3 Filtro normalizado por rótulo, código e grupo, com ordenação e limite de 50 itens; verificar com testes do filtro (acento, caixa, código, grupo, ordem, limite, "Digite para refinar")
+- [ ] 1.4 Teclado e ARIA (setas, Enter, Esc em fase de captura, Tab) sem enviar o formulário; verificar com teste de interação, incluindo `Esc` dentro de uma gaveta fechando só a lista
+- [ ] 1.5 Lista suspensa em portal no `body` com posicionamento (abre para cima, rolagem, redimensionamento); verificar com teste e2e de um campo no fim de uma gaveta rolável
+- [ ] 1.6 Ação fixa no fim da lista (`acaoFinal`); verificar com teste de que ela permanece visível com filtro ativo e sem resultados
+- [ ] 1.7 Estilos pelos tokens (claro e escuro, foco, vazio, `prefers-reduced-motion`) e o novo token de camada `--z-selecao`; verificar visualmente nos dois temas
 
-## 2. Adoção
+## 2. Telas pequenas
 
-- [ ] 2.1 Substituir o select de instituição em `contas-bancarias.ts` (incluindo edição com valor atual)
-- [ ] 2.2 Aplicar em município e parceiro (`parceiros/campos.ts`, `titulos.ts`)
-- [ ] 2.3 Aplicar na conta do plano de contas do título (respeitando o filtro por natureza)
+- [ ] 2.1 Folha de seleção em tela cheia no `body` (cabeçalho com voltar, busca no topo, itens de 44 px, busca com 16 px, atributos do campo, foco preso e devolvido); verificar com e2e em viewport de celular (abrir, filtrar, escolher, valor no formulário)
+- [ ] 2.2 Altura da folha acompanhando o teclado (`visualViewport` com `100dvh` de reserva) e fundo sem rolagem; verificar com e2e em celular simulado
+- [ ] 2.3 Botão Voltar fechando só a folha (entrada de histórico própria e `popstate` reivindicado pelo componente, ignorado pelo roteador); verificar com e2e `goBack()` mantendo gaveta, tela e dados digitados
+- [ ] 2.4 Escolha por `matchMedia("(max-width: 860px)")` entre lista suspensa e folha, reagindo à mudança de tamanho; verificar com teste unitário e e2e
+- [ ] 2.5 Documentar a regra de uso (combobox ou nativo) e o contrato do componente em `frontend/PADROES.md`; verificar lendo o texto e conferindo as telas atuais contra a regra
 
-## 3. Validação
+## 3. Adoção
 
-- [ ] 3.1 Verificar manualmente em gaveta/modal, teclado e tema escuro; rodar testes do front e revisar o diff
+- [ ] 3.1 Instituição financeira em `contas-bancarias.ts`, incluindo edição com valor atual; verificar com teste e conferência na tela
+- [ ] 3.2 Conta do plano no título, com grupo pai no texto e `definirOpcoes` ao trocar o tipo (RN04); verificar com teste: digitar "alug" acha "Aluguel", trocar "A pagar/A receber" refaz a lista e limpa a escolha inválida
+- [ ] 3.3 Parceiro e conta bancária no título; verificar com teste de filtro por nome e por documento
+- [ ] 3.4 Município em `parceiros/campos.ts`, com `definirOpcoes` ao trocar a UF; verificar com teste de troca de UF e valor inicial na edição
+- [ ] 3.5 Cliente em negócio, orçamento, projeto e tarefa (`seletorCliente`/`opcoesClientes`), mantendo "+ Novo cliente…" e trocando `campo.value = …` por `definirValor` em `projetos.ts` e `tarefas.ts`; verificar com teste de que negócio preenche o cliente e de que criar cliente novo continua funcionando
+- [ ] 3.6 Negócio (orçamento e projeto) e projeto (tarefa); verificar com teste de filtro e de edição com valor atual
+- [ ] 3.7 Conta pai em `plano-contas.ts`, preservando a herança da natureza; verificar com teste de que escolher a conta pai preenche a natureza
+
+## 4. Validação
+
+- [ ] 4.1 Rodar testes do front, lint, tipos e e2e em viewport de celular, e revisar o diff; verificar com tudo verde e nenhum `.value =` restante em campo combobox
+- [ ] 4.2 Conferência em aparelhos reais (iPhone e Android): zoom ao tocar, teclado cobrindo a lista, botão Voltar e tema escuro; verificar com a lista de itens marcada pelo usuário
