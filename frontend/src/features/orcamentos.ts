@@ -10,14 +10,16 @@ import { ICONE_WA, numeroWa, urlWa } from "@/domain/whatsapp";
 import { dados, podeEscrever, ui } from "@/state/estado";
 import { recarregar, registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
-import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { area, campo, fv, inp, inpMoeda, sel } from "@/ui/campos";
+import { reaplicarMascara } from "@/ui/mascara";
+import { mascararMoeda, paraCampoMoeda } from "@/ui/moeda";
 import { combobox, comboboxDe, type OpcaoCombobox } from "@/ui/combobox";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, resolverCliente, seletorCliente } from "@/ui/formularios";
+import { botaoExcluir, botaoSalvar, espaco, seletorCliente } from "@/ui/formularios";
 import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
@@ -66,6 +68,9 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
   const clienteInicial = o?.cliente_id ?? inicial.cliente_id ?? "";
   const negocioInicial = o?.negocio_id ?? inicial.negocio_id ?? "";
   const podeAprovar = !!o && podeEscrever() && o.status !== "aprovado";
+  /** Formulário montado: o negócio criado pelo cadastro rápido é do cliente escolhido agora. */
+  let form: HTMLFormElement | null = null;
+  const clienteAtual = (): string => (form ? fv(form, "cliente_id") : clienteInicial);
 
   abrirGaveta({
     titulo: o ? `Orçamento Nº ${o.numero}` : "Novo orçamento",
@@ -73,18 +78,18 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
     autoria: linhaAutoria(o),
     corpo: html`<div class="fields">
       ${campo("Número", raw(`<input value="${esc(o?.numero ?? "Gerado ao salvar")}" readonly aria-readonly="true">`))}${campo("Status", sel("status", Object.entries(ORC_STATUS).filter(([k]) => k !== "vencido").map(([k, v]) => [k, v[0]] as const), status))}
-      ${seletorCliente(clienteInicial)}<div class="field"><label for="f-negocio_id">Negócio</label>${combobox({ nome: "negocio_id", rotulo: "Negócio", opcoes: negociosDoCliente(clienteInicial), valor: negocioInicial, vazio: "Sem negócio vinculado" })}</div>
+      ${seletorCliente(clienteInicial)}<div class="field"><label for="f-negocio_id">Negócio</label>${combobox({ nome: "negocio_id", rotulo: "Negócio", opcoes: negociosDoCliente(clienteInicial), valor: negocioInicial, vazio: "Sem negócio vinculado", cadastroRapido: { tipo: "negocio", contexto: () => ({ clienteId: clienteAtual() }) } })}</div>
       ${campo("Data", inp("data", o?.data ?? inicial.data ?? hoje(), 'type="date"'))}${campo("Validade (dias)", inp("validade_dias", o?.validade_dias ?? inicial.validade_dias ?? 15, 'type="number" min="1"'))}
     </div>
     <div><h2 style="margin-bottom:6px">Itens</h2>${!prods.length ? html`<p class="sub" style="margin:0 0 6px">Cadastre produtos para preencher os itens com um clique. Você também pode digitar a descrição livremente.</p>` : ""}
       <div style="overflow-x:auto"><table class="items" style="min-width:560px"><thead><tr><th style="width:30%">Produto</th><th>Descrição</th><th style="width:60px">Qtd</th><th style="width:110px">Valor unit.</th><th style="width:54px">Mensal</th><th style="width:30px"></th></tr></thead><tbody id="itens"></tbody></table></div>
       <button class="btn" type="button" id="addItem" style="margin-top:8px">Adicionar item</button></div>
-    <div class="fields">${campo("Desconto no projeto (R$)", inp("desconto", o?.desconto ? String(o.desconto).replace(".", ",") : "", 'inputmode="decimal" placeholder="0,00"'))}<div class="totals" id="totais"></div>
+    <div class="fields">${campo("Desconto no projeto (R$)", inpMoeda("desconto", o?.desconto))}<div class="totals" id="totais"></div>
       ${campo("Condições e observações", area("obs", o?.obs ?? inicial.obs, "Forma de pagamento, prazo de entrega, o que está fora do escopo…"), true)}</div>`,
     rodape: html`${botaoSalvar()}<a class="btn wa" id="waOrc" target="_blank" rel="noopener" href="#">${ICONE_WA}Enviar pelo WhatsApp</a>${podeAprovar ? html`<button class="btn" data-aprovar>Cliente aprovou</button>` : ""}${o ? html`<button class="btn" data-baixar>Baixar orçamento</button>` : html`<button class="btn" data-baixar>Salvar e baixar</button>`}${espaco}${botaoExcluir(!!o)}`,
     montar: (f, fechar, L) => {
+      form = f;
       melhorarFormulario(f);
-      ligarNovoCliente(f);
       const clienteSel = f.elements.namedItem("cliente_id") as HTMLInputElement;
       const negociosCbx = comboboxDe(f, "negocio_id")!;
       clienteSel.addEventListener("change", () => negociosCbx.definirOpcoes(negociosDoCliente(clienteSel.value), { valor: negocioInicial }));
@@ -102,7 +107,7 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
           <td><select data-k="produto_id" aria-label="Produto"><option value="">Livre</option>${prods.map((p) => html`<option value="${p.id}"${raw(p.id === it.produto_id ? " selected" : "")}>${p.nome}</option>`)}</select></td>
           <td><input data-k="descricao" value="${it.descricao}" aria-label="Descrição"></td>
           <td><input data-k="qtd" value="${it.qtd}" inputmode="decimal" aria-label="Quantidade"></td>
-          <td><input data-k="preco_unitario" value="${it.preco_unitario ? String(it.preco_unitario).replace(".", ",") : ""}" inputmode="decimal" placeholder="0,00" aria-label="Valor unitário"></td>
+          <td><input data-k="preco_unitario" value="${paraCampoMoeda(it.preco_unitario)}" data-moeda inputmode="decimal" placeholder="0,00" aria-label="Valor unitário"></td>
           <td style="text-align:center"><input type="checkbox" data-k="mensal"${raw(it.mensal ? " checked" : "")} aria-label="Cobrança mensal"></td>
           <td><button type="button" class="btn ghost" data-rm="${i}" aria-label="Remover item" style="padding:2px 6px">×</button></td></tr>`,
           )}`,
@@ -117,7 +122,10 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
         if (!it || !k || k === "produto_id" || k === "mensal") return;
         if (k === "descricao") it.descricao = el.value;
         else if (k === "qtd") it.qtd = numero(el.value);
-        else if (k === "preco_unitario") it.preco_unitario = numero(el.value);
+        else if (k === "preco_unitario") {
+          reaplicarMascara(el, mascararMoeda);
+          it.preco_unitario = numero(el.value);
+        }
         mostrarTotais();
       });
       tb.addEventListener("change", (e) => {
@@ -186,8 +194,7 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
         if (!fv(f, "cliente_id")) return avisar("Escolha o cliente do orçamento.");
         const validos = itens.filter((i) => i.descricao || numero(i.preco_unitario));
         if (!validos.length) return avisar("Inclua pelo menos um item.");
-        const clienteId = await resolverCliente(f);
-        if (!clienteId) return null;
+        const clienteId = fv(f, "cliente_id");
         const lista: ItemEntrada[] = validos.map((i) => ({
           id: i.id ?? null, produto_id: i.produto_id || null, descricao: i.descricao || "Item", qtd: numero(i.qtd) || 1, preco_unitario: numero(i.preco_unitario), mensal: !!i.mensal,
         }));

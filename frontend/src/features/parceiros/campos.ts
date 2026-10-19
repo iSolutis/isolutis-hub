@@ -97,15 +97,16 @@ function campoParticipacao(v: ValoresParceiro): Safe {
 }
 
 /** HTML dos campos. Com `papeis` (lista de papéis disponíveis) mostra as caixas de escolha de papel; sem, o papel é fixo. */
-export function camposDoParceiro(v: ValoresParceiro = {}, papeis?: readonly PapelDisponivel[]): Safe {
+/** Caixas de escolha de papel (só quando a tela deixa escolher). */
+function campoPapeis(v: ValoresParceiro, papeis: readonly PapelDisponivel[]): Safe {
   const marcados = new Set(v.papeis ?? []);
+  return html`<div class="field full"><label>Papéis</label><div class="papeis" style="display:flex;gap:16px;flex-wrap:wrap">${papeis.map((p) => html`<label class="check"><input type="checkbox" name="papel" value="${p.codigo}"${raw(marcados.has(p.codigo) ? " checked" : "")}> ${p.nome}</label>`)}</div></div>`;
+}
+
+export function camposDoParceiro(v: ValoresParceiro = {}, papeis?: readonly PapelDisponivel[]): Safe {
   const c = camposSoltos(v);
   return html`<div class="fields">
-    ${
-      papeis
-        ? html`<div class="field full"><label>Papéis</label><div class="papeis" style="display:flex;gap:16px;flex-wrap:wrap">${papeis.map((p) => html`<label class="check"><input type="checkbox" name="papel" value="${p.codigo}"${raw(marcados.has(p.codigo) ? " checked" : "")}> ${p.nome}</label>`)}</div></div>`
-        : ""
-    }
+    ${papeis ? campoPapeis(v, papeis) : ""}
     ${papeis ? campoParticipacao(v) : ""}
     ${c.nome}
     ${c.tipo}
@@ -119,6 +120,15 @@ export function camposDoParceiro(v: ValoresParceiro = {}, papeis?: readonly Pape
     ${c.municipio}
     ${c.obs}
   </div>`;
+}
+
+/**
+ * Só os campos chave (nome, tipo de pessoa, documento e, com `papeis`, papéis e participação do sócio), para o
+ * cadastro rápido. Sem a grade `.fields` em volta: quem usa já a fornece.
+ */
+export function camposReduzidosDoParceiro(v: ValoresParceiro = {}, papeis?: readonly PapelDisponivel[]): Safe {
+  const c = camposSoltos(v);
+  return html`${c.nome}${c.tipo}${c.doc}${papeis ? html`${campoPapeis(v, papeis)}${campoParticipacao(v)}` : ""}`;
 }
 
 /** Os mesmos campos agrupados em seções, para o formulário em página (papel fixo, sem escolha de papéis). */
@@ -137,17 +147,20 @@ export function ligarCamposDoParceiro(form: HTMLFormElement, v: ValoresParceiro 
   const tipoPessoa = form.elements.namedItem("tipo_pessoa") as HTMLSelectElement;
   const mascara = ligarMascaraDeDocumento(form.elements.namedItem("cpf_cnpj") as HTMLInputElement, () => tipoDoDocumento(tipoPessoa.value));
   tipoPessoa.addEventListener("change", () => mascara.atualizarTipo());
-  const uf = form.elements.namedItem("uf") as HTMLSelectElement;
-  const municipio = comboboxDe(form, "municipio_id")!;
-  const visivel = form.querySelector<HTMLInputElement>("#f-municipio_id")!;
-  const carregar = async (selecionado?: string | null): Promise<void> => {
-    visivel.placeholder = "Carregando…";
-    const lista = uf.value ? await tentar(() => apiFinanceiro.municipios(uf.value)) : [];
-    municipio.definirOpcoes((lista ?? []).map((m) => ({ id: m.id, rotulo: m.nome })), { valor: selecionado ?? null, silencioso: true });
-    visivel.placeholder = uf.value ? "Digite para buscar…" : "Escolha a UF primeiro";
-  };
-  uf.addEventListener("change", () => void carregar());
-  if (v.municipio_id && v.uf) void carregar(v.municipio_id);
+  const uf = form.elements.namedItem("uf") as HTMLSelectElement | null;
+  const municipio = comboboxDe(form, "municipio_id");
+  const visivel = form.querySelector<HTMLInputElement>("#f-municipio_id");
+  // O formulário reduzido (cadastro rápido) não tem endereço.
+  if (uf && municipio && visivel) {
+    const carregar = async (selecionado?: string | null): Promise<void> => {
+      visivel.placeholder = "Carregando…";
+      const lista = uf.value ? await tentar(() => apiFinanceiro.municipios(uf.value)) : [];
+      municipio.definirOpcoes((lista ?? []).map((m) => ({ id: m.id, rotulo: m.nome })), { valor: selecionado ?? null, silencioso: true });
+      visivel.placeholder = uf.value ? "Digite para buscar…" : "Escolha a UF primeiro";
+    };
+    uf.addEventListener("change", () => void carregar());
+    if (v.municipio_id && v.uf) void carregar(v.municipio_id);
+  }
   // A participação só faz sentido para sócios: mostra o campo ao marcar o papel e esconde ao desmarcar.
   const caixaSocio = form.querySelector<HTMLInputElement>(`input[name="papel"][value="${PAPEL_SOCIO}"]`);
   const campoParticipacao = form.querySelector<HTMLElement>("#campoParticipacao");

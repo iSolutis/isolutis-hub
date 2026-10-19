@@ -1,11 +1,11 @@
 import { $, $$ } from "@/core/dom";
 import { brl, dataBR, hoje } from "@/core/formato";
 import { html, type Safe } from "@/core/html";
-import { numero, paraCampo } from "@/core/numero";
+import { numero } from "@/core/numero";
 import { ui } from "@/state/estado";
 import { registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
-import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { area, campo, fv, inp, inpMoeda, sel } from "@/ui/campos";
 import { combobox, comboboxDe, type OpcaoCombobox } from "@/ui/combobox";
 import { tentar } from "@/ui/erros";
 import { abrirGaveta } from "@/ui/gaveta";
@@ -13,8 +13,9 @@ import { espaco } from "@/ui/formularios";
 import { gravar } from "@/ui/gravacao";
 import { avisar } from "@/ui/toast";
 import { apiFinanceiro, type ContaBancaria, type Parceiro, type PlanoConta, type Titulo, type TituloEntrada } from "./api";
-import { formatarDocumento } from "@/ui/documento";
 import { acoesDaLinha, confirmarExclusao, contasDoPlanoParaTitulo, GRUPO, parceirosParaTitulo } from "./comum";
+import { opcaoDaConta, prepararCadastroDeConta } from "./contas-bancarias";
+import { opcaoDoParceiro, prepararCadastroDeParceiro } from "../parceiros/cadastro-rapido";
 
 const STATUS: Record<string, readonly [string, string]> = { A: ["Aberto", "info"], Q: ["Quitado", "ok"], C: ["Cancelado", ""] };
 const TIPO: Record<string, string> = { P: "A pagar", R: "A receber" };
@@ -57,9 +58,11 @@ registrarVista({ id: "fin-titulos", nome: "Títulos Financeiros", grupo: GRUPO, 
 
 async function formTitulo(t?: Titulo): Promise<void> {
   // as listas de apoio são buscadas na hora, para refletir cadastros feitos há pouco
-  const apoio = await tentar(() => Promise.all([apiFinanceiro.plano.listar(), apiFinanceiro.contas.listar(), apiFinanceiro.parceiros.listar()]));
+  const apoio = await tentar(() =>
+    Promise.all([apiFinanceiro.plano.listar(), apiFinanceiro.contas.listar(), apiFinanceiro.parceiros.listar(), prepararCadastroDeParceiro(), prepararCadastroDeConta()]),
+  );
   if (!apoio) return;
-  const [plano, contas, parceiros]: [PlanoConta[], ContaBancaria[], Parceiro[]] = apoio;
+  const [plano, contas, parceiros]: [PlanoConta[], ContaBancaria[], Parceiro[], void, void] = apoio;
   const tipoInicial = t?.tipo_conta ?? "R";
   /** RN04: contas a pagar mostram só despesas; a receber, só receitas. */
   const contasDoTipo = (tipo: string): PlanoConta[] => contasDoPlanoParaTitulo(plano, tipo);
@@ -74,8 +77,14 @@ async function formTitulo(t?: Titulo): Promise<void> {
     const aporte = plano.find((c) => c.id === planoId)?.aporte_socio ?? false;
     const lista = parceirosParaTitulo(parceiros, tipo, aporte);
     const atualFora = parceiros.find((p) => p.id === atual && !lista.some((x) => x.id === p.id));
-    return [...lista, ...(atualFora ? [atualFora] : [])].map((p) => ({ id: p.id, rotulo: `${p.nome} · ${formatarDocumento(p.cpf_cnpj)}` }));
+    return [...lista, ...(atualFora ? [atualFora] : [])].map(opcaoDoParceiro);
   };
+  /** Formulário montado (o contexto do cadastro rápido lê o tipo e a conta escolhidos na hora). */
+  let form: HTMLFormElement | null = null;
+  const contextoParceiro = () => ({
+    tipoConta: form ? fv(form, "tipo_conta") : tipoInicial,
+    aporte: plano.find((c) => c.id === (form ? fv(form, "plano_conta_id") : t?.plano_conta_id))?.aporte_socio ?? false,
+  });
 
   abrirGaveta({
     titulo: t ? `Título · ${t.parceiro_nome}` : "Novo título financeiro",
@@ -83,18 +92,19 @@ async function formTitulo(t?: Titulo): Promise<void> {
       ${campo("Tipo", sel("tipo_conta", [["R", "A receber (receita)"], ["P", "A pagar (despesa)"]], tipoInicial))}
       ${campo("Situação", sel("status", [["A", "Aberto"], ["Q", "Quitado"], ["C", "Cancelado"]], t?.status ?? "A"))}
       <div class="field full"><label for="f-plano_conta_id">Conta do plano de contas</label>${campoPlano(tipoInicial, t?.plano_conta_id)}<span class="sub" id="dicaPlano"></span></div>
-      ${campo("Conta bancária", combobox({ nome: "conta_bancaria_id", rotulo: "Conta bancária", opcoes: contas.map((c) => ({ id: c.id, rotulo: `${c.nome} (${c.instituicao_codigo})` })), valor: t?.conta_bancaria_id }))}
-      ${campo("Parceiro de negócio", combobox({ nome: "parceiro_id", rotulo: "Parceiro de negócio", opcoes: opcoesParceiro(tipoInicial, t?.plano_conta_id ?? "", t?.parceiro_id), valor: t?.parceiro_id }))}
+      ${campo("Conta bancária", combobox({ nome: "conta_bancaria_id", rotulo: "Conta bancária", opcoes: contas.map(opcaoDaConta), valor: t?.conta_bancaria_id, cadastroRapido: { tipo: "conta-bancaria" } }))}
+      ${campo("Parceiro de negócio", combobox({ nome: "parceiro_id", rotulo: "Parceiro de negócio", opcoes: opcoesParceiro(tipoInicial, t?.plano_conta_id ?? "", t?.parceiro_id), valor: t?.parceiro_id, cadastroRapido: { tipo: "parceiro", contexto: contextoParceiro, aoCriar: (c) => parceiros.push(c.item as Parceiro) } }))}
       ${campo("Data de emissão", inp("data_emissao", t?.data_emissao, 'type="date"'))}${campo("Data de vencimento", inp("data_vencimento", t?.data_vencimento ?? hoje(), 'type="date"'))}
-      ${campo("Valor do título (R$)", inp("valor_titulo", paraCampo(t?.valor_titulo), 'inputmode="decimal" placeholder="0,00"'))}${campo("Desconto (R$)", inp("valor_desconto", paraCampo(t?.valor_desconto), 'inputmode="decimal" placeholder="0,00"'))}
-      ${campo("Multa (R$)", inp("valor_multa", paraCampo(t?.valor_multa), 'inputmode="decimal" placeholder="0,00"'))}${campo("Juros (R$)", inp("valor_juros", paraCampo(t?.valor_juros), 'inputmode="decimal" placeholder="0,00"'))}
+      ${campo("Valor do título (R$)", inpMoeda("valor_titulo", t?.valor_titulo))}${campo("Desconto (R$)", inpMoeda("valor_desconto", t?.valor_desconto))}
+      ${campo("Multa (R$)", inpMoeda("valor_multa", t?.valor_multa))}${campo("Juros (R$)", inpMoeda("valor_juros", t?.valor_juros))}
       <div class="field full"><span class="sub">Valor devido: <b class="num" id="devido">R$ 0,00</b></span></div>
       <div class="field quitacao"${t?.status === "Q" ? "" : " hidden"}><label for="f-data_pagamento">Data de pagamento</label>${inp("data_pagamento", t?.data_pagamento, 'type="date"')}</div>
-      <div class="field quitacao"${t?.status === "Q" ? "" : " hidden"}><label for="f-valor_quitacao">Valor pago (R$)</label>${inp("valor_quitacao", t?.status === "Q" ? paraCampo(t?.valor_quitacao) : "", 'inputmode="decimal" placeholder="vazio = valor devido"')}</div>
+      <div class="field quitacao"${t?.status === "Q" ? "" : " hidden"}><label for="f-valor_quitacao">Valor pago (R$)</label>${inpMoeda("valor_quitacao", t?.status === "Q" ? t?.valor_quitacao : "", "vazio = valor devido")}</div>
       ${campo("Anotação", area("anotacao", t?.anotacao), true)}
     </div>`,
     rodape: html`<button class="btn primary" data-salvar>Salvar</button>${espaco}`,
     montar: (f, fechar, L) => {
+      form = f;
       const tipo = f.elements.namedItem("tipo_conta") as HTMLSelectElement;
       const planoSel = f.elements.namedItem("plano_conta_id") as HTMLInputElement;
       const status = f.elements.namedItem("status") as HTMLSelectElement;

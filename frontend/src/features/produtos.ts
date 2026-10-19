@@ -2,13 +2,13 @@ import { api } from "@/api/endpoints";
 import type { Produto, ProdutoEntrada } from "@/api/tipos";
 import { brl, compararTexto } from "@/core/formato";
 import { html, type Safe } from "@/core/html";
-import { numero, paraCampo } from "@/core/numero";
+import { numero } from "@/core/numero";
 import { $ } from "@/core/dom";
 import { TIPOS, UNIDADES } from "@/domain/constantes";
 import { dados, podeEscrever } from "@/state/estado";
 import { recarregar, registrarVista } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
-import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { area, campo, fv, inp, inpMoeda, sel } from "@/ui/campos";
 import { registrarConsulta } from "@/ui/conflito";
 import { registrarAbertura } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
@@ -50,7 +50,7 @@ function formProduto(p?: Produto): void {
     corpo: html`<div class="fields">
       ${campo("Nome", inp("nome", p?.nome), true)}
       ${campo("Tipo", sel("tipo", Object.entries(TIPOS), p?.tipo ?? "projeto"))}${campo("Cobrado por", inp("unidade", p?.unidade ?? UNIDADES.projeto, 'placeholder="projeto, mês, hora…"'))}
-      ${campo("Preço de referência (R$)", inp("preco", paraCampo(p?.preco), 'inputmode="decimal" placeholder="0,00"'))}${campo("Situação", sel("ativo", [["1", "Ativo"], ["0", "Inativo"]], p && !p.ativo ? "0" : "1"))}
+      ${campo("Preço de referência (R$)", inpMoeda("preco", p?.preco))}${campo("Situação", sel("ativo", [["1", "Ativo"], ["0", "Inativo"]], p && !p.ativo ? "0" : "1"))}
       ${campo("Descrição", area("descricao", p?.descricao), true)}</div>`,
     rodape: html`${botaoSalvar()}${espaco}${botaoExcluir(!!p)}`,
     montar: (f, fechar, L) => {

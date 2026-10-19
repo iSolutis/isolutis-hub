@@ -5,6 +5,8 @@
 import { api } from "@/api/endpoints";
 import { ErroApi } from "@/api/http";
 import type { Usuario } from "@/api/tipos";
+import { numero } from "@/core/numero";
+import { ligarMascaraDeMoeda } from "@/ui/moeda";
 
 export interface EstadoApp {
   usuario: Usuario | null;
@@ -92,7 +94,7 @@ function renderProdutoLinha(i: number, p: { nome: string; preco: string }): stri
       </div>
       <div class="field" style="width:140px">
         <label for="obPPreco${i}" style="font-size:var(--text-xs)">Preço (R$)</label>
-        <input id="obPPreco${i}" inputmode="decimal" placeholder="0,00"
+        <input id="obPPreco${i}" data-moeda inputmode="decimal" placeholder="0,00"
           value="${esc(p.preco)}">
       </div>
       ${i > 0 ? `<button type="button" class="btn ghost" id="obRemProd${i}" style="padding:4px 8px;margin-top:22px" title="Remover">✕</button>` : '<div style="width:36px;margin-top:22px"></div>'}
@@ -207,6 +209,11 @@ function ligarEventos(): void {
   }
 
   if (estado.etapa === 2) {
+    estado.produtos.forEach((_, i) => {
+      const campo = document.getElementById(`obPPreco${i}`) as HTMLInputElement | null;
+      if (campo) ligarMascaraDeMoeda(campo);
+    });
+
     document.getElementById("obVolt2")?.addEventListener("click", () => {
       lerProdutosDom();
       estado.etapa = 1;
@@ -240,7 +247,7 @@ function ligarEventos(): void {
           setMsg(2, "Salvando…");
           try {
             await api.onboarding.salvarProdutos(
-              validos.map((p) => ({ nome: p.nome, preco: p.preco ? Number(p.preco.replace(",", ".")) : null })),
+              validos.map((p) => ({ nome: p.nome, preco: p.preco ? numero(p.preco) : null })),
             );
           } catch (err) {
             setMsg(2, err instanceof ErroApi ? err.message : "Não foi possível salvar os produtos.");

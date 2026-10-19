@@ -12,9 +12,10 @@ import { combobox, comboboxDe } from "@/ui/combobox";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura } from "@/ui/eventos";
+import { registrarCadastroRapido } from "@/ui/cadastro-rapido";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, opcoesEquipe, resolverCliente, seletorCliente, seletorDono, soLeitura } from "@/ui/formularios";
+import { avisoSoLeitura, botaoExcluir, botaoSalvar, comboboxClientes, espaco, opcoesEquipe, seletorCliente, seletorDono, soLeitura } from "@/ui/formularios";
 import { excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
@@ -207,7 +208,6 @@ export function formProjeto(p?: Projeto, inicial: Partial<ProjetoEntrada> = {}):
     rodape: html`${botaoSalvar()}${p || podeEscrever() ? html`<button class="btn" data-relatorio>Gerar relatório de entrega</button>` : ""}${espaco}${botaoExcluir(!!p)}`,
     montar: (f, fechar, L) => {
       melhorarFormulario(f);
-      ligarNovoCliente(f);
       if (p) ligarParticipantes(p.id, L, true);
       const box = $("#etapasBox", L) as HTMLElement;
       const equipeOps = opcoesEquipe("Sem responsável");
@@ -283,8 +283,7 @@ export function formProjeto(p?: Projeto, inicial: Partial<ProjetoEntrada> = {}):
         const titulo = fv(f, "titulo");
         if (!titulo) return avisar("Dê um nome ao projeto.");
         if (!fv(f, "cliente_id")) return avisar("Escolha o cliente.");
-        const clienteId = await resolverCliente(f);
-        if (!clienteId) return null;
+        const clienteId = fv(f, "cliente_id");
         return {
           titulo, cliente_id: clienteId, negocio_id: fv(f, "negocio_id") || null, orcamento_id: atual?.orcamento_id ?? inicial.orcamento_id ?? null,
           status: fv(f, "status") as ProjetoEntrada["status"], responsavel_id: fv(f, "responsavel_id") || null, inicio: fv(f, "inicio") || null, entrega: fv(f, "entrega") || null,
@@ -385,3 +384,24 @@ registrarAbertura("projeto", (id) => {
   if (p) formProjeto(p);
 });
 
+
+// ------------------------------------------------------------------------------------------- cadastro rápido
+/** Projeto criado a partir da tarefa: nome e cliente (o da tarefa, se houver); o resto fica no padrão. */
+export const opcaoDoProjeto = (p: Pick<Projeto, "id" | "titulo" | "cliente_nome">) => ({ id: p.id, rotulo: `${p.titulo} · ${p.cliente_nome}` });
+
+registrarCadastroRapido<ProjetoEntrada, Projeto>("projeto", {
+  novo: "Novo projeto",
+  mensagem: "Projeto cadastrado",
+  recarregar: ["projetos"],
+  pode: () => true,
+  campos: (ctx) =>
+    html`${campo("Nome do projeto", inp("titulo", ctx.sugestao, 'maxlength="150"'), true)}${campo("Cliente", comboboxClientes(ctx.clienteId), true)}`,
+  ler: (f) => {
+    const titulo = fv(f, "titulo");
+    if (!titulo) return avisar("Dê um nome ao projeto.");
+    if (!fv(f, "cliente_id")) return avisar("Escolha o cliente.");
+    return { titulo, cliente_id: fv(f, "cliente_id"), status: "planejamento", etapas: [] };
+  },
+  criar: (d) => api.projetos.criar(d),
+  opcao: opcaoDoProjeto,
+});
