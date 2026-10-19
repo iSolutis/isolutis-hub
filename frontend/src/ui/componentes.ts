@@ -8,7 +8,7 @@ import { icone } from "@/ui/icones";
 
 export interface OpcoesCabecalho {
   titulo: string;
-  descricao?: string;
+  descricao?: string | Safe;
   /** Botões e controles principais da tela, à direita do título. */
   acoes?: Safe;
 }

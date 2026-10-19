@@ -2,19 +2,19 @@ import { api } from "@/api/endpoints";
 import type { Produto, ProdutoEntrada } from "@/api/tipos";
 import { brl, compararTexto } from "@/core/formato";
 import { html, type Safe } from "@/core/html";
-import { numero, paraCampo } from "@/core/numero";
+import { numero } from "@/core/numero";
 import { $ } from "@/core/dom";
 import { TIPOS, UNIDADES } from "@/domain/constantes";
 import { dados, podeEscrever } from "@/state/estado";
 import { recarregar, registrarVista } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
-import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { area, campo, fv, inp, inpMoeda, sel } from "@/ui/campos";
 import { registrarConsulta } from "@/ui/conflito";
 import { registrarAbertura } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
 import { botaoExcluir, botaoSalvar, espaco } from "@/ui/formularios";
-import { excluir, gravar } from "@/ui/gravacao";
+import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { tentar } from "@/ui/erros";
 import { toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
@@ -50,7 +50,7 @@ function formProduto(p?: Produto): void {
     corpo: html`<div class="fields">
       ${campo("Nome", inp("nome", p?.nome), true)}
       ${campo("Tipo", sel("tipo", Object.entries(TIPOS), p?.tipo ?? "projeto"))}${campo("Cobrado por", inp("unidade", p?.unidade ?? UNIDADES.projeto, 'placeholder="projeto, mês, hora…"'))}
-      ${campo("Preço de referência (R$)", inp("preco", paraCampo(p?.preco), 'inputmode="decimal" placeholder="0,00"'))}${campo("Situação", sel("ativo", [["1", "Ativo"], ["0", "Inativo"]], p && !p.ativo ? "0" : "1"))}
+      ${campo("Preço de referência (R$)", inpMoeda("preco", p?.preco))}${campo("Situação", sel("ativo", [["1", "Ativo"], ["0", "Inativo"]], p && !p.ativo ? "0" : "1"))}
       ${campo("Descrição", area("descricao", p?.descricao), true)}</div>`,
     rodape: html`${botaoSalvar()}${espaco}${botaoExcluir(!!p)}`,
     montar: (f, fechar, L) => {
@@ -66,14 +66,8 @@ function formProduto(p?: Produto): void {
         }
 
         const botao = e.target as HTMLButtonElement;
-        const textoOriginal = botao.textContent;
 
-        // Loading visual
-        botao.disabled = true;
-        botao.classList.add("loading");
-        botao.innerHTML = '<span class="spinner"></span> Salvando…';
-
-        try {
+        await comTrava(botao, async () => {
           const corpo = {
             nome, tipo: fv(f, "tipo") as ProdutoEntrada["tipo"], unidade: fv(f, "unidade") || "projeto", preco: numero(fv(f, "preco")),
             ativo: fv(f, "ativo") === "1", descricao: fv(f, "descricao") || null,
@@ -82,11 +76,7 @@ function formProduto(p?: Produto): void {
             recarregar: ["produtos"], mensagem: "Produto salvo", fechar,
             operacao: () => (p ? api.produtos.atualizar(p.id, { ...corpo, versao: p.versao }) : api.produtos.criar(corpo)),
           });
-        } catch {
-          botao.disabled = false;
-          botao.classList.remove("loading");
-          botao.innerHTML = textoOriginal || "Salvar";
-        }
+        });
       });
       $("[data-excluir]", L)?.addEventListener("click", () => {
         if (p) void excluir({ recarregar: ["produtos"], mensagem: "Produto excluído", fechar, operacao: () => api.produtos.excluir(p.id) });

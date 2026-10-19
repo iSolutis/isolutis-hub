@@ -12,6 +12,7 @@ beforeAll(() => {
   tela("painel", "Painel");
   tela("clientes", "Clientes");
   tela("orcamentos", "Orçamentos");
+  tela("fin-titulos", "Títulos Financeiros");
   tela("equipe", "Equipe", "administracao");
   iniciarRoteador();
 });
@@ -31,6 +32,10 @@ describe("resolverRotaInicial", () => {
 
   it("sem tela salva, a raiz abre o painel", () => {
     expect(resolverRotaInicial("/")).toMatchObject({ vista: "painel", corrigir: "/painel" });
+  });
+
+  it("o endereço antigo de Despesas abre Títulos e corrige a URL", () => {
+    expect(resolverRotaInicial("/despesas")).toEqual({ vista: "fin-titulos", corrigir: "/fin-titulos", registro: null });
   });
 
   it("endereço explícito prevalece sobre a tela salva", () => {

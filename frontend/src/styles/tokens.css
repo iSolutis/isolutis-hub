@@ -30,7 +30,7 @@
   --controle-sm:30px; --controle-md:36px; --controle-lg:42px;
   --topbar-h:56px; --sidebar-w:272px; --sidebar-w-recolhida:68px;
   /* Camadas de empilhamento (nenhum z-index literal fora daqui) */
-  --z-topbar:20; --z-scrim:35; --z-sidebar:36; --z-gaveta:40; --z-modal:50; --z-paleta:60; --z-toast:70; --z-login:80;
+  --z-topbar:20; --z-scrim:35; --z-sidebar:36; --z-gaveta:40; --z-modal:50; --z-selecao:55; --z-paleta:60; --z-toast:70; --z-login:80;
   /* Cores de status para TEXTO sobre fundo claro (AA, 4.5:1). As cores originais seguem em bordas, barras e pontos. */
   --ok-texto:#397955; --warn-texto:#836d2b; --bad-texto:#a0584e; --info-texto:#466da7; --teal-texto:#0c7882;
   /* Barra lateral (escura nos dois temas) */

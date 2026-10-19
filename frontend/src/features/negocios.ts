@@ -3,22 +3,23 @@ import type { Negocio, NegocioEntrada } from "@/api/tipos";
 import { $ } from "@/core/dom";
 import { brl, brlCurto, dataBR, hoje } from "@/core/formato";
 import { html, type Safe } from "@/core/html";
-import { numero, paraCampo } from "@/core/numero";
+import { numero } from "@/core/numero";
 import { ABERTAS, ETAPAS, MOTIVOS_PERDA, ORC_STATUS, ORIGENS, etapaNome } from "@/domain/constantes";
 import { botaoWa } from "@/domain/whatsapp";
-import { dados, nomeMembro, podeEscrever, ui } from "@/state/estado";
+import { dados, nomeCliente, nomeMembro, podeEscrever, temPermissao, ui } from "@/state/estado";
 import { recarregar, registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
-import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { area, campo, fv, inp, inpMoeda, sel } from "@/ui/campos";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura, registrarSoltar } from "@/ui/eventos";
+import { registrarCadastroRapido } from "@/ui/cadastro-rapido";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, resolverCliente, seletorCliente, seletorDono, soLeitura } from "@/ui/formularios";
-import { excluir, gravar } from "@/ui/gravacao";
+import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, seletorCliente, seletorDono, soLeitura } from "@/ui/formularios";
+import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { melhorarFormulario } from "@/ui/acessibilidade";
-import { toast } from "@/ui/toast";
+import { avisar, toast } from "@/ui/toast";
 import { botaoNovo } from "./comum";
 import { abrirFormulario, registrarFormulario } from "./ponte";
 
@@ -74,7 +75,7 @@ export function formNegocio(n: Inicial = { etapa: "lead" }, existente?: Negocio)
     corpo: html`<div class="fields">
       ${campo("Título do negócio", inp("titulo", n.titulo, 'placeholder="Ex.: Portal do cliente para a distribuidora"'), true)}
       ${seletorCliente(n.cliente_id)}${campo("Etapa", sel("etapa", ETAPAS.map((e) => [e.id, e.nome] as const), n.etapa ?? "lead"))}
-      ${campo("Valor do projeto (R$)", inp("valor", paraCampo(n.valor), 'inputmode="decimal" placeholder="0,00"'))}${campo("Manutenção mensal (R$)", inp("mensal", paraCampo(n.mensal), 'inputmode="decimal" placeholder="0,00"'))}
+      ${campo("Valor do projeto (R$)", inpMoeda("valor", n.valor))}${campo("Manutenção mensal (R$)", inpMoeda("mensal", n.mensal))}
       ${campo("Previsão de fechamento", inp("previsao", n.previsao, 'type="date"'))}${seletorDono("Responsável", n.responsavel_id, !reg)}
       ${campo("Origem", sel("origem", [["", "—"], ...ORIGENS.map((o) => [o, o] as const)], n.origem))}
       <div class="field" id="motivoBox"${n.etapa === "perdido" ? "" : " hidden"}><label>Motivo da perda</label>${sel("motivo_perda", [["", "—"], ...MOTIVOS_PERDA.map((m) => [m, m] as const)], n.motivo_perda)}</div>
@@ -84,8 +85,6 @@ export function formNegocio(n: Inicial = { etapa: "lead" }, existente?: Negocio)
     montar: (f, fechar, L) => {
       // Melhorar acessibilidade
       melhorarFormulario(f);
-
-      ligarNovoCliente(f);
       const etapaSel = f.elements.namedItem("etapa") as HTMLSelectElement;
       etapaSel.addEventListener("change", () => {
         const motivo = $("#motivoBox");
@@ -112,20 +111,8 @@ export function formNegocio(n: Inicial = { etapa: "lead" }, existente?: Negocio)
           return;
         }
 
-        // Loading visual
-        botao.disabled = true;
-        botao.classList.add("loading");
-        const textoOriginal = botao.textContent;
-        botao.innerHTML = '<span class="spinner"></span> Salvando…';
-
-        try {
-          const clienteId = await resolverCliente(f);
-          if (!clienteId) {
-            botao.disabled = false;
-            botao.classList.remove("loading");
-            botao.innerHTML = textoOriginal || "Salvar";
-            return;
-          }
+        await comTrava(botao, async () => {
+          const clienteId = fv(f, "cliente_id");
 
           const corpo: NegocioEntrada = {
             titulo,
@@ -154,11 +141,7 @@ export function formNegocio(n: Inicial = { etapa: "lead" }, existente?: Negocio)
           if (salvo && salvo.etapa === "ganho" && reg?.etapa !== "ganho" && !salvo.faturado) {
             oferecerFaturamento(salvo);
           }
-        } catch {
-          botao.disabled = false;
-          botao.classList.remove("loading");
-          botao.innerHTML = textoOriginal || "Salvar";
-        }
+        });
       });
 
       $("[data-orc]", L)?.addEventListener("click", () => reg && abrirFormulario("orcamento", { cliente_id: reg.cliente_id, negocio_id: reg.id }));
@@ -202,3 +185,25 @@ registrarAbertura("negocio", (id) => {
   if (n) formNegocio(n, n);
 });
 registrarSoltar("etapa", (id, etapa) => void moverEtapa(id, etapa));
+
+// ------------------------------------------------------------------------------------------- cadastro rápido
+/** Negócio criado a partir do orçamento: só o título; o cliente é o do orçamento e a etapa, Lead. */
+export const opcaoDoNegocio = (n: Pick<Negocio, "id" | "titulo" | "etapa">) => ({ id: n.id, rotulo: `${n.titulo} (${etapaNome(n.etapa)})` });
+
+registrarCadastroRapido<NegocioEntrada, Negocio>("negocio", {
+  novo: "Novo negócio",
+  mensagem: "Negócio cadastrado",
+  recarregar: ["negocios"],
+  pode: (ctx) => temPermissao("comercial") && !!ctx.clienteId,
+  campos: (ctx) =>
+    html`${campo("Título do negócio", inp("titulo", ctx.sugestao, 'maxlength="150" placeholder="Ex.: Sistema de gestão para a distribuidora"'), true)}
+    <input type="hidden" name="cliente_id" value="${ctx.clienteId ?? ""}">${campo("Cliente", html`<div class="campo-fixo">${nomeCliente(ctx.clienteId)}</div>`, true)}`,
+  ler: (f) => {
+    const titulo = fv(f, "titulo");
+    if (!titulo) return avisar("Dê um título ao negócio.");
+    return { titulo, cliente_id: fv(f, "cliente_id"), etapa: "lead", valor: 0, mensal: 0 };
+  },
+  criar: (d) => api.negocios.criar(d),
+  opcao: opcaoDoNegocio,
+  aceito: (n, ctx) => n.cliente_id === ctx.clienteId,
+});

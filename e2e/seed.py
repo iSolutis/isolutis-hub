@@ -29,9 +29,8 @@ c.post("/orcamentos",json={"cliente_id":cli[1]["id"],"negocio_id":n2["id"],"data
 for i in range(0,8):
     mes=(hoje.replace(day=1)-d.timedelta(days=30*i)).replace(day=10)
     c.post("/faturamento",json={"cliente_id":cli[0]["id"],"tipo":"mensal" if i%2 else "projeto","descricao":f"Lançamento {i}","valor":3000+i*450,"vencimento":mes.isoformat(),"status":"recebido" if i>0 else "previsto"})
-cat=c.get("/despesas/opcoes").json()
-c.post("/despesas",json={"data":hoje.replace(day=5).isoformat(),"descricao":"Hospedagem","valor":420,"categoria_id":cat["categorias"][0]["id"],"status":"pago","repetir":3,"fornecedor":"AWS"})
-c.post("/investimentos",json={"data":hoje.replace(day=2).isoformat(),"descricao":"Aporte inicial","valor":10000,"investidor":"Soraya Sá","forma":"Dinheiro (aporte)"})
+# despesas e aportes agora são títulos financeiros (Financeiro › Títulos), que exigem plano de contas e conta bancária:
+# este seed cobre só o módulo comercial
 pr=c.post("/projetos",json={"titulo":"ERP leve","cliente_id":cli[0]["id"],"negocio_id":n4["id"],"status":"construcao","responsavel_id":eu["id"],"inicio":(hoje-d.timedelta(days=20)).isoformat(),"entrega":(hoje+d.timedelta(days=40)).isoformat(),"objetivo":"Centralizar pedidos e estoque.","escopo":"• Pedidos\n• Estoque","etapas":[{"titulo":"Diagnóstico","status":"concluida"},{"titulo":"Desenvolvimento","status":"andamento","inicio":(hoje-d.timedelta(days=10)).isoformat(),"fim":(hoje+d.timedelta(days=20)).isoformat()},{"titulo":"Validação","status":"a_fazer"}]}).json()
 for ti,col,pri in [("Enviar proposta revisada","a_fazer","alta"),("Preparar diagnóstico","fazendo","media"),("Revisar contrato","revisao","baixa"),("Ligar para a Clínica","concluido","media")]:
     c.post("/tarefas",json={"titulo":ti,"coluna":col,"prioridade":pri,"responsavel_id":eu["id"],"prazo":(hoje+d.timedelta(days=2)).isoformat(),"checklist":[{"texto":"Passo 1","feito":True},{"texto":"Passo 2"}]})

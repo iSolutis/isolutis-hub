@@ -45,7 +45,7 @@ class Negocio(ComAuditoria, ComEmpresa, Base):
     # Preenchido pela consulta (EXISTS em lancamentos_receita); não é coluna.
     faturado: bool = False
 
-    # Só o nome, sem depender de enxergar o cadastro do cliente (RLS por dono): ver app_nome_cliente na 0013.
+    # Só o nome, sem depender de enxergar o cadastro do cliente (RLS por dono): ver app_nome_cliente na 0015.
     cliente_nome: Mapped[str] = column_property(func.app_nome_cliente(cliente_id))
 
 
@@ -69,7 +69,7 @@ class Orcamento(ComAuditoria, ComEmpresa, Base):
         back_populates="orcamento", cascade="all, delete-orphan", order_by="OrcamentoItem.ordem", lazy="raise"
     )
 
-    # Só o nome, sem depender de enxergar o cadastro do cliente (RLS por dono): ver app_nome_cliente na 0013.
+    # Só o nome, sem depender de enxergar o cadastro do cliente (RLS por dono): ver app_nome_cliente na 0015.
     cliente_nome: Mapped[str] = column_property(func.app_nome_cliente(cliente_id))
 
     @property
@@ -108,6 +108,6 @@ class OrcamentoItem(ComAuditoria, ComEmpresa, Base):
     orcamento: Mapped[Orcamento] = relationship(back_populates="itens", lazy="raise")
 
 
-# Permissão de edição calculada pelo banco para a pessoa da requisição (escopo de acesso, migração 0013).
+# Permissão de edição calculada pelo banco para a pessoa da requisição (escopo de acesso, migração 0015).
 Negocio.pode_editar = column_property(func.app_pode_editar_negocio(Negocio.id))  # type: ignore[attr-defined]
 Orcamento.pode_editar = column_property(func.app_pode_editar_orcamento(Orcamento.id))  # type: ignore[attr-defined]

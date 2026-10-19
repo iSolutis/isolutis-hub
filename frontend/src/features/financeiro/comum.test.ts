@@ -1,12 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { contasDoPlanoParaTitulo, formatarCep, formatarDocumento } from "./comum";
+import { contasDoPlanoParaTitulo, formatarCep, parceirosParaTitulo } from "./comum";
 
-describe("formatação de documentos do financeiro", () => {
-  it("formata CNPJ e CPF guardados só com dígitos", () => {
-    expect(formatarDocumento("11222333000181")).toBe("11.222.333/0001-81");
-    expect(formatarDocumento("52998224725")).toBe("529.982.247-25");
-    expect(formatarDocumento("123")).toBe("123");
-  });
+describe("formatação do financeiro", () => {
   it("formata CEP", () => {
     expect(formatarCep("40000000")).toBe("40000-000");
     expect(formatarCep(null)).toBe("");
@@ -28,5 +23,23 @@ describe("conta do plano para o título (RN04)", () => {
   });
   it("plano sem conta compatível devolve lista vazia", () => {
     expect(contasDoPlanoParaTitulo(plano.filter((c) => c.natureza === "R"), "P")).toEqual([]);
+  });
+});
+
+describe("parceiros oferecidos no título", () => {
+  const parceiros = [
+    { id: "a", papeis: ["cliente"] },
+    { id: "b", papeis: ["fornecedor"] },
+    { id: "c", papeis: ["cliente", "funcionario"] },
+    { id: "d", papeis: ["socio"] },
+  ];
+  it("a pagar exclui quem é só cliente", () => {
+    expect(parceirosParaTitulo(parceiros, "P").map((p) => p.id)).toEqual(["b", "c", "d"]);
+  });
+  it("a receber aceita qualquer parceiro", () => {
+    expect(parceirosParaTitulo(parceiros, "R").map((p) => p.id)).toEqual(["a", "b", "c", "d"]);
+  });
+  it("conta de aporte aceita só sócios", () => {
+    expect(parceirosParaTitulo(parceiros, "R", true).map((p) => p.id)).toEqual(["d"]);
   });
 });

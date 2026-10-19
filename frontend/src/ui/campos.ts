@@ -1,4 +1,5 @@
 import { esc, html, raw, type Safe } from "@/core/html";
+import { paraCampoMoeda } from "./moeda";
 
 /** Auxiliares de formulário. Todos devolvem HTML já seguro para uso dentro de `html`. */
 export type Opcao = readonly [valor: string | number, rotulo: string];
@@ -9,6 +10,10 @@ export const campo = (rotulo: string, conteudo: Safe | string, cheio = false): S
 /** `attrs` é texto controlado pelo código (ex.: 'type="date"'), nunca dado do usuário. */
 export const inp = (nome: string, valor?: string | number | null, attrs = ""): Safe =>
   raw(`<input name="${nome}" id="f-${nome}" value="${esc(valor ?? "")}" ${attrs}>`);
+
+/** Campo de valor em reais: aplica a máscara monetária (ligada em `abrirGaveta` via `data-moeda`). */
+export const inpMoeda = (nome: string, valor?: number | string | null, placeholder = "0,00", attrs = ""): Safe =>
+  inp(nome, paraCampoMoeda(valor), `data-moeda inputmode="decimal" placeholder="${placeholder}" ${attrs}`);
 
 export const sel = (nome: string, opcoes: readonly Opcao[], valor?: string | number | null): Safe =>
   html`<select name="${nome}" id="f-${nome}">${opcoes.map(

@@ -1,15 +1,22 @@
-## MODIFIED Requirements
+# plano-contas-view Specification
 
+## Purpose
+Layout da tela Plano de Contas: árvore hierárquica de contas, cabeçalho com título, descrição e ações, e selos de tipo/natureza de cada conta.
+## Requirements
 ### Requirement: Plano de Contas screen layout
-The Plano de Contas screen SHALL display a hierarchical tree of accounts with integrated search and action buttons.
+The Plano de Contas screen SHALL display a hierarchical tree of accounts, with a page header followed by a toolbar that holds the search field, immediately above the tree.
 
-#### Scenario: Screen header with search and new button
+#### Scenario: Screen header with title, description and new button
 - **WHEN** user navigates to Plano de Contas
-- **THEN** the screen header contains:
-  - Page title "Plano de Contas"
+- **THEN** the page header contains:
+  - Page title "Plano de contas"
   - Descriptive subtitle about three hierarchy levels
-  - A search input field for filtering accounts
   - A "+ Nova Conta Raiz" button for creating root accounts
+
+#### Scenario: Toolbar with search field below the header
+- **WHEN** user navigates to Plano de Contas
+- **THEN** a toolbar is shown immediately below the page header and above the tree
+- **AND** the toolbar contains a search input field for filtering accounts
 
 #### Scenario: Tree displays accounts in hierarchy
 - **WHEN** page loads

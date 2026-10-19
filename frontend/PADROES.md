@@ -152,3 +152,12 @@ e pergunta antes de sair pelo menu, pela paleta, pelo Voltar ou ao recarregar a 
 - Onde a tela aparece no menu, o ícone e as ações do "+ Novo" e da paleta: `state/menu.ts`.
 - Espaços, raios, camadas e alturas vêm dos tokens de `styles/tokens.css` (`--esp-*`, `--r-*`, `--z-*`,
   `--controle-*`); não use `z-index` nem medidas soltas.
+
+## Campos de escolha: combobox ou `<select>`
+
+- **Combobox pesquisável** (`ui/combobox.ts`) para listas que vêm de dados (clientes, negócios, projetos, parceiros, contas, instituições, municípios, conta pai) ou com mais de ~12 itens. O usuário digita e a lista filtra por código, nome e grupo, sem diferenciar acento nem caixa.
+- **`<select>` nativo** para enumerações pequenas e fixas (situação, tipo, prioridade, UF).
+- Uso: `combobox({ nome, rotulo, opcoes: [{ id, rotulo, codigo?, grupo? }], valor, vazio?, acaoFinal? })` no HTML. O valor fica num `<input type="hidden" name=…>` (lido por `fv` e escutado por `change`); o campo visível é `#f-<nome>`.
+- Código da tela: `comboboxDe(form, nome)` → `definirValor(id, { silencioso })` e `definirOpcoes(opcoes, { valor })`. Nunca atribua `.value` ao campo oculto: o texto visível não acompanharia.
+- Em telas ≤ 860 px o campo abre a **folha de seleção** em tela cheia (busca de 16 px, itens de 44 px, botão Voltar do aparelho fecha só a folha via `state/voltar.ts`); em telas largas, lista suspensa em portal no `body`.
+- `Esc` fecha só a lista (captura), `Enter` nunca envia o formulário.

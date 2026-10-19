@@ -6,18 +6,23 @@ import { toast } from "@/ui/toast";
 
 export const GRUPO = "Financeiro";
 
-/** 11.222.333/0001-81 · 529.982.247-25 (documentos guardados só com dígitos). */
-export function formatarDocumento(doc: string | null | undefined): string {
-  if (!doc) return "—";
-  if (doc.length === 14) return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
-  if (doc.length === 11) return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-  return doc;
-}
-
 /** RN04: título a pagar (`P`) usa conta analítica de despesa (`D`); a receber (`R`), de receita (`R`). */
 export function contasDoPlanoParaTitulo<T extends { tipo_conta: string; natureza: string }>(plano: readonly T[], tipoTitulo: string): T[] {
   const natureza = tipoTitulo === "P" ? "D" : "R";
   return plano.filter((c) => c.tipo_conta === "A" && c.natureza === natureza);
+}
+
+/** Papéis de parceiro que podem receber um pagamento da empresa (a regra é imposta também no servidor). */
+export const PAPEIS_QUE_RECEBEM_PAGAMENTO = ["fornecedor", "funcionario", "socio"] as const;
+
+/**
+ * Parceiros que o formulário oferece: título a pagar vai para fornecedor, funcionário ou sócio; numa conta de
+ * aporte de sócio, só para sócios; a receber aceita qualquer parceiro.
+ */
+export function parceirosParaTitulo<T extends { papeis: readonly string[] }>(parceiros: readonly T[], tipoTitulo: string, contaDeAporte = false): T[] {
+  if (contaDeAporte) return parceiros.filter((p) => p.papeis.includes("socio"));
+  if (tipoTitulo === "P") return parceiros.filter((p) => p.papeis.some((papel) => (PAPEIS_QUE_RECEBEM_PAGAMENTO as readonly string[]).includes(papel)));
+  return [...parceiros];
 }
 
 export const formatarCep = (cep?: string | null): string => (cep && cep.length === 8 ? cep.replace(/(\d{5})(\d{3})/, "$1-$2") : (cep ?? ""));

@@ -16,7 +16,7 @@ import { registrarAbertura } from "@/ui/eventos";
 import { abrirFormularioPagina, mostrarRegistroNaoEncontrado } from "@/ui/formulario-pagina";
 import { linhaAutoria } from "@/ui/autoria";
 import { botaoExcluir, botaoSalvar } from "@/ui/formularios";
-import { excluir, gravar } from "@/ui/gravacao";
+import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { melhorarFormulario } from "@/ui/acessibilidade";
 import { toast } from "@/ui/toast";
 import { ligarCamposDoParceiro, lerCamposDoParceiro, secoesDoParceiro } from "./parceiros/campos";
@@ -74,6 +74,7 @@ function vista(): Safe {
 
 registrarVista({
   id: "clientes",
+  grupo: "Cadastros",
   permissao: "comercial",
   nome: "Clientes",
   contagem: () => dados.clientes.length,
@@ -115,30 +116,19 @@ export function formCliente(c?: Cliente): void {
           return;
         }
 
-        // Loading visual
-        botao.disabled = true;
-        botao.classList.add("loading");
-        const textoOriginal = botao.textContent;
-        botao.innerHTML = '<span class="spinner"></span> Salvando…';
-
-        try {
+        await comTrava(botao, async () => {
           const corpo = Object.fromEntries(
-            Object.entries(lido).filter(([k]) => k !== "tipo_pessoa" && k !== "papeis")
+            Object.entries(lido).filter(([k]) => k !== "tipo_pessoa" && k !== "papeis" && k !== "participacao_percentual")
           ) as Parameters<typeof api.clientes.criar>[0];
 
-          await gravar({
+          return gravar({
             recarregar: ["clientes"],
             mensagem: "Cliente salvo",
             fechar,
             operacao: () =>
               novo ? api.clientes.criar(corpo) : api.clientes.atualizar(c.id, { ...corpo, versao: c.versao }),
           });
-        } catch {
-          // Erro já foi tratado em gravar/tentar
-          botao.disabled = false;
-          botao.classList.remove("loading");
-          botao.innerHTML = textoOriginal || "Salvar";
-        }
+        });
       });
 
       // Excluir

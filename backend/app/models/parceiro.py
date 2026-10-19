@@ -7,7 +7,7 @@ Negócios, orçamentos, projetos, tarefas e lançamentos de receita apontam para
 
 import uuid
 from datetime import date, datetime
-from decimal import Decimal  # noqa: F401  (reexport de tipo usado por outros módulos)
+from decimal import Decimal
 
 from sqlalchemy import FetchedValue, ForeignKey, LargeBinary, String, func, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -86,6 +86,20 @@ class ParceiroPapel(Base):
     papel: Mapped[str] = mapped_column(ForeignKey("papel_parceiro.codigo"), primary_key=True)
 
 
+class ParceiroSocio(Base):
+    """Participação (%) de um parceiro com o papel `socio`; a soma por empresa não passa de 100."""
+
+    __tablename__ = "parceiro_socio"
+
+    empresa_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=text("app_empresa_id()")
+    )
+    parceiro_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("parceiro_negocio.id"), primary_key=True)
+    participacao_percentual: Mapped[Decimal]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime | None]
+
+
 class Parceiro(Base):
     __tablename__ = "parceiro_negocio"
 
@@ -105,7 +119,7 @@ class Parceiro(Base):
     obs: Mapped[str | None]
     endereco: Mapped[str | None]
     cep: Mapped[str | None]
-    # Dono do cliente (carteira): define quem o enxerga e edita (RLS por escopo, migração 0013).
+    # Dono do cliente (carteira): define quem o enxerga e edita (RLS por escopo, migração 0015).
     responsavel_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("usuarios.id"))
     municipio_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("municipio.id"))
     # Carimbos mantidos pelo trigger (mesmos nomes de atributo das demais entidades: criado_em/atualizado_em)
@@ -117,12 +131,17 @@ class Parceiro(Base):
 
     municipio: Mapped[Municipio | None] = relationship(lazy="raise")
     papeis: Mapped[list[ParceiroPapel]] = relationship(cascade="all, delete-orphan", lazy="raise")
+    socio: Mapped[ParceiroSocio | None] = relationship(cascade="all, delete-orphan", lazy="raise", uselist=False)
 
     __mapper_args__ = {"eager_defaults": True, "version_id_col": versao, "version_id_generator": False}
 
     @property
     def codigos_de_papel(self) -> list[str]:
         return sorted(p.papel for p in self.papeis)
+
+    @property
+    def participacao_percentual(self) -> Decimal | None:
+        return self.socio.participacao_percentual if self.socio else None
 
     @property
     def municipio_nome(self) -> str | None:

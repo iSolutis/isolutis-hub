@@ -1,5 +1,5 @@
 # ruff: noqa: E501  (SQL dos cenários em linhas longas de propósito)
-"""Escopo de acesso imposto pelo banco (migração 0013), exercitado com o papel de runtime da aplicação.
+"""Escopo de acesso imposto pelo banco (migração 0015), exercitado com o papel de runtime da aplicação.
 
 Os dados são montados como operador (superusuário, sem RLS); cada verificação roda como `hub_runtime` com as
 variáveis de transação que a API grava (app.usuario_id, app.empresa_id) seguidas de `app_definir_escopo()`.

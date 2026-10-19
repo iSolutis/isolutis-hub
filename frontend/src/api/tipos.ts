@@ -31,12 +31,6 @@ export type Lancamento = S["LancamentoLeitura"];
 export type LancamentoEntrada = S["LancamentoEntrada"];
 export type FaturamentoEmLote = S["FaturamentoEmLote"];
 export type ResumoFaturamento = S["ResumoFaturamento"];
-export type Despesa = S["DespesaLeitura"];
-export type DespesaEntrada = S["DespesaEntrada"];
-export type Investimento = S["InvestimentoLeitura"];
-export type InvestimentoEntrada = S["InvestimentoEntrada"];
-export type OpcoesDespesa = S["OpcoesDespesa"];
-export type ResumoDespesas = S["ResumoDespesas"];
 export type Projeto = S["ProjetoLeitura"];
 export type ProjetoReferencia = S["ProjetoReferencia"];
 export type PessoaReferencia = S["PessoaReferencia"];
@@ -95,7 +89,7 @@ export interface TokenSaida {
 }
 
 /** Recursos que a interface mantém em memória e recarrega quando o servidor avisa de mudanças. */
-export type Recurso = "clientes" | "produtos" | "negocios" | "orcamentos" | "projetos" | "tarefas" | "equipe" | "faturamento" | "despesas";
+export type Recurso = "clientes" | "produtos" | "negocios" | "orcamentos" | "projetos" | "tarefas" | "equipe" | "faturamento";
 
 // ─── Onboarding ─────────────────────────────────────────────────────────────
 

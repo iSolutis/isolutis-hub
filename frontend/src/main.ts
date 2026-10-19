@@ -34,7 +34,8 @@ import "@/features/projetos";
 import "@/features/tarefas";
 import "@/features/produtos";
 import "@/features/financeiro";
-import "@/features/despesas";
+import "@/features/parceiros/telas";
+import "@/features/parceiros/cadastro-rapido";
 import "@/features/faturamento";
 import "@/features/relatorios";
 import "@/features/equipe";
@@ -44,13 +45,17 @@ import "@/features/aparencia";
 import "@/features/conta";
 import "@/features/periodo";
 
+/** Chaves de `ui` que guardam texto de busca (qualquer campo novo entra automaticamente, sem precisar tocar aqui). */
+type ChaveDeBusca = { [K in keyof typeof ui]: (typeof ui)[K] extends string ? K : never }[keyof typeof ui];
+
 /** Busca nas listas: refaz a tela a cada tecla e devolve o foco ao campo. */
 function ligarBuscas(): void {
   obrigatorio("#view").addEventListener("input", (e) => {
     const campo = e.target as HTMLInputElement;
-    const chave = campo.dataset.busca as "busca" | "tarefaBusca" | "buscaFin" | undefined;
-    if (!chave) return;
-    ui[chave] = campo.value;
+    const chave = campo.dataset.busca;
+    if (!chave || !(chave in ui) || typeof ui[chave as keyof typeof ui] !== "string") return;
+    const chaveDeBusca = chave as ChaveDeBusca;
+    ui[chaveDeBusca] = campo.value;
     const pos = campo.selectionStart ?? campo.value.length;
     render();
     const novo = $<HTMLInputElement>(`[data-busca="${chave}"]`);
@@ -167,7 +172,15 @@ async function selecionarEmpresa(): Promise<EmpresaAcesso> {
   return ativa;
 }
 
+/** Mostra "Dev" na barra superior fora de produção: dev server local (Vite) ou preview com VITE_AMBIENTE=desenvolvimento. */
+function mostrarSeloDeAmbiente(): void {
+  const dev = import.meta.env.DEV || import.meta.env.VITE_AMBIENTE === "desenvolvimento";
+  const selo = document.getElementById("seloAmbiente");
+  if (selo) selo.hidden = !dev;
+}
+
 async function principal(): Promise<void> {
+  mostrarSeloDeAmbiente();
   // /login/2fa só faz sentido logo após a senha; aberta direto ou recarregada, volta ao login.
   if (location.pathname === ROTA_2FA && !tokenSegundoFator.existe()) {
     history.replaceState(null, "", sessaoToken.obter() ? "/" : "/login");

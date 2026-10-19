@@ -8,12 +8,14 @@ import { dados, nomeCliente, nomeMembro, podeEscrever, ui } from "@/state/estado
 import { registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { combobox, comboboxDe } from "@/ui/combobox";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura } from "@/ui/eventos";
+import { registrarCadastroRapido } from "@/ui/cadastro-rapido";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, opcoesEquipe, resolverCliente, seletorCliente, seletorDono, soLeitura } from "@/ui/formularios";
+import { avisoSoLeitura, botaoExcluir, botaoSalvar, comboboxClientes, espaco, opcoesEquipe, seletorCliente, seletorDono, soLeitura } from "@/ui/formularios";
 import { excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
@@ -191,7 +193,7 @@ export function formProjeto(p?: Projeto, inicial: Partial<ProjetoEntrada> = {}):
     autoria: linhaAutoria(p),
     corpo: html`<div class="fields">
       ${campo("Nome do projeto", inp("titulo", v("titulo"), 'placeholder="Ex.: Portal do cliente"'), true)}
-      ${seletorCliente(v("cliente_id"))}<div class="field"><label for="f-negocio_id">Negócio vendido</label>${sel("negocio_id", [["", "Sem vínculo"], ...ganhos.map((n) => [n.id, `${n.titulo} · ${nomeCliente(n.cliente_id)}`] as const)], v("negocio_id"))}</div>
+      ${seletorCliente(v("cliente_id"))}<div class="field"><label for="f-negocio_id">Negócio vendido</label>${combobox({ nome: "negocio_id", rotulo: "Negócio vendido", opcoes: ganhos.map((n) => ({ id: n.id, rotulo: n.titulo, grupo: nomeCliente(n.cliente_id) })), valor: v("negocio_id"), vazio: "Sem vínculo" })}</div>
       ${campo("Situação", sel("status", Object.entries(PROJ_STATUS).map(([k, x]) => [k, x[0]] as const), v("status") ?? "planejamento"))}${seletorDono("Responsável técnico", v("responsavel_id"), !p)}
       ${campo("Início", inp("inicio", v("inicio") ?? hoje(), 'type="date"'))}${campo("Entrega prevista", inp("entrega", v("entrega"), 'type="date"'))}
       ${campo("Objetivo do projeto", area("objetivo", v("objetivo"), "O problema que o sistema resolve para o cliente, em uma ou duas frases."), true)}
@@ -206,7 +208,6 @@ export function formProjeto(p?: Projeto, inicial: Partial<ProjetoEntrada> = {}):
     rodape: html`${botaoSalvar()}${p || podeEscrever() ? html`<button class="btn" data-relatorio>Gerar relatório de entrega</button>` : ""}${espaco}${botaoExcluir(!!p)}`,
     montar: (f, fechar, L) => {
       melhorarFormulario(f);
-      ligarNovoCliente(f);
       if (p) ligarParticipantes(p.id, L, true);
       const box = $("#etapasBox", L) as HTMLElement;
       const equipeOps = opcoesEquipe("Sem responsável");
@@ -270,20 +271,19 @@ export function formProjeto(p?: Projeto, inicial: Partial<ProjetoEntrada> = {}):
         toast("Etapas padrão adicionadas. Ajuste nomes e datas ao projeto.");
       });
       desenhar();
-      (f.elements.namedItem("negocio_id") as HTMLSelectElement).addEventListener("change", () => {
+      (f.elements.namedItem("negocio_id") as HTMLInputElement).addEventListener("change", () => {
         const n = dados.negocios.find((x) => x.id === fv(f, "negocio_id"));
         if (!n) return;
         const titulo = f.elements.namedItem("titulo") as HTMLInputElement;
         if (!titulo.value) titulo.value = n.titulo;
-        (f.elements.namedItem("cliente_id") as HTMLSelectElement).value = n.cliente_id;
+        comboboxDe(f, "cliente_id")?.definirValor(n.cliente_id);
       });
 
       const coletar = async (): Promise<ProjetoEntrada | null> => {
         const titulo = fv(f, "titulo");
         if (!titulo) return avisar("Dê um nome ao projeto.");
         if (!fv(f, "cliente_id")) return avisar("Escolha o cliente.");
-        const clienteId = await resolverCliente(f);
-        if (!clienteId) return null;
+        const clienteId = fv(f, "cliente_id");
         return {
           titulo, cliente_id: clienteId, negocio_id: fv(f, "negocio_id") || null, orcamento_id: atual?.orcamento_id ?? inicial.orcamento_id ?? null,
           status: fv(f, "status") as ProjetoEntrada["status"], responsavel_id: fv(f, "responsavel_id") || null, inicio: fv(f, "inicio") || null, entrega: fv(f, "entrega") || null,
@@ -384,3 +384,24 @@ registrarAbertura("projeto", (id) => {
   if (p) formProjeto(p);
 });
 
+
+// ------------------------------------------------------------------------------------------- cadastro rápido
+/** Projeto criado a partir da tarefa: nome e cliente (o da tarefa, se houver); o resto fica no padrão. */
+export const opcaoDoProjeto = (p: Pick<Projeto, "id" | "titulo" | "cliente_nome">) => ({ id: p.id, rotulo: `${p.titulo} · ${p.cliente_nome}` });
+
+registrarCadastroRapido<ProjetoEntrada, Projeto>("projeto", {
+  novo: "Novo projeto",
+  mensagem: "Projeto cadastrado",
+  recarregar: ["projetos"],
+  pode: () => true,
+  campos: (ctx) =>
+    html`${campo("Nome do projeto", inp("titulo", ctx.sugestao, 'maxlength="150"'), true)}${campo("Cliente", comboboxClientes(ctx.clienteId), true)}`,
+  ler: (f) => {
+    const titulo = fv(f, "titulo");
+    if (!titulo) return avisar("Dê um nome ao projeto.");
+    if (!fv(f, "cliente_id")) return avisar("Escolha o cliente.");
+    return { titulo, cliente_id: fv(f, "cliente_id"), status: "planejamento", etapas: [] };
+  },
+  criar: (d) => api.projetos.criar(d),
+  opcao: opcaoDoProjeto,
+});

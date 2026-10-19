@@ -15,6 +15,17 @@ describe("resolverCaminho", () => {
     expect(resolverCaminho("/fin-titulos?x=1#topo", telas)).toEqual({ tipo: "tela", vista: "fin-titulos" });
   });
 
+  it("endereços de telas que saíram do menu abrem a que as substituiu", () => {
+    const comNovas = new Set([...telas, "fornecedores"]);
+    expect(resolverCaminho("/despesas", comNovas)).toEqual({ tipo: "tela", vista: "fin-titulos" });
+    expect(resolverCaminho("/investimentos/", comNovas)).toEqual({ tipo: "tela", vista: "fin-titulos" });
+    expect(resolverCaminho("/fin-parceiros", comNovas)).toEqual({ tipo: "tela", vista: "fornecedores" });
+    // sem a tela substituta (ex.: sem permissão), continua desconhecida
+    expect(resolverCaminho("/fin-parceiros", telas)).toEqual({ tipo: "desconhecida" });
+    // só vale para a tela, não para registros dentro dela
+    expect(resolverCaminho("/despesas/abc", comNovas)).toEqual({ tipo: "desconhecida" });
+  });
+
   it("reconhece novo registro e registro existente", () => {
     expect(resolverCaminho("/clientes/novo", telas)).toEqual({ tipo: "novo", vista: "clientes" });
     expect(resolverCaminho("/clientes/abc-123", telas)).toEqual({ tipo: "registro", vista: "clientes", id: "abc-123" });

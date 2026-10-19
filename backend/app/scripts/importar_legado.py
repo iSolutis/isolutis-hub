@@ -24,10 +24,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import SessionLocal, definir_empresa_da_transacao, definir_usuario_da_transacao
 from app.models import (
-    CategoriaDespesa,
-    Despesa,
-    Investidor,
-    Investimento,
     LancamentoReceita,
     Municipio,
     Negocio,
@@ -52,8 +48,6 @@ class Importador:
         self.sessao, self.origem, self.empresa_id, self.rel = sessao, origem, empresa_id, lg.Relatorio()
         self.ids: dict[str, dict[str, uuid.UUID]] = defaultdict(dict)  # colecao -> id antigo -> id novo
         self.usuarios_por_email: dict[str, Usuario] = {}
-        self.categorias: dict[str, CategoriaDespesa] = {}
-        self.investidores: dict[str, Investidor] = {}
 
     # -- infraestrutura ---------------------------------------------------------------------
     async def _carregar_mapa(self) -> None:
@@ -112,10 +106,6 @@ class Importador:
         await self._carregar_mapa()
         for u in (await self.sessao.scalars(select(Usuario))).all():
             self.usuarios_por_email[str(u.email).lower()] = u
-        for c in (await self.sessao.scalars(select(CategoriaDespesa))).all():
-            self.categorias[lg.sem_acento(str(c.nome))] = c
-        for i in (await self.sessao.scalars(select(Investidor))).all():
-            self.investidores[lg.sem_acento(str(i.nome))] = i
 
         await self.membros()
         await self.clientes()
@@ -123,7 +113,6 @@ class Importador:
         await self.negocios()
         await self.orcamentos()
         await self.faturamento()
-        await self.despesas()
         await self.projetos()
         await self.tarefas()
         return self.rel
@@ -282,53 +271,6 @@ class Importador:
                     **campos, cliente_id=cliente_id, negocio_id=negocio_id, orcamento_id=orc_id, **self._carimbos(linha)
                 )
                 await self._adicionar("hub_faturamento", linha, lanc)
-
-    async def _categoria(self, nome: str | None) -> CategoriaDespesa:
-        chave = lg.sem_acento(nome or "outros")
-        if chave not in self.categorias:
-            cat = CategoriaDespesa(nome=nome or "Outros", ordem=100)
-            self.sessao.add(cat)
-            await self.sessao.flush()
-            self.categorias[chave] = cat
-        return self.categorias[chave]
-
-    async def _investidor(self, nome: str) -> Investidor:
-        chave = lg.sem_acento(nome)
-        if chave not in self.investidores:
-            inv = Investidor(nome=nome, usuario_id=self._usuario_por_texto_silencioso(nome))
-            self.sessao.add(inv)
-            await self.sessao.flush()
-            self.investidores[chave] = inv
-        return self.investidores[chave]
-
-    def _usuario_por_texto_silencioso(self, nome: str) -> uuid.UUID | None:
-        antes = len(self.rel.avisos)
-        achado = self._usuario_por_texto(nome, "Investidor")
-        del self.rel.avisos[antes:]
-        usado = {i.usuario_id for i in self.investidores.values()}
-        return None if achado in usado else achado
-
-    async def despesas(self) -> None:
-        series: dict[tuple, uuid.UUID] = {}
-        for linha in self._novas("hub_despesas"):
-            d = linha.dados
-            if d.get("tipo") == "investimento":
-                campos = lg.limpar_investimento(d)
-                investidor = await self._investidor(campos.pop("investidor"))
-                obj = Investimento(**campos, investidor_id=investidor.id, **self._carimbos(linha))
-            else:
-                campos = lg.limpar_despesa(d)
-                categoria = await self._categoria(campos.pop("categoria"))
-                serie = {}
-                if p := lg.parcela_do_texto(campos["descricao"]):
-                    chave = (campos["valor"], campos["descricao"].rsplit(" ", 1)[0], categoria.id, p[1])
-                    serie = {
-                        "grupo_id": series.setdefault(chave, uuid.uuid4()),
-                        "parcela": p[0],
-                        "total_parcelas": p[1],
-                    }
-                obj = Despesa(**campos, categoria_id=categoria.id, **serie, **self._carimbos(linha))
-            await self._adicionar("hub_despesas", linha, obj)
 
     async def projetos(self) -> None:
         negocios_usados = {

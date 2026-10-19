@@ -1,5 +1,8 @@
-## ADDED Requirements
+# plano-contas-search Specification
 
+## Purpose
+Busca que filtra a árvore do Plano de Contas por código ou nome, em tempo real, preservando o estado da árvore e o foco do campo.
+## Requirements
 ### Requirement: Search input in Plano de Contas header
 The Plano de Contas screen SHALL include a search input field that filters the account tree by code or name in real time.
 
@@ -31,7 +34,12 @@ The Plano de Contas screen SHALL include a search input field that filters the a
 - **AND** non-matching branches remain collapsed as they were
 
 ### Requirement: Search focus management
-The search input focus SHALL be preserved and restored correctly when searching and re-rendering.
+The search input value, focus and cursor position SHALL be preserved and restored correctly on every re-render triggered by typing.
+
+#### Scenario: Input retains its typed value across re-renders
+- **WHEN** user types any character in the search input
+- **THEN** the screen re-renders the filtered tree
+- **AND** the search input shows the full text typed so far, not just the last character
 
 #### Scenario: Input retains focus during typing
 - **WHEN** user types in the search input

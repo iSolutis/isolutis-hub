@@ -1,4 +1,4 @@
-"""Escopo de acesso dentro da empresa (migração 0013): o banco decide quem vê e edita o quê; aqui ficam as
+"""Escopo de acesso dentro da empresa (migração 0015): o banco decide quem vê e edita o quê; aqui ficam as
 perguntas que a API faz a ele antes de gravar, para responder com mensagens claras em vez de erro de banco.
 
 Regras: openspec/changes/escopo-de-acesso. Fora do escopo = "não encontrado" (sem revelar existência);

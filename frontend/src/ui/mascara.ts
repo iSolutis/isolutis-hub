@@ -1,0 +1,12 @@
+/** Reaplica a máscara mantendo o cursor logo após o mesmo dígito (não salta para o fim ao editar no meio). */
+export function reaplicarMascara(campo: HTMLInputElement, mascarar: (valor: string) => string): void {
+  const anterior = campo.value;
+  const digitosAntes = anterior.slice(0, campo.selectionStart ?? anterior.length).replace(/\D/g, "").length;
+  const novo = mascarar(anterior);
+  if (novo === anterior) return;
+  campo.value = novo;
+  if (campo.ownerDocument.activeElement !== campo) return;
+  let pos = 0;
+  for (let vistos = 0; pos < novo.length && vistos < digitosAntes; pos++) if (/\d/.test(novo.charAt(pos))) vistos++;
+  campo.setSelectionRange(pos, pos);
+}

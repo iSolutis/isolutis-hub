@@ -1,5 +1,5 @@
 import { api } from "@/api/endpoints";
-import type { Tarefa, TarefaEntrada } from "@/api/tipos";
+import type { Projeto, Tarefa, TarefaEntrada } from "@/api/tipos";
 import { $ } from "@/core/dom";
 import { dataBR, hoje, iniciais, pluralizar } from "@/core/formato";
 import { html, raw, type Safe } from "@/core/html";
@@ -8,13 +8,16 @@ import { dados, eu, nomeCliente, nomeMembro, podeEscrever, tituloProjeto, ui } f
 import { recarregar, registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { combobox, comboboxDe } from "@/ui/combobox";
+import { barraDeFerramentas, cabecalhoDePagina } from "@/ui/componentes";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura, registrarSoltar } from "@/ui/eventos";
+import type { CriadoNoCadastro } from "@/ui/cadastro-rapido";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, opcoesClientes, opcoesEquipe, soLeitura } from "@/ui/formularios";
-import { excluir, gravar } from "@/ui/gravacao";
+import { avisoSoLeitura, botaoExcluir, botaoSalvar, comboboxClientes, espaco, opcoesEquipe, soLeitura } from "@/ui/formularios";
+import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
 import { botaoNovo } from "./comum";
@@ -47,9 +50,10 @@ function vista(): Safe {
   const atrasadas = dados.tarefas.filter((t) => t.coluna !== "concluido" && t.prazo && t.prazo < h).length;
   const minhas = dados.tarefas.filter((t) => t.coluna !== "concluido" && t.responsavel_id === eu.id).length;
   const filtros: Array<[string, string]> = [["todas", "Todas"], ["minhas", "Minhas"], ...dados.equipe.filter((m) => m.ativo && m.id !== eu.id).map((m): [string, string] => [m.id, m.nome.split(" ")[0] ?? m.nome]), ["sem", "Sem responsável"]];
-  return html`<div class="head"><div><h1>Tarefas da equipe</h1><p>${minhas} ${pluralizar(minhas, "tarefa", "tarefas")} com você${atrasadas ? html` · <b style="color:var(--bad-texto)">${atrasadas} ${pluralizar(atrasadas, "atrasada", "atrasadas")}</b>` : ""}. Arraste um cartão para mudar de coluna.</p></div>
-    <div class="tools"><input class="search" id="tbusca" data-busca="tarefaBusca" type="search" placeholder="Buscar tarefa, cliente ou projeto" value="${ui.tarefaBusca}">${botaoNovo("novaTarefa", "Nova tarefa")}</div></div>
-  <div class="seg" role="group" aria-label="Filtrar por pessoa" style="margin-bottom:14px;flex-wrap:wrap">${filtros.map(([k, r]) => html`<button data-act="filtroPessoa" data-valor="${k}" aria-pressed="${p === k}">${r}</button>`)}</div>
+  const descricao = html`${minhas} ${pluralizar(minhas, "tarefa", "tarefas")} com você${atrasadas ? html` · <b style="color:var(--bad-texto)">${atrasadas} ${pluralizar(atrasadas, "atrasada", "atrasadas")}</b>` : ""}. Arraste um cartão para mudar de coluna.`;
+  return html`${cabecalhoDePagina({ titulo: "Tarefas da equipe", descricao, acoes: botaoNovo("novaTarefa", "Nova tarefa") })}
+    ${barraDeFerramentas({ busca: { chave: "tarefaBusca", valor: ui.tarefaBusca, placeholder: "Buscar tarefa, cliente ou projeto", rotulo: "Buscar tarefas" } })}
+  <div class="seg" role="group" aria-label="Filtrar por pessoa" style="margin:14px 0;flex-wrap:wrap">${filtros.map(([k, r]) => html`<button data-act="filtroPessoa" data-valor="${k}" aria-pressed="${p === k}">${r}</button>`)}</div>
   ${!dados.tarefas.length ? html`<div class="empty" style="margin-bottom:14px"><b>Nenhuma tarefa ainda</b>Crie as tarefas da semana, escolha quem é o responsável e o prazo. Cada pessoa filtra pelas suas em "Minhas".${escrever ? html`<br><button class="btn primary" data-act="novaTarefa">Criar a primeira tarefa</button>` : ""}</div>` : ""}
   <div class="board tboard">${COLUNAS_TAREFA.map((c) => {
     const daColuna = filtradas.filter((t) => t.coluna === c.id);
@@ -101,6 +105,13 @@ export function formTarefa(t?: Tarefa, colunaInicial = "a_fazer"): void {
     .map((p) => [p.id, `${p.titulo} · ${p.cliente_nome}`] as const);
   // Quem só executa a tarefa não vê o projeto dela: mantém o vínculo pelo título (referência mínima).
   if (t?.projeto_id && !projs.some(([id]) => id === t.projeto_id)) projs.push([t.projeto_id, tituloProjeto(t.projeto_id) || "Projeto"]);
+  /** Formulário montado (o contexto do cadastro rápido de projeto lê o cliente escolhido agora). */
+  let form: HTMLFormElement | null = null;
+  /** Projeto criado pelo cadastro rápido: a tarefa sem cliente passa a ter o cliente do projeto (como ao escolher um projeto). */
+  const clienteDoProjetoCriado = (criado: CriadoNoCadastro): void => {
+    const clienteId = (criado.item as Projeto).cliente_id;
+    if (form && !fv(form, "cliente_id")) comboboxDe(form, "cliente_id")?.definirValor(clienteId, { silencioso: true });
+  };
   abrirGaveta({
     titulo: t ? t.titulo : "Nova tarefa",
     registro: t ? { recurso: "tarefas", id: t.id, versao: t.versao } : null,
@@ -111,14 +122,15 @@ export function formTarefa(t?: Tarefa, colunaInicial = "a_fazer"): void {
       ${campo("Responsável", sel("responsavel_id", opcoesEquipe("Sem responsável", true), t ? (t.responsavel_id ?? "") : eu.id))}
       ${campo("Prazo", inp("prazo", t?.prazo, 'type="date"'))}
       ${campo("Prioridade", sel("prioridade", Object.entries(PRIORIDADES).map(([k, v]) => [k, v[0]] as const), t?.prioridade ?? "media"))}
-      ${campo("Cliente", sel("cliente_id", opcoesClientes("Nenhum"), t?.cliente_id))}
-      ${campo("Projeto", sel("projeto_id", [["", "Nenhum"], ...projs], t?.projeto_id))}
+      ${campo("Cliente", comboboxClientes(t?.cliente_id, "Nenhum"))}
+      ${campo("Projeto", combobox({ nome: "projeto_id", rotulo: "Projeto", opcoes: projs.map(([id, rotulo]) => ({ id, rotulo })), valor: t?.projeto_id, vazio: "Nenhum", cadastroRapido: { tipo: "projeto", contexto: () => ({ clienteId: form ? fv(form, "cliente_id") : (t?.cliente_id ?? undefined) }), aoCriar: clienteDoProjetoCriado } }))}
       ${campo("Detalhes", area("descricao", t?.descricao, "Contexto, links, o que é preciso para considerar pronta…"), true)}
     </div>
     <div><h2 style="margin-bottom:6px">Checklist</h2><div id="ckBox" class="ck"></div>
       <div style="display:flex;gap:8px;margin-top:8px"><input id="ckNovo" class="search" style="flex:1;width:auto" placeholder="Adicionar item e apertar Enter"><button class="btn" type="button" id="ckAdd">Adicionar</button></div></div>`,
     rodape: html`${soLeitura(t) ? avisoSoLeitura() : botaoSalvar()}${t && t.coluna !== "concluido" && podeEscrever() && !soLeitura(t) ? html`<button class="btn" data-concluir>Concluir</button>` : ""}${espaco}${botaoExcluir(!!t && !soLeitura(t))}`,
     montar: (f, fechar, L) => {
+      form = f;
       melhorarFormulario(f);
       const box = $("#ckBox", L) as HTMLElement;
       const novo = $<HTMLInputElement>("#ckNovo", L)!;
@@ -159,10 +171,9 @@ export function formTarefa(t?: Tarefa, colunaInicial = "a_fazer"): void {
         }
       });
       desenhar();
-      (f.elements.namedItem("projeto_id") as HTMLSelectElement).addEventListener("change", () => {
+      (f.elements.namedItem("projeto_id") as HTMLInputElement).addEventListener("change", () => {
         const p = dados.projetos.find((x) => x.id === fv(f, "projeto_id"));
-        const cli = f.elements.namedItem("cliente_id") as HTMLSelectElement;
-        if (p && !cli.value) cli.value = p.cliente_id;
+        if (p && !fv(f, "cliente_id")) comboboxDe(f, "cliente_id")?.definirValor(p.cliente_id, { silencioso: true });
       });
       const coletar = (colunaForcada?: string): TarefaEntrada | null => {
         const titulo = fv(f, "titulo");
@@ -173,34 +184,18 @@ export function formTarefa(t?: Tarefa, colunaInicial = "a_fazer"): void {
           descricao: fv(f, "descricao") || null, checklist,
         };
       };
-      const salvar = async (corpo: TarefaEntrada, mensagem: string): Promise<void> => {
-        await gravar({
+      const salvar = (corpo: TarefaEntrada, mensagem: string) =>
+        gravar({
           recarregar: ["tarefas"], mensagem, fechar,
           operacao: () => (t ? api.tarefas.atualizar(t.id, { ...corpo, versao: t.versao }) : api.tarefas.criar(corpo)),
         });
-      };
       $("[data-salvar]", L)?.addEventListener("click", async (e) => {
         const botao = e.target as HTMLButtonElement;
-        const textoOriginal = botao.textContent;
 
-        // Loading visual
-        botao.disabled = true;
-        botao.classList.add("loading");
-        botao.innerHTML = '<span class="spinner"></span> Salvando…';
-
-        try {
+        await comTrava(botao, async () => {
           const corpo = coletar();
-          if (corpo) await salvar(corpo, t ? "Tarefa salva" : "Tarefa criada");
-          else {
-            botao.disabled = false;
-            botao.classList.remove("loading");
-            botao.innerHTML = textoOriginal || "Salvar";
-          }
-        } catch {
-          botao.disabled = false;
-          botao.classList.remove("loading");
-          botao.innerHTML = textoOriginal || "Salvar";
-        }
+          return corpo ? salvar(corpo, t ? "Tarefa salva" : "Tarefa criada") : null;
+        });
       });
       $("[data-concluir]", L)?.addEventListener("click", async (e) => {
         const botao = e.target as HTMLButtonElement;

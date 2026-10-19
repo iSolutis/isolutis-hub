@@ -4,6 +4,8 @@ import { registrarVista, render } from "@/state/nucleo";
 import { ui } from "@/state/estado";
 import { registrarAcao } from "@/ui/acoes";
 import { campo, fv, inp, sel } from "@/ui/campos";
+import { combobox } from "@/ui/combobox";
+import { barraDeFerramentas, cabecalhoDePagina } from "@/ui/componentes";
 import { tentar } from "@/ui/erros";
 import { abrirGaveta } from "@/ui/gaveta";
 import { espaco } from "@/ui/formularios";
@@ -55,7 +57,7 @@ function no(c: PlanoConta): Safe {
     <div class="tree-row">
       <button class="tree-caret${filhas.length ? "" : " vazio"}" type="button" data-act="alternarNo" data-id="${c.id}" aria-expanded="${aberto}" aria-label="${aberto ? "Recolher" : "Expandir"} ${c.nome}"><i>›</i></button>
       <span class="tree-cod">${c.codigo}</span><span class="tree-nome${c.tipo_conta === "S" ? " sintetica" : ""}">${c.nome}</span>
-      <span class="tree-pills"><span class="pill ${c.natureza === "R" ? "ok" : "bad"}">${c.natureza === "R" ? "Receita" : "Despesa"}</span><span class="pill">${c.tipo_conta === "S" ? "Sintética" : "Analítica"}</span></span>
+      <span class="tree-pills"><span class="pill ${c.natureza === "R" ? "ok" : "bad"}">${c.natureza === "R" ? "Receita" : "Despesa"}</span><span class="pill">${c.tipo_conta === "S" ? "Sintética" : "Analítica"}</span>${c.aporte_socio ? html`<span class="pill info">Aporte de sócio</span>` : ""}</span>
       <span class="tree-actions">
         <button type="button" data-act="editarConta" data-id="${c.id}" title="Editar">✏️</button>
         <button type="button" data-act="excluirConta" data-id="${c.id}" title="Excluir">🗑️</button>
@@ -67,16 +69,18 @@ function no(c: PlanoConta): Safe {
 }
 
 function vista(): Safe {
-  if (!tela.contas) return html`<div class="head"><div><h1>Plano de contas</h1></div></div><p class="sub">Carregando…</p>`;
-  return html`<div class="head"><div><h1>Plano de contas</h1><p>Até três níveis (1 · 1.01 · 1.01.001). Só contas analíticas recebem lançamentos.</p>
-    <div style="margin-top:8px"><input class="search" type="search" placeholder="Pesquisar contas..." data-busca="buscaPlano" aria-label="Pesquisar contas por código ou nome"></div></div>
-    <div class="tools">
-      <button class="btn primary" data-act="novaConta">+ Nova Conta Raiz</button>
-    </div></div>
+  const cabecalho = cabecalhoDePagina({
+    titulo: "Plano de contas",
+    descricao: "Até três níveis (1 · 1.01 · 1.01.001). Só contas analíticas recebem lançamentos.",
+    acoes: html`<button class="btn primary" data-act="novaConta">+ Nova Conta Raiz</button>`,
+  });
+  if (!tela.contas) return html`${cabecalho}<p class="sub">Carregando…</p>`;
+  const barra = barraDeFerramentas({ busca: { chave: "buscaPlano", valor: ui.buscaPlano, placeholder: "Pesquisar contas...", rotulo: "Pesquisar contas por código ou nome" } });
+  return html`${cabecalho}${barra}
   ${
     tela.contas.length
-      ? html`<div class=”panel”><ul class=”tree” role=”tree” aria-label=”Plano de contas”>${filhasDe(null).map(no)}</ul></div>`
-      : html`<div class=”empty”><b>Plano de contas vazio</b>Comece pelas contas de primeiro nível, por exemplo 1 Receita e 2 Despesa, e vá abrindo os níveis.<br><button class=”btn primary” data-act=”novaConta”>Criar a primeira conta</button></div>`
+      ? html`<div class="painel-lista"><ul class="tree" role="tree" aria-label="Plano de contas">${filhasDe(null).map(no)}</ul></div>`
+      : html`<div class="empty"><b>Plano de contas vazio</b>Comece pelas contas de primeiro nível, por exemplo 1 Receita e 2 Despesa, e vá abrindo os níveis.<br><button class="btn primary" data-act="novaConta">Criar a primeira conta</button></div>`
   }`;
 }
 
@@ -94,20 +98,22 @@ function formConta(modo: "nova" | "editar", base?: PlanoConta, paiInicial?: Plan
   abrirGaveta({
     titulo: editando ? `Conta ${base.codigo}` : paiInicial ? `Nova conta em ${paiInicial.codigo}` : "Nova conta",
     corpo: html`<div class="fields">
-      ${campo("Conta pai", sel("plano_pai_id", [["", "— (primeiro nível)"], ...possiveisPais.map((c) => [c.id, `${c.codigo} ${c.nome}`] as const)], paiAtual ?? ""), true)}
+      ${campo("Conta pai", combobox({ nome: "plano_pai_id", rotulo: "Conta pai", opcoes: possiveisPais.map((c) => ({ id: c.id, codigo: c.codigo, rotulo: c.nome })), valor: paiAtual, vazio: "— (primeiro nível)" }), true)}
       <div class="field"><label for="f-codigo">Código</label><div style="display:flex;gap:6px">${inp("codigo", base?.codigo, `placeholder="Ex.: 1.01.001"${temFilhas ? " readonly" : ""}`)}${editando ? "" : html`<button class="btn" type="button" id="sugerir" title="Sugere o próximo código livre">Sugerir</button>`}</div></div>
       ${campo("Nome", inp("nome", base?.nome, 'maxlength="150"'))}
       ${campo("Tipo", sel("tipo_conta", [["A", "Analítica (recebe lançamentos)"], ["S", "Sintética (agrupa contas)"]], base?.tipo_conta ?? "A"))}
       ${campo("Natureza", sel("natureza", [["R", "Receita"], ["D", "Despesa"]], natureza))}
+      <div class="field full" id="campoAporte"><label class="check"><input type="checkbox" name="aporte_socio"${raw(base?.aporte_socio ? " checked" : "")}> Conta de aporte de sócio</label><span class="sub">Títulos nesta conta só aceitam parceiros com o papel de sócio e ficam fora da receita operacional.</span></div>
     </div>
     <p class="sub" id="dicaConta" style="margin:0"></p>`,
     rodape: html`<button class="btn primary" data-salvar>Salvar</button>${espaco}`,
     montar: (f, fechar, L) => {
-      const pai = f.elements.namedItem("plano_pai_id") as HTMLSelectElement;
+      const pai = f.elements.namedItem("plano_pai_id") as HTMLInputElement;
       const codigo = f.elements.namedItem("codigo") as HTMLInputElement;
       const tipo = f.elements.namedItem("tipo_conta") as HTMLSelectElement;
       const nat = f.elements.namedItem("natureza") as HTMLSelectElement;
       const dica = $("#dicaConta", L)!;
+      const aporte = f.elements.namedItem("aporte_socio") as HTMLInputElement;
       const paiEscolhido = (): PlanoConta | undefined => todas.find((c) => c.id === pai.value);
 
       const ajustar = (): void => {
@@ -118,12 +124,19 @@ function formConta(modo: "nova" | "editar", base?: PlanoConta, paiInicial?: Plan
         if (terceiro) tipo.value = "A"; // o terceiro nível é sempre analítico
         tipo.disabled = terceiro || temFilhas;
         if (temFilhas) tipo.value = "S";
+        // só uma conta analítica de receita pode receber aportes
+        const podeAporte = tipo.value === "A" && nat.value === "R";
+        const campoAporte = $("#campoAporte", L);
+        if (campoAporte) campoAporte.hidden = !podeAporte;
+        if (!podeAporte) aporte.checked = false;
         dica.textContent = terceiro ? "Contas do terceiro nível são sempre analíticas." : temFilhas ? "Esta conta tem filhas: código, natureza e tipo não podem mudar." : "";
       };
       const sugerir = async (): Promise<void> => {
         const r = await tentar(() => apiFinanceiro.plano.proximoCodigo(pai.value || null));
         if (r) codigo.value = r.codigo;
       };
+      tipo.addEventListener("change", ajustar);
+      nat.addEventListener("change", ajustar);
       pai.addEventListener("change", async () => {
         ajustar();
         if (!editando) await sugerir();
@@ -137,7 +150,7 @@ function formConta(modo: "nova" | "editar", base?: PlanoConta, paiInicial?: Plan
         if (!fv(f, "nome")) return void avisar("Informe o nome da conta.");
         const corpo: PlanoContaEntrada = {
           plano_pai_id: pai.value || null, codigo: fv(f, "codigo"), nome: fv(f, "nome"),
-          tipo_conta: tipo.value as "A" | "S", natureza: nat.value as "R" | "D",
+          tipo_conta: tipo.value as "A" | "S", natureza: nat.value as "R" | "D", aporte_socio: aporte.checked,
         };
         const salva = await gravar({
           recarregar: ["financeiro"], mensagem: "Conta salva", fechar,
