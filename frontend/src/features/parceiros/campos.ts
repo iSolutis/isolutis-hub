@@ -7,9 +7,10 @@ import { html, raw, type Safe } from "@/core/html";
 import { numero, paraCampo } from "@/core/numero";
 import { ORIGENS } from "@/domain/constantes";
 import { apiFinanceiro } from "@/features/financeiro/api";
-import { formatarCep, formatarDocumento } from "@/features/financeiro/comum";
+import { formatarCep } from "@/features/financeiro/comum";
 import { campo, fv, inp, sel, area } from "@/ui/campos";
 import { combobox, comboboxDe } from "@/ui/combobox";
+import { ligarMascaraDeDocumento, MAXLENGTH_DOCUMENTO, PLACEHOLDER_DOCUMENTO, tipoDoDocumento, valorInicialDoDocumento } from "@/ui/documento";
 import { seletorDono } from "@/ui/formularios";
 import type { SecaoFormulario } from "@/ui/formulario-pagina";
 import { tentar } from "@/ui/erros";
@@ -70,10 +71,11 @@ export interface CamposLidos {
 
 /** Campos soltos do parceiro (com o valor atual), para montar numa grade única ou em seções. */
 function camposSoltos(v: ValoresParceiro) {
+  const tipoDoc = tipoDoDocumento(v.tipo_pessoa ?? "PJ");
   return {
     nome: campo("Nome / Razão social", inp("nome", v.nome, 'maxlength="150" required'), true),
     tipo: campo("Tipo de pessoa", sel("tipo_pessoa", [["PJ", "Pessoa jurídica (CNPJ)"], ["PF", "Pessoa física (CPF)"]], v.tipo_pessoa ?? "PJ")),
-    doc: campo("CPF / CNPJ", inp("cpf_cnpj", v.cpf_cnpj ? formatarDocumento(v.cpf_cnpj) : "", 'inputmode="numeric" maxlength="18"')),
+    doc: campo("CPF / CNPJ", inp("cpf_cnpj", valorInicialDoDocumento(v.cpf_cnpj, tipoDoc), `inputmode="numeric" autocomplete="off" maxlength="${MAXLENGTH_DOCUMENTO}" placeholder="${PLACEHOLDER_DOCUMENTO[tipoDoc]}"`)),
     contato: campo("Contato principal", inp("contato", v.contato)),
     cargo: campo("Cargo", inp("cargo", v.cargo)),
     telefone: campo("Telefone / WhatsApp", inp("telefone", v.telefone, 'inputmode="tel"')),
@@ -130,8 +132,11 @@ export function secoesDoParceiro(v: ValoresParceiro = {}): SecaoFormulario[] {
   ];
 }
 
-/** Liga o carregamento de municípios por UF e, se o parceiro já tem município, o pré-seleciona. */
+/** Liga a máscara do CPF/CNPJ ao tipo de pessoa e o carregamento de municípios por UF (pré-selecionando o atual). */
 export function ligarCamposDoParceiro(form: HTMLFormElement, v: ValoresParceiro = {}): void {
+  const tipoPessoa = form.elements.namedItem("tipo_pessoa") as HTMLSelectElement;
+  const mascara = ligarMascaraDeDocumento(form.elements.namedItem("cpf_cnpj") as HTMLInputElement, () => tipoDoDocumento(tipoPessoa.value));
+  tipoPessoa.addEventListener("change", () => mascara.atualizarTipo());
   const uf = form.elements.namedItem("uf") as HTMLSelectElement;
   const municipio = comboboxDe(form, "municipio_id")!;
   const visivel = form.querySelector<HTMLInputElement>("#f-municipio_id")!;

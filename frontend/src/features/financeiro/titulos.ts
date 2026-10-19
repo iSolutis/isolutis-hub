@@ -13,7 +13,8 @@ import { espaco } from "@/ui/formularios";
 import { gravar } from "@/ui/gravacao";
 import { avisar } from "@/ui/toast";
 import { apiFinanceiro, type ContaBancaria, type Parceiro, type PlanoConta, type Titulo, type TituloEntrada } from "./api";
-import { acoesDaLinha, confirmarExclusao, contasDoPlanoParaTitulo, formatarDocumento, GRUPO, parceirosParaTitulo } from "./comum";
+import { formatarDocumento } from "@/ui/documento";
+import { acoesDaLinha, confirmarExclusao, contasDoPlanoParaTitulo, GRUPO, parceirosParaTitulo } from "./comum";
 
 const STATUS: Record<string, readonly [string, string]> = { A: ["Aberto", "info"], Q: ["Quitado", "ok"], C: ["Cancelado", ""] };
 const TIPO: Record<string, string> = { P: "A pagar", R: "A receber" };
