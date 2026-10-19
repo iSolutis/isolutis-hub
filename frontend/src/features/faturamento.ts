@@ -14,7 +14,7 @@ import { tentar } from "@/ui/erros";
 import { registrarAbertura } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, resolverCliente, seletorCliente } from "@/ui/formularios";
+import { botaoExcluir, botaoSalvar, espaco, seletorCliente } from "@/ui/formularios";
 import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
@@ -93,7 +93,6 @@ function formLanc(l?: Lancamento): void {
     rodape: html`${botaoSalvar()}${espaco}${botaoExcluir(!!l)}`,
     montar: (f, fechar, L) => {
       melhorarFormulario(f);
-      ligarNovoCliente(f);
       $("[data-salvar]", L)?.addEventListener("click", async (e) => {
         const botao = e.target as HTMLButtonElement;
 
@@ -108,8 +107,7 @@ function formLanc(l?: Lancamento): void {
         }
 
         await comTrava(botao, async () => {
-          const clienteId = await resolverCliente(f);
-          if (!clienteId) return null;
+          const clienteId = fv(f, "cliente_id");
           const base = {
             cliente_id: clienteId, tipo: fv(f, "tipo") as LancamentoEntrada["tipo"], descricao: fv(f, "descricao") || TIPOS[fv(f, "tipo")] || "Lançamento",
             valor: numero(fv(f, "valor")), vencimento: fv(f, "vencimento") || hoje(), status: fv(f, "status") as LancamentoEntrada["status"], nf: fv(f, "nf") || null,

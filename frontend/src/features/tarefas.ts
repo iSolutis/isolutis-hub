@@ -1,5 +1,5 @@
 import { api } from "@/api/endpoints";
-import type { Tarefa, TarefaEntrada } from "@/api/tipos";
+import type { Projeto, Tarefa, TarefaEntrada } from "@/api/tipos";
 import { $ } from "@/core/dom";
 import { dataBR, hoje, iniciais, pluralizar } from "@/core/formato";
 import { html, raw, type Safe } from "@/core/html";
@@ -12,6 +12,7 @@ import { combobox, comboboxDe } from "@/ui/combobox";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura, registrarSoltar } from "@/ui/eventos";
+import type { CriadoNoCadastro } from "@/ui/cadastro-rapido";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
 import { avisoSoLeitura, botaoExcluir, botaoSalvar, comboboxClientes, espaco, opcoesEquipe, soLeitura } from "@/ui/formularios";
@@ -102,6 +103,13 @@ export function formTarefa(t?: Tarefa, colunaInicial = "a_fazer"): void {
     .map((p) => [p.id, `${p.titulo} · ${p.cliente_nome}`] as const);
   // Quem só executa a tarefa não vê o projeto dela: mantém o vínculo pelo título (referência mínima).
   if (t?.projeto_id && !projs.some(([id]) => id === t.projeto_id)) projs.push([t.projeto_id, tituloProjeto(t.projeto_id) || "Projeto"]);
+  /** Formulário montado (o contexto do cadastro rápido de projeto lê o cliente escolhido agora). */
+  let form: HTMLFormElement | null = null;
+  /** Projeto criado pelo cadastro rápido: a tarefa sem cliente passa a ter o cliente do projeto (como ao escolher um projeto). */
+  const clienteDoProjetoCriado = (criado: CriadoNoCadastro): void => {
+    const clienteId = (criado.item as Projeto).cliente_id;
+    if (form && !fv(form, "cliente_id")) comboboxDe(form, "cliente_id")?.definirValor(clienteId, { silencioso: true });
+  };
   abrirGaveta({
     titulo: t ? t.titulo : "Nova tarefa",
     registro: t ? { recurso: "tarefas", id: t.id, versao: t.versao } : null,
@@ -113,13 +121,14 @@ export function formTarefa(t?: Tarefa, colunaInicial = "a_fazer"): void {
       ${campo("Prazo", inp("prazo", t?.prazo, 'type="date"'))}
       ${campo("Prioridade", sel("prioridade", Object.entries(PRIORIDADES).map(([k, v]) => [k, v[0]] as const), t?.prioridade ?? "media"))}
       ${campo("Cliente", comboboxClientes(t?.cliente_id, "Nenhum"))}
-      ${campo("Projeto", combobox({ nome: "projeto_id", rotulo: "Projeto", opcoes: projs.map(([id, rotulo]) => ({ id, rotulo })), valor: t?.projeto_id, vazio: "Nenhum" }))}
+      ${campo("Projeto", combobox({ nome: "projeto_id", rotulo: "Projeto", opcoes: projs.map(([id, rotulo]) => ({ id, rotulo })), valor: t?.projeto_id, vazio: "Nenhum", cadastroRapido: { tipo: "projeto", contexto: () => ({ clienteId: form ? fv(form, "cliente_id") : (t?.cliente_id ?? undefined) }), aoCriar: clienteDoProjetoCriado } }))}
       ${campo("Detalhes", area("descricao", t?.descricao, "Contexto, links, o que é preciso para considerar pronta…"), true)}
     </div>
     <div><h2 style="margin-bottom:6px">Checklist</h2><div id="ckBox" class="ck"></div>
       <div style="display:flex;gap:8px;margin-top:8px"><input id="ckNovo" class="search" style="flex:1;width:auto" placeholder="Adicionar item e apertar Enter"><button class="btn" type="button" id="ckAdd">Adicionar</button></div></div>`,
     rodape: html`${soLeitura(t) ? avisoSoLeitura() : botaoSalvar()}${t && t.coluna !== "concluido" && podeEscrever() && !soLeitura(t) ? html`<button class="btn" data-concluir>Concluir</button>` : ""}${espaco}${botaoExcluir(!!t && !soLeitura(t))}`,
     montar: (f, fechar, L) => {
+      form = f;
       melhorarFormulario(f);
       const box = $("#ckBox", L) as HTMLElement;
       const novo = $<HTMLInputElement>("#ckNovo", L)!;

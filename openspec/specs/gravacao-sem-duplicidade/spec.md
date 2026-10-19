@@ -2,9 +2,7 @@
 
 ## Purpose
 Uma tentativa de salvar produz no máximo um registro, com retorno imediato do estado da gravação e sem botão preso.
-
 ## Requirements
-
 ### Requirement: Uma tentativa de salvar cria no máximo um registro
 O sistema SHALL garantir que cliques ou toques repetidos, Enter repetido e reenvio de uma mesma tentativa de salvar resultem em um único registro criado.
 
@@ -24,9 +22,9 @@ O sistema SHALL garantir que cliques ou toques repetidos, Enter repetido e reenv
 - **WHEN** a requisição de criação não traz chave
 - **THEN** o servidor se comporta como antes (cria o registro)
 
-#### Scenario: Cliente criado junto com outro registro
-- **WHEN** o usuário escolhe "+ Novo cliente…", o cliente é criado e a gravação do registro principal falha
-- **THEN** ao tentar salvar de novo o cliente já criado é reutilizado e nenhum cliente duplicado é criado
+#### Scenario: Cliente criado pelo cadastro rápido
+- **WHEN** o usuário cria um cliente pelo cadastro rápido e depois a gravação do registro principal falha
+- **THEN** ao tentar salvar de novo o cliente já criado continua selecionado e nenhum cliente duplicado é criado
 
 ### Requirement: Retorno imediato e botão que nunca fica preso
 O sistema SHALL mostrar o estado "Salvando…" assim que o usuário aciona Salvar e SHALL restaurar o botão quando a gravação terminar, com sucesso ou erro.

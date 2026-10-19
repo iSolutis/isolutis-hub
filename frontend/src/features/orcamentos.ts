@@ -17,7 +17,7 @@ import { tentar } from "@/ui/erros";
 import { registrarAbertura } from "@/ui/eventos";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, resolverCliente, seletorCliente } from "@/ui/formularios";
+import { botaoExcluir, botaoSalvar, espaco, seletorCliente } from "@/ui/formularios";
 import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { avisar, toast } from "@/ui/toast";
 import { melhorarFormulario } from "@/ui/acessibilidade";
@@ -66,6 +66,9 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
   const clienteInicial = o?.cliente_id ?? inicial.cliente_id ?? "";
   const negocioInicial = o?.negocio_id ?? inicial.negocio_id ?? "";
   const podeAprovar = !!o && podeEscrever() && o.status !== "aprovado";
+  /** Formulário montado: o negócio criado pelo cadastro rápido é do cliente escolhido agora. */
+  let form: HTMLFormElement | null = null;
+  const clienteAtual = (): string => (form ? fv(form, "cliente_id") : clienteInicial);
 
   abrirGaveta({
     titulo: o ? `Orçamento Nº ${o.numero}` : "Novo orçamento",
@@ -73,7 +76,7 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
     autoria: linhaAutoria(o),
     corpo: html`<div class="fields">
       ${campo("Número", raw(`<input value="${esc(o?.numero ?? "Gerado ao salvar")}" readonly aria-readonly="true">`))}${campo("Status", sel("status", Object.entries(ORC_STATUS).filter(([k]) => k !== "vencido").map(([k, v]) => [k, v[0]] as const), status))}
-      ${seletorCliente(clienteInicial)}<div class="field"><label for="f-negocio_id">Negócio</label>${combobox({ nome: "negocio_id", rotulo: "Negócio", opcoes: negociosDoCliente(clienteInicial), valor: negocioInicial, vazio: "Sem negócio vinculado" })}</div>
+      ${seletorCliente(clienteInicial)}<div class="field"><label for="f-negocio_id">Negócio</label>${combobox({ nome: "negocio_id", rotulo: "Negócio", opcoes: negociosDoCliente(clienteInicial), valor: negocioInicial, vazio: "Sem negócio vinculado", cadastroRapido: { tipo: "negocio", contexto: () => ({ clienteId: clienteAtual() }) } })}</div>
       ${campo("Data", inp("data", o?.data ?? inicial.data ?? hoje(), 'type="date"'))}${campo("Validade (dias)", inp("validade_dias", o?.validade_dias ?? inicial.validade_dias ?? 15, 'type="number" min="1"'))}
     </div>
     <div><h2 style="margin-bottom:6px">Itens</h2>${!prods.length ? html`<p class="sub" style="margin:0 0 6px">Cadastre produtos para preencher os itens com um clique. Você também pode digitar a descrição livremente.</p>` : ""}
@@ -83,8 +86,8 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
       ${campo("Condições e observações", area("obs", o?.obs ?? inicial.obs, "Forma de pagamento, prazo de entrega, o que está fora do escopo…"), true)}</div>`,
     rodape: html`${botaoSalvar()}<a class="btn wa" id="waOrc" target="_blank" rel="noopener" href="#">${ICONE_WA}Enviar pelo WhatsApp</a>${podeAprovar ? html`<button class="btn" data-aprovar>Cliente aprovou</button>` : ""}${o ? html`<button class="btn" data-baixar>Baixar orçamento</button>` : html`<button class="btn" data-baixar>Salvar e baixar</button>`}${espaco}${botaoExcluir(!!o)}`,
     montar: (f, fechar, L) => {
+      form = f;
       melhorarFormulario(f);
-      ligarNovoCliente(f);
       const clienteSel = f.elements.namedItem("cliente_id") as HTMLInputElement;
       const negociosCbx = comboboxDe(f, "negocio_id")!;
       clienteSel.addEventListener("change", () => negociosCbx.definirOpcoes(negociosDoCliente(clienteSel.value), { valor: negocioInicial }));
@@ -186,8 +189,7 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
         if (!fv(f, "cliente_id")) return avisar("Escolha o cliente do orçamento.");
         const validos = itens.filter((i) => i.descricao || numero(i.preco_unitario));
         if (!validos.length) return avisar("Inclua pelo menos um item.");
-        const clienteId = await resolverCliente(f);
-        if (!clienteId) return null;
+        const clienteId = fv(f, "cliente_id");
         const lista: ItemEntrada[] = validos.map((i) => ({
           id: i.id ?? null, produto_id: i.produto_id || null, descricao: i.descricao || "Item", qtd: numero(i.qtd) || 1, preco_unitario: numero(i.preco_unitario), mensal: !!i.mensal,
         }));

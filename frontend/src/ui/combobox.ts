@@ -18,6 +18,8 @@
 import { normalizarTexto } from "@/core/formato";
 import { attr, esc, html, raw, type Safe } from "@/core/html";
 import { abrirCamada, type CamadaAberta } from "@/state/voltar";
+import { abrirCadastroRapido, cadastroRapidoDisponivel, rotuloCadastroRapido, type ContextoCadastro, type CriadoNoCadastro } from "./cadastro-rapido";
+import { avisar } from "./toast";
 
 export interface OpcaoCombobox {
   id: string;
@@ -28,7 +30,7 @@ export interface OpcaoCombobox {
   grupo?: string;
 }
 
-/** Ação fixa no fim da lista, visível mesmo com filtro ativo (por exemplo, "+ Novo cliente…"). */
+/** Ação fixa no fim da lista, visível mesmo com filtro ativo (para criar itens, prefira `cadastroRapido`). */
 export interface AcaoFinalCombobox {
   valor: string;
   rotulo: string;
@@ -46,7 +48,21 @@ export interface OpcoesCombobox {
   obrigatorio?: boolean;
   desabilitado?: boolean;
   acaoFinal?: AcaoFinalCombobox;
+  /** Oferece "+ Novo …" no fim da lista para criar o item sem sair da tela (ver `cadastro-rapido.ts`). */
+  cadastroRapido?: CadastroRapidoCombobox;
 }
+
+export interface CadastroRapidoCombobox {
+  /** Entidade registrada com `registrarCadastroRapido` ("cliente", "parceiro"…). */
+  tipo: string;
+  /** Contexto da tela de origem, lido na hora da escolha (tipo do título, cliente escolhido…). */
+  contexto?: () => ContextoCadastro;
+  /** Avisado com o item criado (a tela guarda-o nas suas listas, para não perdê-lo ao refazer as opções). */
+  aoCriar?: (criado: CriadoNoCadastro) => void;
+}
+
+/** Valor interno da opção de cadastro rápido: nunca chega ao campo oculto. */
+const VALOR_CADASTRO = "__cadastro_rapido";
 
 export const LIMITE_DE_ITENS = 50;
 const CONSULTA_ESTREITA = "(max-width: 860px)";
@@ -390,7 +406,7 @@ export class Combobox {
     if (!caixa) return;
     const { itens, total } = filtrarOpcoes(this.opcoes, this.consulta);
     this.itens = itens;
-    const acao = this.cfg.acaoFinal;
+    const acao = this.acao();
     const linhas = itens.map(
       (o, i) =>
         `<div class="cbx-op" role="option" id="${this.id}-op-${i}" data-i="${i}" aria-selected="${o.id === this.valor}">${o.codigo ? `<span class="cbx-cod">${esc(o.codigo)}</span>` : ""}<span class="cbx-tx">${esc(o.rotulo)}${o.grupo ? `<small class="cbx-gr">${esc(o.grupo)}</small>` : ""}</span></div>`,
@@ -409,7 +425,15 @@ export class Combobox {
   }
 
   private get quantidade(): number {
-    return this.itens.length + (this.cfg.acaoFinal ? 1 : 0);
+    return this.itens.length + (this.acao() ? 1 : 0);
+  }
+
+  /** Opção fixa do fim da lista: a `acaoFinal` da tela ou, se habilitado e permitido, o cadastro rápido. */
+  private acao(): AcaoFinalCombobox | undefined {
+    if (this.cfg.acaoFinal) return this.cfg.acaoFinal;
+    const cr = this.cfg.cadastroRapido;
+    if (!cr || !cadastroRapidoDisponivel(cr.tipo, cr.contexto?.())) return undefined;
+    return { valor: VALOR_CADASTRO, rotulo: rotuloCadastroRapido(cr.tipo, this.consulta) };
   }
 
   private marcarAtivo(rolar = true): void {
@@ -442,12 +466,31 @@ export class Combobox {
   }
 
   private escolherIndice(i: number): void {
-    const acao = this.cfg.acaoFinal;
-    if (acao && i === this.itens.length) this.escolher(acao.valor);
+    const acao = this.acao();
+    if (acao?.valor === VALOR_CADASTRO && i === this.itens.length) void this.cadastrar();
+    else if (acao && i === this.itens.length) this.escolher(acao.valor);
     else {
       const o = this.itens[i];
       if (o) this.escolher(o.id);
     }
+  }
+
+  /** Fecha a lista, abre o cadastro rápido e seleciona o item criado (se servir neste campo). */
+  private async cadastrar(): Promise<void> {
+    const cr = this.cfg.cadastroRapido;
+    if (!cr) return;
+    const sugestao = this.consulta.trim();
+    this.fechar(true);
+    const criado = await abrirCadastroRapido(cr.tipo, { ...cr.contexto?.(), sugestao });
+    if (criado) {
+      cr.aoCriar?.(criado);
+      if (!criado.aceito) avisar(`${criado.opcao.rotulo} foi cadastrado, mas não pode ser usado neste campo.`);
+      else {
+        this.opcoes = [...this.opcoes.filter((o) => o.id !== criado.opcao.id), criado.opcao];
+        this.aplicar(criado.opcao.id, true);
+      }
+    }
+    if (this.campo.isConnected) this.campo.focus({ preventScroll: true });
   }
 
   private escolher(valor: string): void {

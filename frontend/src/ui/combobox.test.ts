@@ -2,6 +2,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { combobox, comboboxDe, filtrarOpcoes, type OpcaoCombobox } from "./combobox";
 import { reiniciarCamadas } from "@/state/voltar";
+import { html } from "@/core/html";
+import { fv } from "./campos";
+import { registrarCadastroRapido } from "./cadastro-rapido";
+import { gavetasAbertas } from "./gaveta";
 
 const plano: OpcaoCombobox[] = [
   { id: "1", codigo: "1.01.001", rotulo: "Caixa", grupo: "Ativo circulante" },
@@ -127,5 +131,107 @@ describe("combobox", () => {
     expect(ops.at(-1)?.textContent).toContain("+ Novo…");
     ops.at(-1)!.click();
     expect(oculto.value).toBe("__novo");
+  });
+});
+
+describe("cadastro rápido", () => {
+  let permitido = true;
+  const criados: Array<{ id: string; nome: string }> = [];
+  registrarCadastroRapido<{ nome: string }, { id: string; nome: string }>("conta-teste", {
+    novo: "Nova conta",
+    mensagem: "Conta cadastrada",
+    recarregar: [],
+    pode: () => permitido,
+    campos: (ctx) => html`<input name="nome" value="${ctx.sugestao ?? ""}">`,
+    ler: (f) => (fv(f, "nome") ? { nome: fv(f, "nome") } : null),
+    criar: async (e) => {
+      const c = { id: `n${criados.length + 1}`, nome: e.nome };
+      criados.push(c);
+      return c;
+    },
+    opcao: (c) => ({ id: c.id, rotulo: c.nome }),
+    aceito: (c) => c.nome !== "Recusada",
+  });
+
+  const abrirLista = (campo: HTMLInputElement, texto = ""): HTMLElement[] => {
+    campo.click();
+    if (texto) {
+      campo.value = texto;
+      campo.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    return [...document.querySelectorAll<HTMLElement>(".cbx-op")];
+  };
+  const tick = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
+  async function salvarNaGaveta(nome?: string): Promise<void> {
+    const camada = document.querySelector<HTMLElement>(".gaveta-camada:last-child")!;
+    const campoNome = camada.querySelector<HTMLInputElement>("[name=nome]")!;
+    if (nome !== undefined) campoNome.value = nome;
+    camada.querySelector<HTMLButtonElement>("[data-salvar]")!.click();
+    for (let i = 0; i < 5; i++) await tick();
+  }
+
+  beforeEach(() => {
+    while (gavetasAbertas()) document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    permitido = true;
+    criados.length = 0;
+  });
+
+  function montarComCadastro() {
+    const m = montar({ cadastroRapido: { tipo: "conta-teste" } });
+    document.body.insertAdjacentHTML("beforeend", '<div id="layer"></div>');
+    return m;
+  }
+
+  it("mostra “+ Nova conta…” sem texto e “+ Cadastrar “…”…” com texto", () => {
+    const { campo } = montarComCadastro();
+    expect(abrirLista(campo).at(-1)?.textContent).toBe("+ Nova conta…");
+    expect(abrirLista(campo, "Banco X").at(-1)?.textContent).toBe("+ Cadastrar “Banco X”…");
+  });
+
+  it("não oferece sem permissão", () => {
+    permitido = false;
+    const { campo } = montarComCadastro();
+    expect(abrirLista(campo).some((o) => o.textContent?.includes("Nova conta"))).toBe(false);
+  });
+
+  it("cria, inclui e seleciona o item, com a busca como sugestão", async () => {
+    const { campo, oculto } = montarComCadastro();
+    const mudou = vi.fn();
+    oculto.addEventListener("change", mudou);
+    abrirLista(campo, "Banco X").at(-1)!.click();
+    expect(gavetasAbertas()).toBe(1);
+    expect(document.querySelector<HTMLInputElement>(".gaveta-camada [name=nome]")!.value).toBe("Banco X");
+    await salvarNaGaveta();
+    expect(gavetasAbertas()).toBe(0);
+    expect(oculto.value).toBe("n1");
+    expect(campo.value).toBe("Banco X");
+    expect(mudou).toHaveBeenCalledTimes(1);
+    expect(oculto.value).not.toBe("__cadastro_rapido");
+  });
+
+  it("dentro do cadastro rápido nenhum campo oferece outro cadastro", () => {
+    const { campo } = montarComCadastro();
+    abrirLista(campo).at(-1)!.click();
+    document.body.insertAdjacentHTML("beforeend", `<form id="g">${combobox({ nome: "outra", rotulo: "Outra", opcoes: plano, cadastroRapido: { tipo: "conta-teste" } })}</form>`);
+    const outra = document.querySelector<HTMLInputElement>("#f-outra")!;
+    expect(abrirLista(outra).some((o) => o.textContent?.includes("Nova conta"))).toBe(false);
+  });
+
+  it("item que não serve no campo é avisado e não selecionado", async () => {
+    const { campo, oculto } = montarComCadastro();
+    abrirLista(campo).at(-1)!.click();
+    await salvarNaGaveta("Recusada");
+    expect(oculto.value).toBe("");
+    expect([...document.querySelectorAll(".toast")].map((t) => t.textContent).join(" ")).toContain("não pode ser usado");
+  });
+
+  it("desistir não muda o campo", async () => {
+    const { campo, oculto } = montarComCadastro();
+    abrirLista(campo).at(-1)!.click();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await tick();
+    expect(gavetasAbertas()).toBe(0);
+    expect(oculto.value).toBe("");
+    expect(criados).toHaveLength(0);
   });
 });

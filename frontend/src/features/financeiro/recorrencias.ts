@@ -11,6 +11,7 @@ import { podeEscrever } from "@/state/estado";
 import { registrarVista } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { combobox, comboboxDe, type OpcaoCombobox } from "@/ui/combobox";
 import { cabecalhoDePagina, carregando, estadoVazio } from "@/ui/componentes";
 import { tentar } from "@/ui/erros";
 import { abrirGaveta } from "@/ui/gaveta";
@@ -19,8 +20,9 @@ import { gravar } from "@/ui/gravacao";
 import { avisar } from "@/ui/toast";
 import { botaoNovo } from "../comum";
 import { apiFinanceiro, type ContaBancaria, type Parceiro, type PlanoConta, type Recorrencia, type RecorrenciaAtualizar, type RecorrenciaEntrada } from "./api";
-import { formatarDocumento } from "@/ui/documento";
 import { confirmarExclusao, contasDoPlanoParaTitulo, GRUPO, parceirosParaTitulo } from "./comum";
+import { opcaoDaConta, prepararCadastroDeConta } from "./contas-bancarias";
+import { opcaoDoParceiro, prepararCadastroDeParceiro } from "../parceiros/cadastro-rapido";
 
 export const FREQUENCIAS: ReadonlyArray<readonly [string, string]> = [
   ["semanal", "Semanal"],
@@ -98,18 +100,29 @@ registrarVista({ id: "fin-recorrencias", nome: "Recorrências", grupo: GRUPO, pe
 
 async function formulario(r?: Recorrencia): Promise<void> {
   // as listas de apoio são buscadas na hora, para refletir cadastros feitos há pouco
-  const apoio = await tentar(() => Promise.all([apiFinanceiro.plano.listar(), apiFinanceiro.contas.listar(), apiFinanceiro.parceiros.listar()]));
+  const apoio = await tentar(() =>
+    Promise.all([apiFinanceiro.plano.listar(), apiFinanceiro.contas.listar(), apiFinanceiro.parceiros.listar(), prepararCadastroDeParceiro(), prepararCadastroDeConta()]),
+  );
   if (!apoio) return;
-  const [plano, contas, parceiros]: [PlanoConta[], ContaBancaria[], Parceiro[]] = apoio;
+  const [plano, contas, parceiros]: [PlanoConta[], ContaBancaria[], Parceiro[], void, void] = apoio;
   const tipoInicial = r?.tipo_conta ?? "P";
   const opcoesPlano = (tipo: string, atual?: string): Safe => {
     const contasDoTipo = contasDoPlanoParaTitulo(plano, tipo);
     return html`<option value="">${contasDoTipo.length ? "Selecione…" : "Nenhuma conta disponível"}</option>${contasDoTipo.map((c) => html`<option value="${c.id}"${raw(c.id === atual ? " selected" : "")}>${c.codigo} ${c.nome}</option>`)}`;
   };
-  const opcoesParceiro = (tipo: string, planoId: string, atual?: string): Safe => {
+  /** Parceiros do tipo e da conta escolhidos (a conta de aporte só aceita sócios); o atual sempre fica na lista. */
+  const opcoesParceiro = (tipo: string, planoId: string, atual?: string): OpcaoCombobox[] => {
     const aporte = plano.find((c) => c.id === planoId)?.aporte_socio ?? false;
-    return html`<option value="">Selecione…</option>${parceirosParaTitulo(parceiros, tipo, aporte).map((p) => html`<option value="${p.id}"${raw(p.id === atual ? " selected" : "")}>${p.nome} · ${formatarDocumento(p.cpf_cnpj)}</option>`)}`;
+    const lista = parceirosParaTitulo(parceiros, tipo, aporte);
+    const atualFora = parceiros.find((p) => p.id === atual && !lista.some((x) => x.id === p.id));
+    return [...lista, ...(atualFora ? [atualFora] : [])].map(opcaoDoParceiro);
   };
+  /** Formulário montado (o contexto do cadastro rápido lê o tipo e a conta escolhidos na hora). */
+  let form: HTMLFormElement | null = null;
+  const contextoParceiro = () => ({
+    tipoConta: form ? fv(form, "tipo_conta") : tipoInicial,
+    aporte: plano.find((c) => c.id === (form ? fv(form, "plano_conta_id") : r?.plano_conta_id))?.aporte_socio ?? false,
+  });
 
   abrirGaveta({
     titulo: r ? `Recorrência · ${r.parceiro_nome}` : "Nova recorrência",
@@ -117,8 +130,8 @@ async function formulario(r?: Recorrencia): Promise<void> {
       ${campo("Tipo", sel("tipo_conta", [["P", "A pagar (despesa)"], ["R", "A receber (receita)"]], tipoInicial))}
       ${campo("Valor de cada título (R$)", inp("valor_titulo", paraCampo(r?.valor_titulo), 'inputmode="decimal" placeholder="0,00"'))}
       <div class="field full"><label for="f-plano_conta_id">Conta do plano de contas</label><select name="plano_conta_id" id="f-plano_conta_id">${opcoesPlano(tipoInicial, r?.plano_conta_id)}</select></div>
-      ${campo("Conta bancária", sel("conta_bancaria_id", [["", "Selecione…"], ...contas.map((c) => [c.id, `${c.nome} (${c.instituicao_codigo})`] as const)], r?.conta_bancaria_id ?? ""))}
-      <div class="field"><label for="f-parceiro_id">Parceiro de negócio</label><select name="parceiro_id" id="f-parceiro_id">${opcoesParceiro(tipoInicial, r?.plano_conta_id ?? "", r?.parceiro_id)}</select></div>
+      ${campo("Conta bancária", combobox({ nome: "conta_bancaria_id", rotulo: "Conta bancária", opcoes: contas.map(opcaoDaConta), valor: r?.conta_bancaria_id, cadastroRapido: { tipo: "conta-bancaria" } }))}
+      ${campo("Parceiro de negócio", combobox({ nome: "parceiro_id", rotulo: "Parceiro de negócio", opcoes: opcoesParceiro(tipoInicial, r?.plano_conta_id ?? "", r?.parceiro_id), valor: r?.parceiro_id, cadastroRapido: { tipo: "parceiro", contexto: contextoParceiro, aoCriar: (c) => parceiros.push(c.item as Parceiro) } }))}
       ${campo("Frequência", sel("frequencia", FREQUENCIAS, r?.frequencia ?? "mensal"))}
       ${campo("Primeiro vencimento", inp("data_inicio", r?.data_inicio ?? hoje(), 'type="date"'))}
       ${campo("Término", sel("termino", TERMINOS, r?.termino ?? "sem_fim"))}
@@ -129,9 +142,10 @@ async function formulario(r?: Recorrencia): Promise<void> {
     <p class="sub" id="dicaRecorrencia" style="margin:0"></p>`,
     rodape: html`<button class="btn primary" data-salvar>Salvar</button>${espaco}`,
     montar: (f, fechar, L) => {
+      form = f;
       const tipo = f.elements.namedItem("tipo_conta") as HTMLSelectElement;
       const planoSel = f.elements.namedItem("plano_conta_id") as HTMLSelectElement;
-      const parceiroSel = f.elements.namedItem("parceiro_id") as HTMLSelectElement;
+      const parceiroCbx = comboboxDe(f, "parceiro_id")!;
       const termino = f.elements.namedItem("termino") as HTMLSelectElement;
       const dica = $("#dicaRecorrencia", L)!;
       if (r) {
@@ -140,8 +154,7 @@ async function formulario(r?: Recorrencia): Promise<void> {
         dica.textContent = "Tipo, frequência e primeiro vencimento não mudam. As alterações valem para os títulos futuros em aberto; os já quitados ficam como estão.";
       }
       const refazerParceiros = (): void => {
-        const atual = parceiroSel.value;
-        parceiroSel.innerHTML = String(opcoesParceiro(tipo.value, planoSel.value, atual));
+        parceiroCbx.definirOpcoes(opcoesParceiro(tipo.value, planoSel.value, fv(f, "parceiro_id")), { valor: fv(f, "parceiro_id") });
       };
       tipo.addEventListener("change", () => {
         planoSel.innerHTML = String(opcoesPlano(tipo.value));

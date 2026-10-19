@@ -35,6 +35,7 @@ import "@/features/tarefas";
 import "@/features/produtos";
 import "@/features/financeiro";
 import "@/features/parceiros/telas";
+import "@/features/parceiros/cadastro-rapido";
 import "@/features/faturamento";
 import "@/features/relatorios";
 import "@/features/equipe";

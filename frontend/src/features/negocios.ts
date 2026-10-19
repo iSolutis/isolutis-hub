@@ -6,19 +6,20 @@ import { html, type Safe } from "@/core/html";
 import { numero, paraCampo } from "@/core/numero";
 import { ABERTAS, ETAPAS, MOTIVOS_PERDA, ORC_STATUS, ORIGENS, etapaNome } from "@/domain/constantes";
 import { botaoWa } from "@/domain/whatsapp";
-import { dados, nomeMembro, podeEscrever, ui } from "@/state/estado";
+import { dados, nomeCliente, nomeMembro, podeEscrever, temPermissao, ui } from "@/state/estado";
 import { recarregar, registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura, registrarSoltar } from "@/ui/eventos";
+import { registrarCadastroRapido } from "@/ui/cadastro-rapido";
 import { abrirGaveta } from "@/ui/gaveta";
 import { linhaAutoria } from "@/ui/autoria";
-import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, ligarNovoCliente, resolverCliente, seletorCliente, seletorDono, soLeitura } from "@/ui/formularios";
+import { avisoSoLeitura, botaoExcluir, botaoSalvar, espaco, seletorCliente, seletorDono, soLeitura } from "@/ui/formularios";
 import { comTrava, excluir, gravar } from "@/ui/gravacao";
 import { melhorarFormulario } from "@/ui/acessibilidade";
-import { toast } from "@/ui/toast";
+import { avisar, toast } from "@/ui/toast";
 import { botaoNovo } from "./comum";
 import { abrirFormulario, registrarFormulario } from "./ponte";
 
@@ -84,8 +85,6 @@ export function formNegocio(n: Inicial = { etapa: "lead" }, existente?: Negocio)
     montar: (f, fechar, L) => {
       // Melhorar acessibilidade
       melhorarFormulario(f);
-
-      ligarNovoCliente(f);
       const etapaSel = f.elements.namedItem("etapa") as HTMLSelectElement;
       etapaSel.addEventListener("change", () => {
         const motivo = $("#motivoBox");
@@ -113,8 +112,7 @@ export function formNegocio(n: Inicial = { etapa: "lead" }, existente?: Negocio)
         }
 
         await comTrava(botao, async () => {
-          const clienteId = await resolverCliente(f);
-          if (!clienteId) return null;
+          const clienteId = fv(f, "cliente_id");
 
           const corpo: NegocioEntrada = {
             titulo,
@@ -187,3 +185,25 @@ registrarAbertura("negocio", (id) => {
   if (n) formNegocio(n, n);
 });
 registrarSoltar("etapa", (id, etapa) => void moverEtapa(id, etapa));
+
+// ------------------------------------------------------------------------------------------- cadastro rápido
+/** Negócio criado a partir do orçamento: só o título; o cliente é o do orçamento e a etapa, Lead. */
+export const opcaoDoNegocio = (n: Pick<Negocio, "id" | "titulo" | "etapa">) => ({ id: n.id, rotulo: `${n.titulo} (${etapaNome(n.etapa)})` });
+
+registrarCadastroRapido<NegocioEntrada, Negocio>("negocio", {
+  novo: "Novo negócio",
+  mensagem: "Negócio cadastrado",
+  recarregar: ["negocios"],
+  pode: (ctx) => temPermissao("comercial") && !!ctx.clienteId,
+  campos: (ctx) =>
+    html`${campo("Título do negócio", inp("titulo", ctx.sugestao, 'maxlength="150" placeholder="Ex.: Sistema de gestão para a distribuidora"'), true)}
+    <input type="hidden" name="cliente_id" value="${ctx.clienteId ?? ""}">${campo("Cliente", html`<div class="campo-fixo">${nomeCliente(ctx.clienteId)}</div>`, true)}`,
+  ler: (f) => {
+    const titulo = fv(f, "titulo");
+    if (!titulo) return avisar("Dê um título ao negócio.");
+    return { titulo, cliente_id: fv(f, "cliente_id"), etapa: "lead", valor: 0, mensal: 0 };
+  },
+  criar: (d) => api.negocios.criar(d),
+  opcao: opcaoDoNegocio,
+  aceito: (n, ctx) => n.cliente_id === ctx.clienteId,
+});
