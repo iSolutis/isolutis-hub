@@ -10,7 +10,9 @@ import { ICONE_WA, numeroWa, urlWa } from "@/domain/whatsapp";
 import { dados, podeEscrever, ui } from "@/state/estado";
 import { recarregar, registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
-import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { area, campo, fv, inp, inpMoeda, sel } from "@/ui/campos";
+import { reaplicarMascara } from "@/ui/mascara";
+import { mascararMoeda, paraCampoMoeda } from "@/ui/moeda";
 import { combobox, comboboxDe, type OpcaoCombobox } from "@/ui/combobox";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
@@ -82,7 +84,7 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
     <div><h2 style="margin-bottom:6px">Itens</h2>${!prods.length ? html`<p class="sub" style="margin:0 0 6px">Cadastre produtos para preencher os itens com um clique. Você também pode digitar a descrição livremente.</p>` : ""}
       <div style="overflow-x:auto"><table class="items" style="min-width:560px"><thead><tr><th style="width:30%">Produto</th><th>Descrição</th><th style="width:60px">Qtd</th><th style="width:110px">Valor unit.</th><th style="width:54px">Mensal</th><th style="width:30px"></th></tr></thead><tbody id="itens"></tbody></table></div>
       <button class="btn" type="button" id="addItem" style="margin-top:8px">Adicionar item</button></div>
-    <div class="fields">${campo("Desconto no projeto (R$)", inp("desconto", o?.desconto ? String(o.desconto).replace(".", ",") : "", 'inputmode="decimal" placeholder="0,00"'))}<div class="totals" id="totais"></div>
+    <div class="fields">${campo("Desconto no projeto (R$)", inpMoeda("desconto", o?.desconto))}<div class="totals" id="totais"></div>
       ${campo("Condições e observações", area("obs", o?.obs ?? inicial.obs, "Forma de pagamento, prazo de entrega, o que está fora do escopo…"), true)}</div>`,
     rodape: html`${botaoSalvar()}<a class="btn wa" id="waOrc" target="_blank" rel="noopener" href="#">${ICONE_WA}Enviar pelo WhatsApp</a>${podeAprovar ? html`<button class="btn" data-aprovar>Cliente aprovou</button>` : ""}${o ? html`<button class="btn" data-baixar>Baixar orçamento</button>` : html`<button class="btn" data-baixar>Salvar e baixar</button>`}${espaco}${botaoExcluir(!!o)}`,
     montar: (f, fechar, L) => {
@@ -105,7 +107,7 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
           <td><select data-k="produto_id" aria-label="Produto"><option value="">Livre</option>${prods.map((p) => html`<option value="${p.id}"${raw(p.id === it.produto_id ? " selected" : "")}>${p.nome}</option>`)}</select></td>
           <td><input data-k="descricao" value="${it.descricao}" aria-label="Descrição"></td>
           <td><input data-k="qtd" value="${it.qtd}" inputmode="decimal" aria-label="Quantidade"></td>
-          <td><input data-k="preco_unitario" value="${it.preco_unitario ? String(it.preco_unitario).replace(".", ",") : ""}" inputmode="decimal" placeholder="0,00" aria-label="Valor unitário"></td>
+          <td><input data-k="preco_unitario" value="${paraCampoMoeda(it.preco_unitario)}" data-moeda inputmode="decimal" placeholder="0,00" aria-label="Valor unitário"></td>
           <td style="text-align:center"><input type="checkbox" data-k="mensal"${raw(it.mensal ? " checked" : "")} aria-label="Cobrança mensal"></td>
           <td><button type="button" class="btn ghost" data-rm="${i}" aria-label="Remover item" style="padding:2px 6px">×</button></td></tr>`,
           )}`,
@@ -120,7 +122,10 @@ export function formOrcamento(inicial: Partial<OrcamentoEntrada> = {}, existente
         if (!it || !k || k === "produto_id" || k === "mensal") return;
         if (k === "descricao") it.descricao = el.value;
         else if (k === "qtd") it.qtd = numero(el.value);
-        else if (k === "preco_unitario") it.preco_unitario = numero(el.value);
+        else if (k === "preco_unitario") {
+          reaplicarMascara(el, mascararMoeda);
+          it.preco_unitario = numero(el.value);
+        }
         mostrarTotais();
       });
       tb.addEventListener("change", (e) => {

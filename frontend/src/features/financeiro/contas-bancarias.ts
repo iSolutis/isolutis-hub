@@ -1,11 +1,11 @@
 import { $ } from "@/core/dom";
 import { brl } from "@/core/formato";
 import { html, type Safe } from "@/core/html";
-import { numero, paraCampo } from "@/core/numero";
+import { numero } from "@/core/numero";
 import { podeEscrever, temPermissao } from "@/state/estado";
 import { registrarVista } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
-import { campo, fv, inp } from "@/ui/campos";
+import { campo, fv, inp, inpMoeda } from "@/ui/campos";
 import { combobox } from "@/ui/combobox";
 import { tentar } from "@/ui/erros";
 import { registrarCadastroRapido } from "@/ui/cadastro-rapido";
@@ -41,7 +41,7 @@ registrarVista({ id: "fin-contas", nome: "Conta Bancária", grupo: GRUPO, permis
 function camposDaConta(instituicoes: readonly Instituicao[], c?: Partial<ContaBancaria>): Safe {
   return html`${campo("Instituição financeira", combobox({ nome: "instituicao_financeira_id", rotulo: "Instituição financeira", opcoes: instituicoes.map((i) => ({ id: i.id, codigo: i.codigo, rotulo: i.nome })), valor: c?.instituicao_financeira_id, vazio: "Digite o nome ou o código…" }), true)}
       ${campo("Nome da conta", inp("nome", c?.nome, 'maxlength="150" placeholder="Ex.: Conta corrente principal"'), true)}
-      ${campo("Saldo inicial (R$)", inp("saldo_inicial", paraCampo(c?.saldo_inicial), 'inputmode="decimal" placeholder="0,00"'))}`;
+      ${campo("Saldo inicial (R$)", inpMoeda("saldo_inicial", c?.saldo_inicial))}`;
 }
 
 /** Lê e valida; null = faltou algo (já avisou). */

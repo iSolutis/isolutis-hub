@@ -2,6 +2,7 @@ import { $, $$ } from "@/core/dom";
 import { esc, type Safe } from "@/core/html";
 import { abrirCamada, type CamadaAberta } from "@/state/voltar";
 import { ligarExclusaoEmDoisCliques } from "./exclusao";
+import { ligarMascaraDeMoeda } from "./moeda";
 import { abrirRegistro, fecharRegistro } from "./registro-aberto";
 
 /**
@@ -93,6 +94,7 @@ export function abrirGaveta(o: OpcoesGaveta): () => void {
   // Exclusão em dois cliques: o primeiro clique arma o botão, o segundo confirma.
   ligarExclusaoEmDoisCliques(el);
 
+  form.querySelectorAll<HTMLInputElement>("[data-moeda]").forEach(ligarMascaraDeMoeda);
   form.querySelector<HTMLElement>("input:not([readonly]):not([disabled]),select:not([disabled]),textarea")?.focus();
   o.montar?.(form, fechar, el);
   return fechar;

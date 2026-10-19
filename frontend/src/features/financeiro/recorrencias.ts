@@ -6,11 +6,11 @@
 import { $ } from "@/core/dom";
 import { brl, dataBR, hoje, pluralizar } from "@/core/formato";
 import { html, raw, type Safe } from "@/core/html";
-import { numero, paraCampo } from "@/core/numero";
+import { numero } from "@/core/numero";
 import { podeEscrever } from "@/state/estado";
 import { registrarVista } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
-import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { area, campo, fv, inp, inpMoeda, sel } from "@/ui/campos";
 import { combobox, comboboxDe, type OpcaoCombobox } from "@/ui/combobox";
 import { cabecalhoDePagina, carregando, estadoVazio } from "@/ui/componentes";
 import { tentar } from "@/ui/erros";
@@ -128,7 +128,7 @@ async function formulario(r?: Recorrencia): Promise<void> {
     titulo: r ? `Recorrência · ${r.parceiro_nome}` : "Nova recorrência",
     corpo: html`<div class="fields">
       ${campo("Tipo", sel("tipo_conta", [["P", "A pagar (despesa)"], ["R", "A receber (receita)"]], tipoInicial))}
-      ${campo("Valor de cada título (R$)", inp("valor_titulo", paraCampo(r?.valor_titulo), 'inputmode="decimal" placeholder="0,00"'))}
+      ${campo("Valor de cada título (R$)", inpMoeda("valor_titulo", r?.valor_titulo))}
       <div class="field full"><label for="f-plano_conta_id">Conta do plano de contas</label><select name="plano_conta_id" id="f-plano_conta_id">${opcoesPlano(tipoInicial, r?.plano_conta_id)}</select></div>
       ${campo("Conta bancária", combobox({ nome: "conta_bancaria_id", rotulo: "Conta bancária", opcoes: contas.map(opcaoDaConta), valor: r?.conta_bancaria_id, cadastroRapido: { tipo: "conta-bancaria" } }))}
       ${campo("Parceiro de negócio", combobox({ nome: "parceiro_id", rotulo: "Parceiro de negócio", opcoes: opcoesParceiro(tipoInicial, r?.plano_conta_id ?? "", r?.parceiro_id), valor: r?.parceiro_id, cadastroRapido: { tipo: "parceiro", contexto: contextoParceiro, aoCriar: (c) => parceiros.push(c.item as Parceiro) } }))}

@@ -3,12 +3,12 @@ import type { Lancamento, LancamentoEntrada, ResumoFaturamento } from "@/api/tip
 import { $ } from "@/core/dom";
 import { MES3, MESES, brl, dataBR, hoje, addMeses } from "@/core/formato";
 import { html, type Safe } from "@/core/html";
-import { numero, paraCampo } from "@/core/numero";
+import { numero } from "@/core/numero";
 import { OPCOES_REPETICAO, TIPOS } from "@/domain/constantes";
 import { nomeCliente, podeEscrever, ui } from "@/state/estado";
 import { recarregar, registrarVista } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
-import { campo, fv, inp, sel } from "@/ui/campos";
+import { campo, fv, inp, inpMoeda, sel } from "@/ui/campos";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura } from "@/ui/eventos";
@@ -86,7 +86,7 @@ function formLanc(l?: Lancamento): void {
     corpo: html`<div class="fields">
       ${seletorCliente(l?.cliente_id)}${campo("Tipo", sel("tipo", Object.entries(TIPOS), l?.tipo ?? "projeto"))}
       ${campo("Descrição", inp("descricao", l?.descricao, 'placeholder="Ex.: Parcela 1/2 do portal do cliente"'), true)}
-      ${campo("Valor (R$)", inp("valor", paraCampo(l?.valor), 'inputmode="decimal" placeholder="0,00"'))}${campo("Data de vencimento", inp("vencimento", l?.vencimento ?? hoje(), 'type="date"'))}
+      ${campo("Valor (R$)", inpMoeda("valor", l?.valor))}${campo("Data de vencimento", inp("vencimento", l?.vencimento ?? hoje(), 'type="date"'))}
       ${campo("Situação", sel("status", [["previsto", "Previsto"], ["recebido", "Recebido"]], l?.status ?? "previsto"))}
       ${l ? "" : campo("Repetir todo mês por", sel("repetir", OPCOES_REPETICAO.map((n) => [n, n === 1 ? "Não repetir" : `${n} meses`] as const), 1))}
       ${campo("Nota fiscal / observação", inp("nf", l?.nf), true)}</div>`,
@@ -136,9 +136,9 @@ function gerarFaturamento(g: VendaFechada): void {
     titulo: "Lançar faturamento",
     corpo: html`<p style="margin:0">Venda fechada com <b>${nomeDoCliente}</b>${g.titulo ? " · " + g.titulo : ""}. Confira como o valor entra no faturamento.</p>
     <div class="gen"><label class="check"><input type="checkbox" name="usaUnico" id="f-usaUnico"${g.unico ? " checked" : ""}> Projeto</label>
-      <div class="fields">${campo("Valor total (R$)", inp("unico", paraCampo(g.unico), 'inputmode="decimal"'))}${campo("Parcelas", inp("parcelas", 1, 'type="number" min="1" max="24"'))}${campo("Primeiro vencimento", inp("dataU", h, 'type="date"'))}</div></div>
+      <div class="fields">${campo("Valor total (R$)", inpMoeda("unico", g.unico))}${campo("Parcelas", inp("parcelas", 1, 'type="number" min="1" max="24"'))}${campo("Primeiro vencimento", inp("dataU", h, 'type="date"'))}</div></div>
     <div class="gen"><label class="check"><input type="checkbox" name="usaMensal" id="f-usaMensal"${g.mensal ? " checked" : ""}> Manutenção mensal</label>
-      <div class="fields">${campo("Valor por mês (R$)", inp("mensal", paraCampo(g.mensal), 'inputmode="decimal"'))}${campo("Quantos meses lançar", inp("meses", 12, 'type="number" min="1" max="36"'))}${campo("Primeira mensalidade", inp("dataM", addMeses(h, 1), 'type="date"'))}</div></div>
+      <div class="fields">${campo("Valor por mês (R$)", inpMoeda("mensal", g.mensal))}${campo("Quantos meses lançar", inp("meses", 12, 'type="number" min="1" max="36"'))}${campo("Primeira mensalidade", inp("dataM", addMeses(h, 1), 'type="date"'))}</div></div>
     <p class="sub" id="resumoGen" style="margin:0"></p>`,
     rodape: html`<button class="btn primary" data-salvar>Lançar no faturamento</button><button class="btn" data-fechar>Agora não</button>`,
     montar: (f, fechar, L) => {

@@ -3,13 +3,13 @@ import type { Negocio, NegocioEntrada } from "@/api/tipos";
 import { $ } from "@/core/dom";
 import { brl, brlCurto, dataBR, hoje } from "@/core/formato";
 import { html, type Safe } from "@/core/html";
-import { numero, paraCampo } from "@/core/numero";
+import { numero } from "@/core/numero";
 import { ABERTAS, ETAPAS, MOTIVOS_PERDA, ORC_STATUS, ORIGENS, etapaNome } from "@/domain/constantes";
 import { botaoWa } from "@/domain/whatsapp";
 import { dados, nomeCliente, nomeMembro, podeEscrever, temPermissao, ui } from "@/state/estado";
 import { recarregar, registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
-import { area, campo, fv, inp, sel } from "@/ui/campos";
+import { area, campo, fv, inp, inpMoeda, sel } from "@/ui/campos";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura, registrarSoltar } from "@/ui/eventos";
@@ -75,7 +75,7 @@ export function formNegocio(n: Inicial = { etapa: "lead" }, existente?: Negocio)
     corpo: html`<div class="fields">
       ${campo("Título do negócio", inp("titulo", n.titulo, 'placeholder="Ex.: Portal do cliente para a distribuidora"'), true)}
       ${seletorCliente(n.cliente_id)}${campo("Etapa", sel("etapa", ETAPAS.map((e) => [e.id, e.nome] as const), n.etapa ?? "lead"))}
-      ${campo("Valor do projeto (R$)", inp("valor", paraCampo(n.valor), 'inputmode="decimal" placeholder="0,00"'))}${campo("Manutenção mensal (R$)", inp("mensal", paraCampo(n.mensal), 'inputmode="decimal" placeholder="0,00"'))}
+      ${campo("Valor do projeto (R$)", inpMoeda("valor", n.valor))}${campo("Manutenção mensal (R$)", inpMoeda("mensal", n.mensal))}
       ${campo("Previsão de fechamento", inp("previsao", n.previsao, 'type="date"'))}${seletorDono("Responsável", n.responsavel_id, !reg)}
       ${campo("Origem", sel("origem", [["", "—"], ...ORIGENS.map((o) => [o, o] as const)], n.origem))}
       <div class="field" id="motivoBox"${n.etapa === "perdido" ? "" : " hidden"}><label>Motivo da perda</label>${sel("motivo_perda", [["", "—"], ...MOTIVOS_PERDA.map((m) => [m, m] as const)], n.motivo_perda)}</div>

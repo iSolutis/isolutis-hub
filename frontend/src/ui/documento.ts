@@ -3,6 +3,10 @@
  * A máscara é só apresentação — o servidor guarda apenas dígitos e valida os dígitos verificadores.
  */
 
+import { reaplicarMascara } from "./mascara";
+
+export { reaplicarMascara } from "./mascara";
+
 export type TipoDocumento = "CPF" | "CNPJ";
 
 const LIMITE: Record<TipoDocumento, number> = { CPF: 11, CNPJ: 14 };
@@ -42,19 +46,6 @@ export function valorInicialDoDocumento(doc: string | null | undefined, tipo: Ti
   const d = (doc ?? "").replace(/\D/g, "");
   if (!d) return "";
   return d.length > LIMITE[tipo] ? formatarDocumento(d) : mascararDocumento(d, tipo);
-}
-
-/** Reaplica a máscara mantendo o cursor logo após o mesmo dígito (não salta para o fim ao editar no meio). */
-export function reaplicarMascara(campo: HTMLInputElement, mascarar: (valor: string) => string): void {
-  const anterior = campo.value;
-  const digitosAntes = anterior.slice(0, campo.selectionStart ?? anterior.length).replace(/\D/g, "").length;
-  const novo = mascarar(anterior);
-  if (novo === anterior) return;
-  campo.value = novo;
-  if (campo.ownerDocument.activeElement !== campo) return;
-  let pos = 0;
-  for (let vistos = 0; pos < novo.length && vistos < digitosAntes; pos++) if (/\d/.test(novo.charAt(pos))) vistos++;
-  campo.setSelectionRange(pos, pos);
 }
 
 /**
