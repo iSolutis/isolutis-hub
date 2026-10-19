@@ -9,6 +9,7 @@ import { recarregar, registrarVista, render } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { area, campo, fv, inp, sel } from "@/ui/campos";
 import { combobox, comboboxDe } from "@/ui/combobox";
+import { barraDeFerramentas, cabecalhoDePagina } from "@/ui/componentes";
 import { registrarConsulta } from "@/ui/conflito";
 import { tentar } from "@/ui/erros";
 import { registrarAbertura, registrarSoltar } from "@/ui/eventos";
@@ -49,9 +50,10 @@ function vista(): Safe {
   const atrasadas = dados.tarefas.filter((t) => t.coluna !== "concluido" && t.prazo && t.prazo < h).length;
   const minhas = dados.tarefas.filter((t) => t.coluna !== "concluido" && t.responsavel_id === eu.id).length;
   const filtros: Array<[string, string]> = [["todas", "Todas"], ["minhas", "Minhas"], ...dados.equipe.filter((m) => m.ativo && m.id !== eu.id).map((m): [string, string] => [m.id, m.nome.split(" ")[0] ?? m.nome]), ["sem", "Sem responsável"]];
-  return html`<div class="head"><div><h1>Tarefas da equipe</h1><p>${minhas} ${pluralizar(minhas, "tarefa", "tarefas")} com você${atrasadas ? html` · <b style="color:var(--bad-texto)">${atrasadas} ${pluralizar(atrasadas, "atrasada", "atrasadas")}</b>` : ""}. Arraste um cartão para mudar de coluna.</p></div>
-    <div class="tools"><input class="search" id="tbusca" data-busca="tarefaBusca" type="search" placeholder="Buscar tarefa, cliente ou projeto" value="${ui.tarefaBusca}">${botaoNovo("novaTarefa", "Nova tarefa")}</div></div>
-  <div class="seg" role="group" aria-label="Filtrar por pessoa" style="margin-bottom:14px;flex-wrap:wrap">${filtros.map(([k, r]) => html`<button data-act="filtroPessoa" data-valor="${k}" aria-pressed="${p === k}">${r}</button>`)}</div>
+  const descricao = html`${minhas} ${pluralizar(minhas, "tarefa", "tarefas")} com você${atrasadas ? html` · <b style="color:var(--bad-texto)">${atrasadas} ${pluralizar(atrasadas, "atrasada", "atrasadas")}</b>` : ""}. Arraste um cartão para mudar de coluna.`;
+  return html`${cabecalhoDePagina({ titulo: "Tarefas da equipe", descricao, acoes: botaoNovo("novaTarefa", "Nova tarefa") })}
+    ${barraDeFerramentas({ busca: { chave: "tarefaBusca", valor: ui.tarefaBusca, placeholder: "Buscar tarefa, cliente ou projeto", rotulo: "Buscar tarefas" } })}
+  <div class="seg" role="group" aria-label="Filtrar por pessoa" style="margin:14px 0;flex-wrap:wrap">${filtros.map(([k, r]) => html`<button data-act="filtroPessoa" data-valor="${k}" aria-pressed="${p === k}">${r}</button>`)}</div>
   ${!dados.tarefas.length ? html`<div class="empty" style="margin-bottom:14px"><b>Nenhuma tarefa ainda</b>Crie as tarefas da semana, escolha quem é o responsável e o prazo. Cada pessoa filtra pelas suas em "Minhas".${escrever ? html`<br><button class="btn primary" data-act="novaTarefa">Criar a primeira tarefa</button>` : ""}</div>` : ""}
   <div class="board tboard">${COLUNAS_TAREFA.map((c) => {
     const daColuna = filtradas.filter((t) => t.coluna === c.id);

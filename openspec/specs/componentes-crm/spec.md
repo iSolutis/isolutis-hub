@@ -2,7 +2,6 @@
 
 ## Purpose
 Peças de interface compartilhadas pelas telas: cabeçalho de página, tabela de dados, barra de ferramentas de listagem, selos de status, estados vazio, de erro e de carregamento, e cartões.
-
 ## Requirements
 ### Requirement: Cabeçalho de página padronizado
 Toda tela SHALL abrir com um cabeçalho de página que mostre o título, uma descrição curta opcional e as ações principais da tela, com a mesma hierarquia visual em todas as telas.
@@ -36,14 +35,22 @@ As listagens SHALL usar tabela com cabeçalho fixo durante a rolagem vertical, d
 ---
 
 ### Requirement: Barra de ferramentas de listagem
-Listagens com busca ou filtros SHALL agrupá-los numa barra de ferramentas acima da tabela, com campo de busca e a contagem de resultados.
+Listagens com busca ou filtros SHALL agrupar o campo de busca numa barra de ferramentas acima do conteúdo da listagem — seja ele uma tabela, uma árvore ou um quadro —, com a contagem de resultados quando aplicável. Filtros específicos de uma tela que não caibam na barra (por exemplo, uma lista de botões por pessoa que cresce com o tamanho da equipe) PODEM continuar numa linha própria, separada da barra de ferramentas.
 
-#### Scenario: Busca e contagem
-- **WHEN** o usuário digita no campo de busca de uma listagem
+#### Scenario: Busca e contagem numa listagem em tabela
+- **WHEN** o usuário digita no campo de busca de uma listagem em tabela
 - **THEN** a tabela mostra apenas os resultados correspondentes
 - **AND** a barra informa a quantidade de resultados exibidos
 
----
+#### Scenario: Busca numa listagem em árvore
+- **WHEN** o usuário digita no campo de busca de uma listagem em árvore
+- **THEN** a árvore mostra apenas os nós correspondentes, mantendo a hierarquia
+- **AND** o campo de busca fica na barra de ferramentas, imediatamente acima da árvore
+
+#### Scenario: Filtro adicional fora da barra de ferramentas
+- **WHEN** uma tela tem, além da busca, um filtro que não cabe na barra (por exemplo, um filtro por pessoa com um botão por membro da equipe)
+- **THEN** esse filtro pode ser exibido numa linha própria, abaixo da barra de ferramentas
+- **AND** a busca continua funcionando normalmente dentro da barra de ferramentas
 
 ### Requirement: Selos de status
 Estados de registros (por exemplo ativo, pendente, atrasado, concluído) SHALL ser exibidos como selos com cor semântica e texto, e SHALL NOT depender apenas da cor para transmitir o significado.

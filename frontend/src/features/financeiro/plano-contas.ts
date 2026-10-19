@@ -5,6 +5,7 @@ import { ui } from "@/state/estado";
 import { registrarAcao } from "@/ui/acoes";
 import { campo, fv, inp, sel } from "@/ui/campos";
 import { combobox } from "@/ui/combobox";
+import { barraDeFerramentas, cabecalhoDePagina } from "@/ui/componentes";
 import { tentar } from "@/ui/erros";
 import { abrirGaveta } from "@/ui/gaveta";
 import { espaco } from "@/ui/formularios";
@@ -68,16 +69,18 @@ function no(c: PlanoConta): Safe {
 }
 
 function vista(): Safe {
-  if (!tela.contas) return html`<div class="head"><div><h1>Plano de contas</h1></div></div><p class="sub">Carregando…</p>`;
-  return html`<div class="head"><div><h1>Plano de contas</h1><p>Até três níveis (1 · 1.01 · 1.01.001). Só contas analíticas recebem lançamentos.</p>
-    <div style="margin-top:8px"><input class="search" type="search" placeholder="Pesquisar contas..." data-busca="buscaPlano" aria-label="Pesquisar contas por código ou nome"></div></div>
-    <div class="tools">
-      <button class="btn primary" data-act="novaConta">+ Nova Conta Raiz</button>
-    </div></div>
+  const cabecalho = cabecalhoDePagina({
+    titulo: "Plano de contas",
+    descricao: "Até três níveis (1 · 1.01 · 1.01.001). Só contas analíticas recebem lançamentos.",
+    acoes: html`<button class="btn primary" data-act="novaConta">+ Nova Conta Raiz</button>`,
+  });
+  if (!tela.contas) return html`${cabecalho}<p class="sub">Carregando…</p>`;
+  const barra = barraDeFerramentas({ busca: { chave: "buscaPlano", valor: ui.buscaPlano, placeholder: "Pesquisar contas...", rotulo: "Pesquisar contas por código ou nome" } });
+  return html`${cabecalho}${barra}
   ${
     tela.contas.length
-      ? html`<div class=”panel”><ul class=”tree” role=”tree” aria-label=”Plano de contas”>${filhasDe(null).map(no)}</ul></div>`
-      : html`<div class=”empty”><b>Plano de contas vazio</b>Comece pelas contas de primeiro nível, por exemplo 1 Receita e 2 Despesa, e vá abrindo os níveis.<br><button class=”btn primary” data-act=”novaConta”>Criar a primeira conta</button></div>`
+      ? html`<div class="painel-lista"><ul class="tree" role="tree" aria-label="Plano de contas">${filhasDe(null).map(no)}</ul></div>`
+      : html`<div class="empty"><b>Plano de contas vazio</b>Comece pelas contas de primeiro nível, por exemplo 1 Receita e 2 Despesa, e vá abrindo os níveis.<br><button class="btn primary" data-act="novaConta">Criar a primeira conta</button></div>`
   }`;
 }
 
