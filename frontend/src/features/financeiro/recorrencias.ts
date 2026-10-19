@@ -19,7 +19,8 @@ import { gravar } from "@/ui/gravacao";
 import { avisar } from "@/ui/toast";
 import { botaoNovo } from "../comum";
 import { apiFinanceiro, type ContaBancaria, type Parceiro, type PlanoConta, type Recorrencia, type RecorrenciaAtualizar, type RecorrenciaEntrada } from "./api";
-import { confirmarExclusao, contasDoPlanoParaTitulo, formatarDocumento, GRUPO, parceirosParaTitulo } from "./comum";
+import { formatarDocumento } from "@/ui/documento";
+import { confirmarExclusao, contasDoPlanoParaTitulo, GRUPO, parceirosParaTitulo } from "./comum";
 
 export const FREQUENCIAS: ReadonlyArray<readonly [string, string]> = [
   ["semanal", "Semanal"],

@@ -10,12 +10,13 @@ import { api } from "@/api/endpoints";
 import { acesso } from "@/state/estado";
 import { html, raw, type Safe } from "@/core/html";
 import { apiFinanceiro, type Municipio } from "@/features/financeiro/api";
-import { formatarCep, formatarDocumento } from "@/features/financeiro/comum";
+import { formatarCep } from "@/features/financeiro/comum";
 import { UFS } from "@/features/parceiros/campos";
 import { registrarGuarda, registrarVista, render, vistaAtual } from "@/state/nucleo";
 import { registrarAcao } from "@/ui/acoes";
 import { cabecalhoDePagina, carregando, estadoDeErro } from "@/ui/componentes";
 import { confirmar } from "@/ui/confirmar";
+import { MAXLENGTH_DOCUMENTO, mascararDocumento, PLACEHOLDER_DOCUMENTO, reaplicarMascara, tipoDoDocumento, valorInicialDoDocumento } from "@/ui/documento";
 import { aplicarLogo, lembrarIdentidade } from "@/ui/identidade";
 import { tentar } from "@/ui/erros";
 import { toast } from "@/ui/toast";
@@ -57,7 +58,7 @@ const tela: {
 export function valoresDe(e: EmpresaLeitura): Valores {
   return {
     tipo_inscricao: e.tipo_inscricao ?? "CNPJ",
-    inscricao: e.inscricao ? formatarDocumento(e.inscricao) : "",
+    inscricao: valorInicialDoDocumento(e.inscricao, tipoDoDocumento(e.tipo_inscricao)),
     nome: e.nome ?? "",
     razao_social: e.razao_social ?? "",
     nome_fantasia: e.nome_fantasia ?? "",
@@ -107,17 +108,6 @@ export function dadosDe(v: Valores): EmpresaDados {
     cnae_descricao: nulo(v.cnae_descricao),
     data_abertura: nulo(v.data_abertura),
   };
-}
-
-/** Máscara de CNPJ (00.000.000/0000-00) ou CPF (000.000.000-00) enquanto se digita. */
-export function mascararInscricao(valor: string, tipo: string): string {
-  const d = valor.replace(/\D/g, "").slice(0, tipo === "CPF" ? 11 : 14);
-  if (tipo === "CPF") return d.replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
-  return d
-    .replace(/^(\d{2})(\d)/, "$1.$2")
-    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/\.(\d{3})(\d)/, ".$1/$2")
-    .replace(/(\d{4})(\d)/, "$1-$2");
 }
 
 export const mascararCep = (valor: string): string => valor.replace(/\D/g, "").slice(0, 8).replace(/^(\d{5})(\d)/, "$1-$2");
@@ -195,7 +185,7 @@ function vista(): Safe {
     <form class="fp-secs empresa-form" id="empresaForm" novalidate>
       ${secao("inscricao", "Inscrição", "Documento de registro da empresa.", html`<div class="fields">
         ${escolha("tipo_inscricao", "Tipo de inscrição", [["CNPJ", "CNPJ"], ["CPF", "CPF"]])}
-        ${entrada("inscricao", "Número de inscrição", `inputmode="numeric" autocomplete="off" maxlength="18" placeholder="${cpf ? "000.000.000-00" : "00.000.000/0000-00"}"`)}
+        ${entrada("inscricao", "Número de inscrição", `inputmode="numeric" autocomplete="off" maxlength="${MAXLENGTH_DOCUMENTO}" placeholder="${PLACEHOLDER_DOCUMENTO[tipoDoDocumento(v.tipo_inscricao)]}"`)}
       </div>`)}
       ${secao("identificacao", "Identificação", "Como a empresa aparece no Hub e nos documentos.", html`<div class="fields">
         ${entrada("nome", "Nome de exibição no Hub", 'maxlength="150" autocomplete="organization" required', true)}
@@ -245,7 +235,7 @@ if (typeof document !== "undefined") {
   document.addEventListener("input", (e) => {
     const campo = e.target as HTMLInputElement;
     if (!tela.valores || !campo.closest?.("#empresaForm") || !campo.name) return;
-    if (campo.name === "inscricao") campo.value = mascararInscricao(campo.value, tela.valores.tipo_inscricao);
+    if (campo.name === "inscricao") reaplicarMascara(campo, (valor) => mascararDocumento(valor, tipoDoDocumento(tela.valores?.tipo_inscricao)));
     if (campo.name === "cep") campo.value = mascararCep(campo.value);
     if ((CAMPOS as readonly string[]).includes(campo.name)) tela.valores[campo.name as Campo] = campo.value;
     marcarSujo();
@@ -257,7 +247,7 @@ if (typeof document !== "undefined") {
     if (campo.id === "emp-logo") return void enviarLogo(campo);
     if (campo.name === "tipo_inscricao") {
       tela.valores.tipo_inscricao = campo.value;
-      tela.valores.inscricao = mascararInscricao(tela.valores.inscricao, campo.value);
+      tela.valores.inscricao = mascararDocumento(tela.valores.inscricao, tipoDoDocumento(campo.value));
       render();
     } else if (campo.name === "uf") {
       tela.valores.uf = campo.value;

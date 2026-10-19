@@ -74,3 +74,21 @@ test("desmarcar Sócio esconde a participação de novo", async ({ page }) => {
   await page.locator(".drawer input[name='papel'][value='socio']").uncheck();
   await expect(page.locator("#campoParticipacao")).toBeHidden();
 });
+
+test("o CPF/CNPJ é mascarado conforme o tipo de pessoa selecionado", async ({ page }) => {
+  await cadastrosSimulados(page, []);
+  await abrir(page, "/fornecedores");
+  await page.locator("[data-act='novoFornecedor']").first().click();
+  const doc = page.locator(".drawer #f-cpf_cnpj");
+  await expect(doc).toHaveAttribute("placeholder", "00.000.000/0000-00");
+  await doc.pressSequentially("11222333000181");
+  await expect(doc).toHaveValue("11.222.333/0001-81");
+
+  await page.selectOption(".drawer select[name='tipo_pessoa']", "PF");
+  await expect(doc).toHaveAttribute("placeholder", "000.000.000-00");
+  await expect(doc).toHaveValue("112.223.330-00");
+
+  await doc.fill("");
+  await doc.pressSequentially("529982247259");
+  await expect(doc).toHaveValue("529.982.247-25");
+});

@@ -138,3 +138,15 @@ test("edição curta continua na gaveta: Novo negócio abre por cima do formulá
   await expect(page.locator(".drawer")).toBeVisible();
   await expect(page.locator("[data-formulario-pagina]")).toBeVisible();
 });
+
+test("o CPF/CNPJ do cliente segue o tipo de pessoa selecionado", async ({ page }) => {
+  await abrir(page, `/clientes/${ID_CLIENTE}`);
+  const doc = page.locator("#view [name=cpf_cnpj]");
+  await page.selectOption("#view select[name='tipo_pessoa']", "PF");
+  await expect(doc).toHaveAttribute("placeholder", "000.000.000-00");
+  await doc.fill("");
+  await doc.pressSequentially("52998224725");
+  await expect(doc).toHaveValue("529.982.247-25");
+  await page.selectOption("#view select[name='tipo_pessoa']", "PJ");
+  await expect(doc).toHaveValue("52.998.224/725");
+});

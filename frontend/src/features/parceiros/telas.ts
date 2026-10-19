@@ -18,7 +18,8 @@ import { espaco } from "@/ui/formularios";
 import { gravar } from "@/ui/gravacao";
 import { botaoNovo } from "../comum";
 import { apiFinanceiro, type Papel, type Parceiro } from "../financeiro/api";
-import { acoesDaLinha, confirmarExclusao, formatarCep, formatarDocumento } from "../financeiro/comum";
+import { formatarDocumento } from "@/ui/documento";
+import { acoesDaLinha, confirmarExclusao, formatarCep } from "../financeiro/comum";
 import { camposDoParceiro, ligarCamposDoParceiro, lerCamposDoParceiro, PAPEL_SOCIO } from "./campos";
 
 export const GRUPO_CADASTROS = "Cadastros";

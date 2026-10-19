@@ -1,14 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { dadosDe, mascararCep, mascararInscricao, problemaNaLogo, valoresDe } from "./empresa";
+import { dadosDe, mascararCep, problemaNaLogo, valoresDe } from "./empresa";
 
 describe("máscaras", () => {
-  it("CNPJ e CPF enquanto se digita", () => {
-    expect(mascararInscricao("11222333000181", "CNPJ")).toBe("11.222.333/0001-81");
-    expect(mascararInscricao("112223", "CNPJ")).toBe("11.222.3");
-    expect(mascararInscricao("52998224725", "CPF")).toBe("529.982.247-25");
-    expect(mascararInscricao("529.982.247-25999", "CPF")).toBe("529.982.247-25");
-  });
-
   it("CEP", () => {
     expect(mascararCep("40000000")).toBe("40000-000");
     expect(mascararCep("4000")).toBe("4000");
